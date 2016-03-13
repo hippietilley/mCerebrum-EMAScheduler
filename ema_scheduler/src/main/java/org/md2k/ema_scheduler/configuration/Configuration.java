@@ -1,6 +1,5 @@
-package org.md2k.emascheduler;
+package org.md2k.ema_scheduler.configuration;
 
-import android.os.Environment;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,7 +27,10 @@ import android.os.Environment;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Constants {
-    public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/org.md2k.ema_scheduler/";
-    public static final String CONFIG_FILENAME = "config.json";
+public class Configuration{
+    ConfigurationEMAType[] ema_type;
+
+    public ConfigurationEMAType[] getEma_type() {
+        return ema_type;
+    }
 }

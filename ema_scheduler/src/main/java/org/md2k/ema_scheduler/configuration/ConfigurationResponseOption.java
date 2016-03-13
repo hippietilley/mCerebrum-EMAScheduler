@@ -1,4 +1,4 @@
-package org.md2k.emascheduler.configuration;
+package org.md2k.ema_scheduler.configuration;
 
 /**
  * Created by monowar on 3/11/16.

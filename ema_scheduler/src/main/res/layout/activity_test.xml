@@ -4,7 +4,7 @@
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".ActivityMoodSurfing"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".ActivityTest"
     android:id="@+id/linear_layout_buttons">
 
     <View

@@ -1,4 +1,4 @@
-package org.md2k.emascheduler;
+package org.md2k.ema_scheduler;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

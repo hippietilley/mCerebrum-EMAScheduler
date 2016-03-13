@@ -1,4 +1,4 @@
-package org.md2k.emascheduler;
+package org.md2k.ema_scheduler;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,21 +11,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.utilities.Apps;
-import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
 
-import java.util.ArrayList;
-
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +42,10 @@ public class ActivityMain extends AppCompatActivity {
         });
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Intent intent = new Intent(this, ServiceEMARunner.class);
+        startService(intent);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -87,17 +87,20 @@ public class ActivityMain extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    public void onResume(){
+
+    public void onResume() {
         mHandler.post(runnable);
         createTable();
         updateTable();
         super.onResume();
     }
-    public void onPause(){
+
+    public void onPause() {
         mHandler.removeCallbacks(runnable);
         super.onPause();
     }
-    void updateTable(){
+
+    void updateTable() {
         //Todo Update Table
     }
 
@@ -120,12 +123,14 @@ public class ActivityMain extends AppCompatActivity {
             }
         }
     };
+
     void createTable() {
         TableLayout ll = (TableLayout) findViewById(R.id.tableLayout);
         ll.removeAllViews();
         ll.addView(createDefaultRow());
     }
-    void addRow(){
+
+    void addRow() {
         TableLayout ll = (TableLayout) findViewById(R.id.tableLayout);
         TableRow row = new TableRow(this);
         TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
@@ -146,6 +151,7 @@ public class ActivityMain extends AppCompatActivity {
         ll.addView(row);
 
     }
+
     TableRow createDefaultRow() {
         TableRow row = new TableRow(this);
         TextView tvDate = new TextView(this);
@@ -171,4 +177,9 @@ public class ActivityMain extends AppCompatActivity {
         return row;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(this, ServiceEMARunner.class));
+    }
 }

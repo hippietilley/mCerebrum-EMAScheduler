@@ -1,6 +1,4 @@
-package org.md2k.emascheduler.configuration;
-
-import java.util.HashMap;
+package org.md2k.ema_scheduler.configuration;
 
 /**
  * Created by monowar on 3/10/16.
@@ -8,7 +6,6 @@ import java.util.HashMap;
 public class ConfigurationApplication {
     String package_name;
     String file_name;
-    HashMap<String, String> params;
 
     public String getPackage_name() {
         return package_name;
@@ -16,9 +13,5 @@ public class ConfigurationApplication {
 
     public String getFile_name() {
         return file_name;
-    }
-
-    public HashMap<String, String> getParams() {
-        return params;
     }
 }

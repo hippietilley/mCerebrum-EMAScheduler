@@ -1,15 +1,19 @@
-package org.md2k.emascheduler;
+package org.md2k.ema_scheduler;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.datakitapi.messagehandler.OnExceptionListener;
 import org.md2k.datakitapi.status.Status;
-import org.md2k.emascheduler.configuration.ConfigurationManager;
+import org.md2k.ema_scheduler.configuration.ConfigurationManager;
 import org.md2k.utilities.Report.Log;
 
 /**
@@ -39,14 +43,21 @@ import org.md2k.utilities.Report.Log;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ServiceEMAScheduler extends Service {
-    private static final String TAG = ServiceEMAScheduler.class.getSimpleName();
+public class ServiceEMARunner extends Service {
+    private static final String TAG = ServiceEMARunner.class.getSimpleName();
     DataKitAPI dataKitAPI;
     ConfigurationManager configurationManager;
+    private MyBroadcastReceiver myReceiver;
+    IntentFilter intentFilter;
+    Handler handler;
 
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate()");
+        myReceiver = new MyBroadcastReceiver();
+        intentFilter= new IntentFilter("org.md2k.ema_scheduler.response");
+        if (intentFilter != null) {
+            registerReceiver(myReceiver, intentFilter);
+        }
         configurationManager = ConfigurationManager.getInstance(getApplicationContext());
 
         if(configurationManager.getConfiguration()==null){
@@ -55,7 +66,23 @@ public class ServiceEMAScheduler extends Service {
         } else {
             connectDataKit();
         }
+        handler=new Handler();
+        handler.postDelayed(runnableTimeOut,10000);
     }
+    Runnable runnableTimeOut=new Runnable() {
+        @Override
+        public void run() {
+            sendData();
+        }
+    };
+    void sendData(){
+        Intent intent=new Intent();
+        intent.setAction("org.md2k.ema.operation");
+        intent.putExtra("type","missed");
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        sendBroadcast(intent);
+    }
+
 
     private void connectDataKit() {
         Log.d(TAG, "connectDataKit()...");
@@ -70,7 +97,7 @@ public class ServiceEMAScheduler extends Service {
             @Override
             public void onException(Status status) {
                 android.util.Log.d(TAG, "onException...");
-                Toast.makeText(ServiceEMAScheduler.this, "Notification Managr.. Stopped. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(ServiceEMARunner.this, "Notification Managr.. Stopped. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
                 stopSelf();
             }
         });
@@ -90,6 +117,8 @@ public class ServiceEMAScheduler extends Service {
             dataKitAPI.close();
         stopScheduler();
         configurationManager.clear();
+        if(myReceiver != null)
+            unregisterReceiver(myReceiver);
         super.onDestroy();
     }
 

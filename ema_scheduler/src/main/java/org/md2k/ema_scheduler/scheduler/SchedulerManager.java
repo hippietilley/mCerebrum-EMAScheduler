@@ -1,4 +1,4 @@
-package org.md2k.emascheduler.scheduler;
+package org.md2k.ema_scheduler.scheduler;
 
 import android.content.Context;
 

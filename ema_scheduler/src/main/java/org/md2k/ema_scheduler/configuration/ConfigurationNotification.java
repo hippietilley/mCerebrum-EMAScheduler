@@ -1,4 +1,4 @@
-package org.md2k.emascheduler.configuration;
+package org.md2k.ema_scheduler.configuration;
 
 import org.md2k.datakitapi.source.datasource.DataSource;
 

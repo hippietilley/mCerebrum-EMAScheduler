@@ -1,22 +1,14 @@
-package org.md2k.emascheduler.configuration;
-
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import java.util.ArrayList;
+package org.md2k.ema_scheduler.configuration;
 
 /**
  * Created by monowar on 3/10/16.
  */
 public class ConfigurationEMAType {
-    public static final String TYPE_USER="USER";
-    public static final String TYPE_SYSTEM="SYSTEM";
     String id;
-    String name;
     String type;
+    String category;
+    String name;
     ConfigurationApplication application;
-    ArrayList<ConfigurationEMA> ema;
-    ConfigurationCondition condition;
 
     public String getId() {
         return id;
@@ -33,4 +25,5 @@ public class ConfigurationEMAType {
     public ConfigurationApplication getApplication() {
         return application;
     }
+
 }

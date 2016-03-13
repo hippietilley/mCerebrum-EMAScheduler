@@ -1,20 +1,18 @@
-package org.md2k.emascheduler.configuration;
+package org.md2k.ema_scheduler.configuration;
 
 import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.md2k.emascheduler.Constants;
+import org.md2k.ema_scheduler.Constants;
 import org.md2k.utilities.Files;
-import org.md2k.utilities.Report.Log;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.util.List;
 
 /**
  * Created by monowar on 3/10/16.
@@ -41,7 +39,7 @@ public class ConfigurationManager {
             try {
                 br = new BufferedReader(new InputStreamReader(new FileInputStream(filepath)));
                 Gson gson = new Gson();
-                Type collectionType = new TypeToken<List<Configuration>>() {
+                Type collectionType = new TypeToken<Configuration>() {
                 }.getType();
                 configuration = gson.fromJson(br, collectionType);
             } catch (IOException e) {

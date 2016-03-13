@@ -1,7 +1,10 @@
-package org.md2k.emascheduler.configuration;
+package org.md2k.ema_scheduler;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 
-import java.util.ArrayList;
+import org.md2k.utilities.Report.Log;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -29,8 +32,18 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Configuration{
-    ConfigurationEMAType[] ema_type;
-    ConfigurationCondition[] condition;
-    ConfigurationNotification[] notification;
+public class MyBroadcastReceiver extends BroadcastReceiver {
+    private static final String TAG = MyBroadcastReceiver.class.getSimpleName();
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        String type=intent.getStringExtra("type");
+        if(type.equals("question_answer")){
+            String value=intent.getStringExtra("value");
+            Log.d(TAG,"data received... sample="+value);
+        }else if(type.equals("last_response_time")){
+            long lastResponseTime=intent.getLongExtra("value",-1);
+            Log.d(TAG, "data received... lastResponseTime=" + lastResponseTime);
+        }
+    }
 }
