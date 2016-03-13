@@ -26,10 +26,10 @@ public class RunnerManager {
         Intent intent = context.getPackageManager().getLaunchIntentForPackage(configurationApplication.getPackage_name());
         intent.setAction(configurationApplication.getPackage_name());
         intent.putExtra("file_name", configurationApplication.getFile_name());
-        intent.putExtra("id","id");
-        intent.putExtra("name","name");
-        intent.putExtra("display_name","display_name");
-        intent.putExtra("timeout",1000000L);
+        intent.putExtra("id", "id");
+        intent.putExtra("name", "name");
+        intent.putExtra("display_name", "display_name");
+        intent.putExtra("timeout", 1000000L);
         //Todo: Set TimeOut
         //intent.putExtra("timeout", notificationConfig.getTimeout().getCompletion_timeout());
         context.startActivity(intent);

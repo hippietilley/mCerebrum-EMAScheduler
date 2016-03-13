@@ -23,5 +23,6 @@ public class NotifierManager {
                 //TODO: generate Notification
             }
         }
-*/    }
+*/
+    }
 }

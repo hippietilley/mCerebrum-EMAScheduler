@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/app_theme_teal_light" >
-        <activity android:name="org.md2k.ema_scheduler.ActivityMain" >
+        <activity android:name="org.md2k.ema_scheduler.ActivityMain">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -27,12 +27,13 @@
             android:name="org.md2k.ema_scheduler.ServiceEMARunner"
             android:enabled="true"
             android:exported="true" />
+
         <activity
             android:name="org.md2k.ema_scheduler.ActivityTest"
             android:enabled="true"
             android:exported="true"
             android:label="EMASchedulerTest"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
     </application>
 

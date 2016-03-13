@@ -7,8 +7,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.datakitapi.messagehandler.OnExceptionListener;
@@ -54,31 +52,33 @@ public class ServiceEMARunner extends Service {
     public void onCreate() {
         super.onCreate();
         myReceiver = new MyBroadcastReceiver();
-        intentFilter= new IntentFilter("org.md2k.ema_scheduler.response");
+        intentFilter = new IntentFilter("org.md2k.ema_scheduler.response");
         if (intentFilter != null) {
             registerReceiver(myReceiver, intentFilter);
         }
         configurationManager = ConfigurationManager.getInstance(getApplicationContext());
 
-        if(configurationManager.getConfiguration()==null){
+        if (configurationManager.getConfiguration() == null) {
             Toast.makeText(getApplicationContext(), "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
             stopSelf();
         } else {
             connectDataKit();
         }
-        handler=new Handler();
-        handler.postDelayed(runnableTimeOut,10000);
+        handler = new Handler();
+        handler.postDelayed(runnableTimeOut, 10000);
     }
-    Runnable runnableTimeOut=new Runnable() {
+
+    Runnable runnableTimeOut = new Runnable() {
         @Override
         public void run() {
             sendData();
         }
     };
-    void sendData(){
-        Intent intent=new Intent();
+
+    void sendData() {
+        Intent intent = new Intent();
         intent.setAction("org.md2k.ema.operation");
-        intent.putExtra("type","missed");
+        intent.putExtra("type", "missed");
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         sendBroadcast(intent);
     }
@@ -102,10 +102,12 @@ public class ServiceEMARunner extends Service {
             }
         });
     }
-    void startScheduler(){
+
+    void startScheduler() {
 
     }
-    void stopScheduler(){
+
+    void stopScheduler() {
 
     }
 
@@ -117,7 +119,7 @@ public class ServiceEMARunner extends Service {
             dataKitAPI.close();
         stopScheduler();
         configurationManager.clear();
-        if(myReceiver != null)
+        if (myReceiver != null)
             unregisterReceiver(myReceiver);
         super.onDestroy();
     }

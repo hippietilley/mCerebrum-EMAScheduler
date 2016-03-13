@@ -37,12 +37,12 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String type=intent.getStringExtra("type");
-        if(type.equals("question_answer")){
-            String value=intent.getStringExtra("value");
-            Log.d(TAG,"data received... sample="+value);
-        }else if(type.equals("last_response_time")){
-            long lastResponseTime=intent.getLongExtra("value",-1);
+        String type = intent.getStringExtra("type");
+        if (type.equals("question_answer")) {
+            String value = intent.getStringExtra("value");
+            Log.d(TAG, "data received... sample=" + value);
+        } else if (type.equals("last_response_time")) {
+            long lastResponseTime = intent.getLongExtra("value", -1);
             Log.d(TAG, "data received... lastResponseTime=" + lastResponseTime);
         }
     }

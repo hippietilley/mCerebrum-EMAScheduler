@@ -1,9 +1,5 @@
 package org.md2k.ema_scheduler;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -54,8 +50,8 @@ public class ActivityTest extends AppCompatActivity {
 
 
     @Override
-    public void onDestroy(){
-        Log.d(TAG,"onDestroy()...");
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy()...");
         super.onDestroy();
     }
 
