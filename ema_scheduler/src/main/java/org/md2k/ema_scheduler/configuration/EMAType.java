@@ -3,12 +3,13 @@ package org.md2k.ema_scheduler.configuration;
 /**
  * Created by monowar on 3/10/16.
  */
-public class ConfigurationEMAType {
+public class EMAType {
     String id;
     String type;
     String category;
     String name;
-    ConfigurationApplication application;
+    Application application;
+    Notification[] notifications;
 
     public String getId() {
         return id;
@@ -22,8 +23,15 @@ public class ConfigurationEMAType {
         return type;
     }
 
-    public ConfigurationApplication getApplication() {
+    public Application getApplication() {
         return application;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public Notification[] getNotifications() {
+        return notifications;
+    }
 }

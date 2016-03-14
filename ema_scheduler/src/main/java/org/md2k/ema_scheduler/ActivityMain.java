@@ -16,6 +16,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.scheduler.ServiceEMAScheduler;
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
@@ -42,8 +43,8 @@ public class ActivityMain extends AppCompatActivity {
         });
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        Intent intent = new Intent(this, ServiceEMARunner.class);
-        startService(intent);
+ //       Intent intent = new Intent(this, ServiceEMARunner.class);
+//        startService(intent);
     }
 
     @Override
@@ -180,6 +181,5 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stopService(new Intent(this, ServiceEMARunner.class));
     }
 }

@@ -1,9 +1,7 @@
-package org.md2k.ema_scheduler;
+package org.md2k.ema_scheduler.scheduler;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -11,7 +9,7 @@ import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.datakitapi.messagehandler.OnExceptionListener;
 import org.md2k.datakitapi.status.Status;
-import org.md2k.ema_scheduler.configuration.ConfigurationManager;
+import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.utilities.Report.Log;
 
 /**
@@ -41,48 +39,25 @@ import org.md2k.utilities.Report.Log;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ServiceEMARunner extends Service {
-    private static final String TAG = ServiceEMARunner.class.getSimpleName();
+public class ServiceEMAScheduler extends Service {
+    private static final String TAG = ServiceEMAScheduler.class.getSimpleName();
     DataKitAPI dataKitAPI;
-    ConfigurationManager configurationManager;
-    private MyBroadcastReceiver myReceiver;
-    IntentFilter intentFilter;
-    Handler handler;
+    Configuration configuration;
+    SchedulerManager schedulerManager;
 
     public void onCreate() {
         super.onCreate();
-        myReceiver = new MyBroadcastReceiver();
-        intentFilter = new IntentFilter("org.md2k.ema_scheduler.response");
-        if (intentFilter != null) {
-            registerReceiver(myReceiver, intentFilter);
-        }
-        configurationManager = ConfigurationManager.getInstance(getApplicationContext());
+        Log.d(TAG, "onCreate()");
+        configuration = Configuration.getInstance();
+        schedulerManager=new SchedulerManager(this);
 
-        if (configurationManager.getConfiguration() == null) {
+        if(configuration.getEma_types()==null){
             Toast.makeText(getApplicationContext(), "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
             stopSelf();
         } else {
             connectDataKit();
         }
-        handler = new Handler();
-        handler.postDelayed(runnableTimeOut, 10000);
     }
-
-    Runnable runnableTimeOut = new Runnable() {
-        @Override
-        public void run() {
-            sendData();
-        }
-    };
-
-    void sendData() {
-        Intent intent = new Intent();
-        intent.setAction("org.md2k.ema.operation");
-        intent.putExtra("type", "missed");
-        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        sendBroadcast(intent);
-    }
-
 
     private void connectDataKit() {
         Log.d(TAG, "connectDataKit()...");
@@ -90,37 +65,35 @@ public class ServiceEMARunner extends Service {
         dataKitAPI.connect(new OnConnectionListener() {
             @Override
             public void onConnected() {
-                Toast.makeText(getApplicationContext(), "EMA Scheduler started Successfully", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "In EMAScheduler .. DataKit connected...", Toast.LENGTH_LONG).show();
                 startScheduler();
             }
         }, new OnExceptionListener() {
             @Override
             public void onException(Status status) {
                 android.util.Log.d(TAG, "onException...");
-                Toast.makeText(ServiceEMARunner.this, "Notification Managr.. Stopped. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(ServiceEMAScheduler.this, "Notification Managr.. Stopped. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
                 stopSelf();
             }
         });
     }
-
-    void startScheduler() {
-
+    void startScheduler(){
+        schedulerManager.start();
     }
-
-    void stopScheduler() {
-
+    void stopScheduler(){
+        schedulerManager.stop();
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()...");
+        stopScheduler();
+        Log.d(TAG,"...stopScheduler()");
         if (dataKitAPI != null && dataKitAPI.isConnected()) dataKitAPI.disconnect();
+        Log.d(TAG,"...DataKit disconnect()");
         if (dataKitAPI != null)
             dataKitAPI.close();
-        stopScheduler();
-        configurationManager.clear();
-        if (myReceiver != null)
-            unregisterReceiver(myReceiver);
+        Configuration.clear();
         super.onDestroy();
     }
 

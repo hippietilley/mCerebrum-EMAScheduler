@@ -3,35 +3,34 @@ package org.md2k.ema_scheduler.runner;
 import android.content.Context;
 import android.content.Intent;
 
-import org.md2k.ema_scheduler.configuration.ConfigurationApplication;
+import org.md2k.ema_scheduler.configuration.Application;
+import org.md2k.ema_scheduler.configuration.Notification;
+import org.md2k.utilities.data_format.NotificationAcknowledge;
 
 /**
  * Created by monowar on 3/10/16.
  */
 public class RunnerManager {
-    private static RunnerManager instance = null;
     Context context;
+    RunnerMonitor runnerMonitor;
 
-    public static RunnerManager getInstance(Context context) {
-        if (instance == null)
-            instance = new RunnerManager(context);
-        return instance;
-    }
-
-    private RunnerManager(Context context) {
+    public RunnerManager(Context context) {
         this.context = context;
+        runnerMonitor=new RunnerMonitor(context);
     }
 
-    public void start(ConfigurationApplication configurationApplication) {
-        Intent intent = context.getPackageManager().getLaunchIntentForPackage(configurationApplication.getPackage_name());
-        intent.setAction(configurationApplication.getPackage_name());
-        intent.putExtra("file_name", configurationApplication.getFile_name());
-        intent.putExtra("id", "id");
-        intent.putExtra("name", "name");
-        intent.putExtra("display_name", "display_name");
-        intent.putExtra("timeout", 1000000L);
-        //Todo: Set TimeOut
-        //intent.putExtra("timeout", notificationConfig.getTimeout().getCompletion_timeout());
-        context.startActivity(intent);
+    public void start(Application application, String status) {
+            runnerMonitor.start(application.getTimeout());
+            Intent intent = context.getPackageManager().getLaunchIntentForPackage(application.getPackage_name());
+            intent.setAction(application.getPackage_name());
+            intent.putExtra("file_name", application.getFile_name());
+            intent.putExtra("id", application.getId());
+            intent.putExtra("name", application.getName());
+            intent.putExtra("timeout", application.getTimeout());
+            context.startActivity(intent);
+    }
+    public void stop(){
+        runnerMonitor.clear();
     }
 }
+

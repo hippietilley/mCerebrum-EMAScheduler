@@ -5,14 +5,9 @@ import org.md2k.datakitapi.source.datasource.DataSource;
 /**
  * Created by monowar on 3/10/16.
  */
-public class ConfigurationNotification {
+public class Condition {
     String id;
     String name;
-    String type;
     DataSource data_source;
-    String format;
-    String repeat;
-    String interval;
-    String[] message;
-    ConfigurationResponseOption response_option;
+    ConfigurationWindow window;
 }

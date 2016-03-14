@@ -31,4 +31,6 @@ import android.os.Environment;
 public class Constants {
     public static final String CONFIG_DIRECTORY= Environment.getExternalStorageDirectory().getAbsolutePath() + "/mCerebrum/org.md2k.ema_scheduler/";
     public static final String CONFIG_FILENAME = "config.json";
+    public static final String NOTIFICATION_FILENAME = "notification.json";
+    public static final String CONDITION_FILENAME = "condition.json";
 }

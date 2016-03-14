@@ -20,11 +20,7 @@
         </activity>
 
         <service
-            android:name="org.md2k.ema_scheduler.ServiceEMAScheduler"
-            android:enabled="true"
-            android:exported="true" />
-        <service
-            android:name="org.md2k.ema_scheduler.ServiceEMARunner"
+            android:name=".scheduler.ServiceEMAScheduler"
             android:enabled="true"
             android:exported="true" />
 
