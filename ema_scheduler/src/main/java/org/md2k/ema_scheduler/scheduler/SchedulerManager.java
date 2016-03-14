@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Handler;
 
 import org.md2k.ema_scheduler.configuration.Configuration;
-import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.delivery.DeliveryManager;
 import org.md2k.utilities.Report.Log;
 
@@ -17,26 +16,42 @@ public class SchedulerManager {
     DeliveryManager deliveryManager;
     Handler handler;
     Configuration configuration;
-
-    public SchedulerManager(Context context){
-        this.context=context;
-        deliveryManager=new DeliveryManager(context);
-        handler=new Handler();
-        configuration=Configuration.getInstance();
-    }
-    public void start(){
-        handler.postDelayed(deliver, 4000);
-
-    }
-    public void stop(){
-        Log.d(TAG, "Stop()");
-        handler.removeCallbacks(deliver);
-        deliveryManager.stop();
-    }
+    DayManager dayManager;
     Runnable deliver=new Runnable() {
         @Override
         public void run() {
             deliveryManager.start(configuration.getEma_types()[0]);
         }
     };
+    public SchedulerManager(Context context){
+        this.context=context;
+        deliveryManager=new DeliveryManager(context);
+        handler=new Handler();
+        configuration=Configuration.getInstance();
+        DayManager.clear();
+        dayManager=DayManager.getInstance(context);
+        dayManager.setCallback(new Callback() {
+            @Override
+            public void onDayStartChanged() {
+                stop();
+                start();
+            }
+
+            @Override
+            public void onDayEndChanged() {
+                stop();
+            }
+        });
+    }
+
+    public void start(){
+        handler.postDelayed(deliver, 4000);
+
+    }
+
+    public void stop(){
+        Log.d(TAG, "Stop()");
+        handler.removeCallbacks(deliver);
+        deliveryManager.stop();
+    }
 }
