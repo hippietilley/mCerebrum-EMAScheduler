@@ -1,11 +1,11 @@
 package org.md2k.ema_scheduler.scheduler;
 
 import android.content.Context;
-import android.os.Handler;
 
 import org.md2k.ema_scheduler.configuration.Configuration;
-import org.md2k.ema_scheduler.delivery.DeliveryManager;
-import org.md2k.utilities.Report.Log;
+import org.md2k.ema_scheduler.configuration.EMAType;
+
+import java.util.ArrayList;
 
 /**
  * Created by monowar on 3/10/16.
@@ -13,23 +13,16 @@ import org.md2k.utilities.Report.Log;
 public class SchedulerManager {
     private static final String TAG = SchedulerManager.class.getSimpleName();
     Context context;
-    DeliveryManager deliveryManager;
-    Handler handler;
     Configuration configuration;
     DayManager dayManager;
-    Runnable deliver=new Runnable() {
-        @Override
-        public void run() {
-            deliveryManager.start(configuration.getEma_types()[0]);
-        }
-    };
-    public SchedulerManager(Context context){
-        this.context=context;
-        deliveryManager=new DeliveryManager(context);
-        handler=new Handler();
-        configuration=Configuration.getInstance();
+    ArrayList<Scheduler> scheduler;
+
+    public SchedulerManager(Context context) {
+        this.context = context;
+        configuration = Configuration.getInstance();
         DayManager.clear();
-        dayManager=DayManager.getInstance(context);
+        dayManager = DayManager.getInstance(context);
+        prepareScheduler();
         dayManager.setCallback(new Callback() {
             @Override
             public void onDayStartChanged() {
@@ -42,16 +35,26 @@ public class SchedulerManager {
                 stop();
             }
         });
-    }
-
-    public void start(){
-        handler.postDelayed(deliver, 4000);
 
     }
 
-    public void stop(){
-        Log.d(TAG, "Stop()");
-        handler.removeCallbacks(deliver);
-        deliveryManager.stop();
+    void prepareScheduler() {
+        for (int i = 0; i < configuration.getEma_types().length; i++) {
+            if (configuration.getEma_types()[i].getType().equals(EMAType.TYPE_RANDOM))
+                scheduler.add(new RandomEMAScheduler(context, configuration.getEma_types()[i]));
+            else if (configuration.getEma_types()[i].getType().equals(EMAType.TYPE_EVENT))
+                scheduler.add(new EventEMAScheduler(context, configuration.getEma_types()[i]));
+        }
+    }
+
+    public void start() {
+        for (int i = 0; i < scheduler.size(); i++)
+            scheduler.get(i).start();
+//        handler.postDelayed(deliver, 4000);
+    }
+
+    public void stop() {
+        for (int i = 0; i < scheduler.size(); i++)
+            scheduler.get(i).stop();
     }
 }

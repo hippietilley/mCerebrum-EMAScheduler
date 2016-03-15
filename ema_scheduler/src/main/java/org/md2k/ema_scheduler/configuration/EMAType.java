@@ -4,11 +4,15 @@ package org.md2k.ema_scheduler.configuration;
  * Created by monowar on 3/10/16.
  */
 public class EMAType {
+    public static final String TYPE_RANDOM = "RANDOM";
+    public static final String TYPE_EVENT = "EVENT";
     String id;
     String type;
     String category;
     String name;
     Application application;
+    Window[] windows;
+    SchedulerRule[] scheduler_rules;
     Notification[] notifications;
 
     public String getId() {
@@ -33,5 +37,13 @@ public class EMAType {
 
     public Notification[] getNotifications() {
         return notifications;
+    }
+
+    public Window[] getWindows() {
+        return windows;
+    }
+
+    public SchedulerRule[] getScheduler_rules() {
+        return scheduler_rules;
     }
 }

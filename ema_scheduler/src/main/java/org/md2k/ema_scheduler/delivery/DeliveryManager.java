@@ -16,13 +16,15 @@ public class DeliveryManager {
     Context context;
     NotifierManager notifierManager;
     RunnerManager runnerManager;
+    EMAType emaType;
 
-    public DeliveryManager(Context context) {
+    public DeliveryManager(Context context, EMAType emaType) {
         this.context = context;
+        this.emaType=emaType;
         runnerManager = new RunnerManager(context);
     }
 
-    public void start(final EMAType emaType) {
+    public void start() {
         notifierManager = new NotifierManager(context, emaType.getNotifications(), new Callback() {
             @Override
             public void onResponse(String response) {
