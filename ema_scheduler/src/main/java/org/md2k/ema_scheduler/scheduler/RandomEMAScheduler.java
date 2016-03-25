@@ -7,6 +7,7 @@ import android.os.Handler;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.configuration.SchedulerRule;
+import org.md2k.ema_scheduler.day.DayManager;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.logger.LogSchedule;
 
@@ -21,7 +22,7 @@ public class RandomEMAScheduler extends Scheduler {
     Runnable runnableDeliver = new Runnable() {
         @Override
         public void run() {
-            startDeliver();
+            startDelivery();
         }
     };
     Runnable runnableSchedule = new Runnable() {
@@ -31,13 +32,14 @@ public class RandomEMAScheduler extends Scheduler {
         }
     };
 
-    public RandomEMAScheduler(Context context, EMAType emaType) {
-        super(context, emaType);
+    public RandomEMAScheduler(Context context, EMAType emaType, DayManager dayManager) {
+        super(context, emaType, dayManager);
         handler = new Handler();
 
     }
 
     public void start() {
+        super.start();
         long triggerTime = retriveLastTriggerTime();
         if (triggerTime > 0)
             setTrigger(triggerTime);
@@ -48,7 +50,7 @@ public class RandomEMAScheduler extends Scheduler {
 
     void setTrigger(long triggerTime) {
         //TODO: add condition
-        startDeliver();
+        startDelivery();
 //        handler.postDelayed(runnableCondition, triggerTime);
     }
 
@@ -146,6 +148,12 @@ public class RandomEMAScheduler extends Scheduler {
     @Override
     public void stop() {
 
+    }
+
+    @Override
+    public void reset() {
+        stop();
+        start();
     }
 
     long retriveLastTriggerTime() {

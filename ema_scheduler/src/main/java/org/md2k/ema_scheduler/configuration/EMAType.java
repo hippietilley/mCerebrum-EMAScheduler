@@ -6,6 +6,10 @@ package org.md2k.ema_scheduler.configuration;
 public class EMAType {
     public static final String TYPE_RANDOM = "RANDOM";
     public static final String TYPE_EVENT = "EVENT";
+    public static final String ID_SMOKING_EMA="SMOKING_EMA";
+    public static final String ID_END_OF_DAY_EMA="END_OF_DAY_EMA";
+    public static final String ID_RANDOM_EMA="RANDOM_EMA";
+    public static final String ID_EMI="EMI";
     String id;
     String type;
     String category;

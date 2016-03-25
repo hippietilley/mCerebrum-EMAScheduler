@@ -16,13 +16,31 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.ema_scheduler.scheduler.ServiceEMAScheduler;
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
 
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
+    Handler mHandler = new Handler();
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            {
+                long time = Apps.serviceRunningTime(ActivityMain.this, ServiceEMAScheduler.class.getName());
+                if (time < 0) {
+                    ((TextView) findViewById(R.id.button_app_status)).setText("START");
+                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_off));
+
+                } else {
+
+                    ((TextView) findViewById(R.id.button_app_status)).setText(DateTime.convertTimestampToTimeStr(time));
+                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_on));
+                }
+                mHandler.postDelayed(this, 1000);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,26 +122,6 @@ public class ActivityMain extends AppCompatActivity {
     void updateTable() {
         //Todo Update Table
     }
-
-    Handler mHandler = new Handler();
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            {
-                long time = Apps.serviceRunningTime(ActivityMain.this, ServiceEMAScheduler.class.getName());
-                if (time < 0) {
-                    ((TextView) findViewById(R.id.button_app_status)).setText("START");
-                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_off));
-
-                } else {
-
-                    ((TextView) findViewById(R.id.button_app_status)).setText(DateTime.convertTimestampToTimeStr(time));
-                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_on));
-                }
-                mHandler.postDelayed(this, 1000);
-            }
-        }
-    };
 
     void createTable() {
         TableLayout ll = (TableLayout) findViewById(R.id.tableLayout);

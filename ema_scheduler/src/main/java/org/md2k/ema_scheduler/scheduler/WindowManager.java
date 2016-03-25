@@ -3,6 +3,7 @@ package org.md2k.ema_scheduler.scheduler;
 import android.content.Context;
 
 import org.md2k.ema_scheduler.configuration.Window;
+import org.md2k.ema_scheduler.day.DayManager;
 
 /**
  * Created by monowar on 3/14/16.
@@ -10,14 +11,16 @@ import org.md2k.ema_scheduler.configuration.Window;
 public class WindowManager {
     Context context;
     Window[] windows;
-    public WindowManager(Context context, Window[] windows){
+    DayManager dayManager;
+    public WindowManager(Context context, Window[] windows, DayManager dayManager){
         this.windows=windows;
         this.context=context;
+        this.dayManager=dayManager;
     }
     int getWindowIndex(long timestamp){
         for(int i=0;i<windows.length;i++){
             if(windows[i].getType().equals(Window.TYPE_DAY_START)){
-                long dayStartTimestamp=DayManager.getInstance(context).getDayStartTime();
+                long dayStartTimestamp= dayManager.getDayStartTime();
                 long startTime=dayStartTimestamp+windows[i].getStart_offset();
                 long endTime=dayStartTimestamp+windows[i].getEnd_offset();
                 if(timestamp>=startTime && timestamp<=endTime)
@@ -29,8 +32,8 @@ public class WindowManager {
     long getWindowStartTime(long timestamp){
         for(int i=0;i<windows.length;i++){
             if(windows[i].getType().equals(Window.TYPE_DAY_START)){
-                long startTime=DayManager.getInstance(context).getDayStartTime()+windows[i].getStart_offset();
-                long endTime=DayManager.getInstance(context).getDayStartTime()+windows[i].getEnd_offset();
+                long startTime=dayManager.getDayStartTime()+windows[i].getStart_offset();
+                long endTime=dayManager.getDayStartTime()+windows[i].getEnd_offset();
                 if(timestamp>=startTime && timestamp<=endTime)
                     return startTime;
             }
@@ -40,11 +43,11 @@ public class WindowManager {
     long getNextWindowStartTime(long timestamp){
         for(int i=0;i<windows.length;i++){
             if(windows[i].getType().equals(Window.TYPE_DAY_START)){
-                long startTime=DayManager.getInstance(context).getDayStartTime()+windows[i].getStart_offset();
-                long endTime=DayManager.getInstance(context).getDayStartTime()+windows[i].getEnd_offset();
+                long startTime=dayManager.getDayStartTime()+windows[i].getStart_offset();
+                long endTime=dayManager.getDayStartTime()+windows[i].getEnd_offset();
                 if(timestamp>=startTime && timestamp<=endTime)
                     if(i<windows.length-1)
-                    return DayManager.getInstance(context).getDayStartTime()+windows[i+1].getStart_offset();
+                    return dayManager.getDayStartTime()+windows[i+1].getStart_offset();
             }
         }
         return -1;
@@ -53,8 +56,8 @@ public class WindowManager {
     long getWindowEndTime(long timestamp){
         for(int i=0;i<windows.length;i++){
             if(windows[i].getType().equals(Window.TYPE_DAY_START)){
-                long startTime=DayManager.getInstance(context).getDayStartTime()+windows[i].getStart_offset();
-                long endTime=DayManager.getInstance(context).getDayStartTime()+windows[i].getEnd_offset();
+                long startTime=dayManager.getDayStartTime()+windows[i].getStart_offset();
+                long endTime=dayManager.getDayStartTime()+windows[i].getEnd_offset();
                 if(timestamp>=startTime && timestamp<=endTime)
                     return endTime;
             }

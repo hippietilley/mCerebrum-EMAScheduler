@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.configuration.EMAType;
-import org.md2k.ema_scheduler.runner.RunnerManager;
+import org.md2k.ema_scheduler.delivery.DeliveryManager;
 import org.md2k.utilities.Report.Log;
 
 public class ActivityTest extends AppCompatActivity {
@@ -21,19 +21,37 @@ public class ActivityTest extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
         configuration = Configuration.getInstance();
-        if (configuration.getEma_types() == null) {
-            Toast.makeText(getApplicationContext(), "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
+        String packageName=getIntent().getStringExtra("package_name");
+        int location=findEMAType(packageName);
+        Log.d(TAG,"location="+location+" packagename="+packageName);
+        if(location!=-1){
+            DeliveryManager deliveryManager=DeliveryManager.getInstance(ActivityTest.this);
+            deliveryManager.start(configuration.getEma_types()[location],false, "USER");
             finish();
-        } else {
-            addButtons();
+        }else {
+            if (configuration.getEma_types() == null) {
+                Toast.makeText(getApplicationContext(), "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
+                finish();
+            } else {
+                addButtons();
+            }
         }
+    }
+    private int findEMAType(String packageName){
+        if(packageName==null) return -1;
+        if(packageName.length()==0) return -1;
+        EMAType emaTypes[]=configuration.getEma_types();
+        for(int i=0;i<emaTypes.length;i++){
+            if(emaTypes[i].getApplication().getPackage_name().equals(packageName)) return i;
+        }
+        return -1;
     }
 
     void addButtons() {
-        final EMAType[] EMATypes = configuration.getEma_types();
-        for (int i = 0; i < EMATypes.length; i++) {
+        final EMAType[] emaTypes = configuration.getEma_types();
+        for (int i = 0; i < emaTypes.length; i++) {
             Button myButton = new Button(this);
-            myButton.setText(EMATypes[i].getName());
+            myButton.setText(emaTypes[i].getName());
             LinearLayout ll = (LinearLayout) findViewById(R.id.linear_layout_buttons);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             ll.addView(myButton, lp);
@@ -41,8 +59,8 @@ public class ActivityTest extends AppCompatActivity {
             myButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    RunnerManager.getInstance(ActivityTest.this).start(EMATypes[finalI].getApplication());
-//                    NotifierManager.getInstance(ActivityTest.this).start(EMATypes.get(finalI).getId());
+                    DeliveryManager deliveryManager=DeliveryManager.getInstance(ActivityTest.this);
+                    deliveryManager.start(emaTypes[finalI],true, "TEST");
                 }
             });
         }

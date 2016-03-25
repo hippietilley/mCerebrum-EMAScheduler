@@ -33,7 +33,6 @@ public class LoggerManager {
 
     private LoggerManager(Context context) {
         this.context = context;
-        readLogInfosFromDataKit();
         dataKitAPI = DataKitAPI.getInstance(context);
         dataSourceBuilderLogger = createDataSourceBuilderLogger();
         registerLogInfo();

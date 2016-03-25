@@ -6,70 +6,148 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 
+import com.google.gson.Gson;
+
+import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.source.METADATA;
+import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
+import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.datakitapi.source.datasource.DataSourceType;
+import org.md2k.datakitapi.source.platform.Platform;
+import org.md2k.datakitapi.source.platform.PlatformBuilder;
+import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.configuration.Application;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.NotificationAcknowledge;
 
 /**
  * Created by monowar on 3/14/16.
  */
 public class RunnerMonitor {
+    public static final long NO_RESPONSE_TIME = 35000;
     private static final String TAG = RunnerMonitor.class.getSimpleName();
-    public static final long NO_RESPONSE_TIME=10000;
-    private MyBroadcastReceiver myReceiver;
     IntentFilter intentFilter;
     Handler handler;
     Context context;
     long lastResponseTime;
-
-    public RunnerMonitor(Context context){
-        this.context=context;
-        myReceiver = new MyBroadcastReceiver();
-        intentFilter = new IntentFilter("org.md2k.ema_scheduler.response");
-        if (intentFilter != null) {
-            context.registerReceiver(myReceiver, intentFilter);
-        }
-        handler = new Handler();
-    }
-    public void start(long timeout){
-        handler.postDelayed(runnableTimeOut, timeout);
-    }
+    String message;
+    String type;
+    Application application;
+    Survey survey;
+    DataSourceClient dataSourceClient;
     Runnable runnableTimeOut = new Runnable() {
         @Override
         public void run() {
-            if(DateTime.getDateTime()-lastResponseTime<NO_RESPONSE_TIME)
-                handler.postDelayed(this,DateTime.getDateTime()-lastResponseTime);
+            if (DateTime.getDateTime() - lastResponseTime < NO_RESPONSE_TIME)
+                handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
             else {
                 sendData();
+                //clear();
             }
         }
     };
+    private MyBroadcastReceiver myReceiver;
+
+    public RunnerMonitor(Context context) {
+        this.context = context;
+        myReceiver = new MyBroadcastReceiver();
+        intentFilter = new IntentFilter("org.md2k.ema_scheduler.response");
+        handler = new Handler();
+        DataSourceBuilder dataSourceBuilder = createDataSourceBuilder();
+        dataSourceClient = DataKitAPI.getInstance(context).register(dataSourceBuilder);
+    }
+
+    public void start(String status, Application application, String type) {
+        context.registerReceiver(myReceiver, intentFilter);
+        this.type = type;
+        this.application = application;
+        survey = new Survey();
+        survey.start_timestamp = DateTime.getDateTime();
+        survey.id = application.getId();
+        survey.name = application.getName();
+        survey.trigger_type = type;
+        switch (status) {
+            case NotificationAcknowledge.OK:
+                Intent intent = context.getPackageManager().getLaunchIntentForPackage(application.getPackage_name());
+                intent.setAction(application.getPackage_name());
+                intent.putExtra("file_name", application.getFile_name());
+                intent.putExtra("id", application.getId());
+                intent.putExtra("name", application.getName());
+                intent.putExtra("timeout", application.getTimeout());
+                context.startActivity(intent);
+                Log.d(TAG,"timeout="+application.getTimeout());
+                handler.postDelayed(runnableTimeOut, application.getTimeout());
+                break;
+            case NotificationAcknowledge.CANCEL:
+                survey.status="CANCELED_BY_USER_AT_PROMPT";
+                survey.end_timestamp=DateTime.getDateTime();
+                saveToDataKit();
+                clear();
+                break;
+            case NotificationAcknowledge.TIMEOUT:
+                survey.status="TIMEOUT_AT_PROMPT";
+                survey.end_timestamp=DateTime.getDateTime();
+                saveToDataKit();
+                clear();
+                break;
+        }
+    }
+
     void sendData() {
         Intent intent = new Intent();
         intent.setAction("org.md2k.ema.operation");
-        intent.putExtra("type", "missed");
+        intent.putExtra("TYPE", "TIMEOUT");
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         context.sendBroadcast(intent);
     }
-    void clear(){
-        Log.d(TAG,"clear()...");
-        sendData();
+
+    void clear() {
+        Log.d(TAG, "clear()...");
         handler.removeCallbacks(runnableTimeOut);
         if (myReceiver != null)
             context.unregisterReceiver(myReceiver);
-        Log.d(TAG,"...clear()");
+        Log.d(TAG, "...clear()");
 
     }
+
+    DataSourceBuilder createDataSourceBuilder() {
+        Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
+        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.SURVEY).setPlatform(platform);
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Survey");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "EMA & EMI Question and answers");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeString.class.getName());
+        return dataSourceBuilder;
+    }
+
+    void saveToDataKit() {
+        Gson gson = new Gson();
+        String json = gson.toJson(survey);
+        Log.d(TAG, "survey=" + json);
+        DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), json);
+        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeString);
+//        Toast.makeText(this, "Information is Saved", Toast.LENGTH_SHORT).show();
+    }
+
     public class MyBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String type = intent.getStringExtra("type");
-            if (type.equals("question_answer")) {
-                String value = intent.getStringExtra("value");
-                Log.d(TAG, "data received... sample=" + value);
-            } else if (type.equals("last_response_time")) {
-                lastResponseTime = intent.getLongExtra("value", -1);
-                Log.d(TAG, "data received... lastResponseTime=" + lastResponseTime);
+            String type = intent.getStringExtra("TYPE");
+            if (type.equals("RESULT")) {
+                String answer = intent.getStringExtra("ANSWER");
+                String status = intent.getStringExtra("STATUS");
+                survey.end_timestamp = DateTime.getDateTime();
+                survey.question_answers = answer;
+                survey.status = status;
+                saveToDataKit();
+                clear();
+            } else if (type.equals("STATUS_MESSAGE")) {
+                lastResponseTime = intent.getLongExtra("TIMESTAMP", -1);
+                message = intent.getStringExtra("MESSAGE");
+                Log.d(TAG, "data received... lastResponseTime=" + lastResponseTime + " message=" + message);
             }
         }
     }
+
 }

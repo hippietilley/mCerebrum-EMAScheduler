@@ -20,7 +20,7 @@
         </activity>
 
         <service
-            android:name=".scheduler.ServiceEMAScheduler"
+            android:name=".ServiceEMAScheduler"
             android:enabled="true"
             android:exported="true" />
 
