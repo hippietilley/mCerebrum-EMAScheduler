@@ -15,8 +15,11 @@ import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.configuration.Configuration;
+import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.configuration.Notification;
 import org.md2k.ema_scheduler.delivery.Callback;
+import org.md2k.ema_scheduler.logger.LogInfo;
+import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.NotificationAcknowledge;
 import org.md2k.utilities.data_format.NotificationRequest;
@@ -39,6 +42,7 @@ public class NotifierManager {
     NotificationRequest notificationRequestAll[];
     Handler handlerSubscribe;
     Callback callbackDelivery;
+    EMAType emaType;
     Runnable runnableNotify = new Runnable() {
         @Override
         public void run() {
@@ -78,9 +82,10 @@ public class NotifierManager {
 
     }
 
-    public void set(Notification[] notifications, Callback callback) {
+    public void set(EMAType emaType, Callback callback) {
         Log.d(TAG, "set()...");
-        this.notifications = notifications;
+        this.emaType = emaType;
+        this.notifications = emaType.getNotifications();
         this.callbackDelivery = callback;
         Log.d(TAG, "before runnableSubscribe..");
         handlerSubscribe.post(runnableSubscribe);
@@ -100,7 +105,9 @@ public class NotifierManager {
                     NotificationAcknowledge notificationAcknowledge = gson.fromJson(dataTypeString.getSample(), collectionType);
                     Log.d(TAG, "notification_acknowledge = " + notificationAcknowledge.getStatus());
                     stop();
+                    log(notificationAcknowledge.getStatus());
                     switch (notificationAcknowledge.getStatus()) {
+
                         case NotificationAcknowledge.DELAY:
                             notifyNo = 0;
                             long delay = notificationAcknowledge.getNotificationRequest().getResponse_option().getDelay_time();
@@ -111,6 +118,7 @@ public class NotifierManager {
                         case NotificationAcknowledge.OK:
                         case NotificationAcknowledge.CANCEL:
                         case NotificationAcknowledge.TIMEOUT:
+                        case NotificationAcknowledge.DELAY_CANCEL:
                             callbackDelivery.onResponse(notificationAcknowledge.getStatus());
                             clear();
                             break;
@@ -133,6 +141,7 @@ public class NotifierManager {
 
     public void start() {
         Log.d(TAG, "start()...");
+        log();
         delayEnable = true;
         if (notifications.length == 0) return;
         Log.d(TAG, "Notification length=" + notifications.length);
@@ -144,15 +153,17 @@ public class NotifierManager {
         Log.d(TAG, "insertDataToDataKit()...");
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
         for (NotificationRequest notificationRequest : notificationRequests) {
-            boolean isDelayOk=false;
-            if(notificationRequest.getResponse_option()!=null)
-                isDelayOk=notificationRequest.getResponse_option().isDelay();
-            if(isDelayOk==true && delayEnable==false) notificationRequest.getResponse_option().setDelay(false);
+            boolean isDelayOk = false;
+            if (notificationRequest.getResponse_option() != null)
+                isDelayOk = notificationRequest.getResponse_option().isDelay();
+            if (isDelayOk == true && delayEnable == false)
+                notificationRequest.getResponse_option().setDelay(false);
             Gson gson = new Gson();
             String json = gson.toJson(notificationRequest);
             DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), json);
             dataKitAPI.insert(dataSourceClientRequest, dataTypeString);
-            if(isDelayOk==true && delayEnable==false && notificationRequest.getResponse_option()!=null) notificationRequest.getResponse_option().setDelay(true);
+            if (isDelayOk == true && delayEnable == false && notificationRequest.getResponse_option() != null)
+                notificationRequest.getResponse_option().setDelay(true);
         }
         Log.d(TAG, "...insertDataToDataKit()");
     }
@@ -178,6 +189,25 @@ public class NotifierManager {
         Log.d(TAG, "stop()...");
         handler.removeCallbacks(runnableNotify);
 
+    }
+
+    protected void log() {
+        LogInfo logInfo = new LogInfo();
+        logInfo.setOperation(LogInfo.OP_NOTIFY);
+        logInfo.setId(emaType.getId());
+        logInfo.setType(emaType.getType());
+        logInfo.setTimestamp(DateTime.getDateTime());
+        logInfo.setMessage("notifying...");
+        LoggerManager.getInstance(context).insert(logInfo);
+    }
+    protected void log(String notificationResult) {
+        LogInfo logInfo = new LogInfo();
+        logInfo.setOperation(LogInfo.OP_NOTIFY);
+        logInfo.setId(emaType.getId());
+        logInfo.setType(emaType.getType());
+        logInfo.setTimestamp(DateTime.getDateTime());
+        logInfo.setMessage("notification feedback from user:"+notificationResult);
+        LoggerManager.getInstance(context).insert(logInfo);
     }
 
 }

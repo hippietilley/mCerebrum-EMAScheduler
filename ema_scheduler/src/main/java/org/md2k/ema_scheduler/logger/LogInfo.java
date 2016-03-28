@@ -7,6 +7,9 @@ public class LogInfo {
     public static final String OP_MESSAGE="MESSAGE";
     public static final String OP_SCHEDULE="SCHEDULE";
     public static final String OP_DELIVER="DELIVER";
+    public static final String OP_NOTIFY="NOTIFY";
+    public static final String OP_RUN="RUN";
+    public static final String OP_CONDITION="CONDITION";
     String operation;
     String type;
     String id;

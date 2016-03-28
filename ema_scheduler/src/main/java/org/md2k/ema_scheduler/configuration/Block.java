@@ -3,19 +3,19 @@ package org.md2k.ema_scheduler.configuration;
 /**
  * Created by monowar on 3/14/16.
  */
-public class Window {
-    public static final String TYPE_DAY_START="DAY_START";
-    int count;
-    String type;
+public class Block {
+    public static final String BASE_DAY_START ="DAY_START";
+    int total;
+    String base;
     long start_offset;
     long end_offset;
 
-    public int getCount() {
-        return count;
+    public int getTotal() {
+        return total;
     }
 
-    public String getType() {
-        return type;
+    public String getBase() {
+        return base;
     }
 
     public long getStart_offset() {

@@ -43,7 +43,7 @@ import java.lang.reflect.Type;
 public class Configuration{
     EMAType[] ema_types;
     NotificationRequest[] notificationRequests;
-    Condition[] conditions;
+    ConfigCondition[] conditions;
     private static Configuration instance=null;
     public static Configuration getInstance(){
         if(instance==null)
@@ -56,7 +56,7 @@ public class Configuration{
     private Configuration(){
         readEMATypes();
         readNotifications();
-//        readConditions();
+        readConditions();
     }
     private void readEMATypes(){
         BufferedReader br;
@@ -103,7 +103,7 @@ public class Configuration{
             try {
                 br = new BufferedReader(new InputStreamReader(new FileInputStream(filepath)));
                 Gson gson = new Gson();
-                Type collectionType = new TypeToken<Condition[]>() {
+                Type collectionType = new TypeToken<ConfigCondition[]>() {
                 }.getType();
                 conditions = gson.fromJson(br, collectionType);
             } catch (IOException e) {
@@ -116,12 +116,22 @@ public class Configuration{
     public EMAType[] getEma_types() {
         return ema_types;
     }
+    public EMAType getEma_types(String id, String type){
+        for (EMAType ema_type : ema_types)
+            if (ema_type.getId().equals(id) && ema_type.getType().equals(type)) return ema_type;
+        return null;
+    }
 
     public NotificationRequest[] getNotificationRequests() {
         return notificationRequests;
     }
 
-    public Condition[] getConditions() {
+    public ConfigCondition[] getConditions() {
         return conditions;
+    }
+    public ConfigCondition getConditions(String id){
+        for (ConfigCondition condition : conditions)
+            if (condition.getId().equals(id)) return condition;
+        return null;
     }
 }

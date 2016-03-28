@@ -2,7 +2,10 @@ package org.md2k.ema_scheduler.delivery;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.logger.LogInfo;
+import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.ema_scheduler.notifier.NotifierManager;
 import org.md2k.ema_scheduler.runner.RunnerManager;
 import org.md2k.utilities.Report.Log;
@@ -30,9 +33,10 @@ public class DeliveryManager {
 
     public void start(final EMAType emaType, boolean isNotifyRequired, final String type){
         Log.d(TAG, "start()...emaType=" + emaType.getType() + " id=" + emaType.getId());
+        log(emaType,type);
         runnerManager.set(emaType.getApplication());
         Log.d(TAG,"runner="+runnerManager);
-        notifierManager.set(emaType.getNotifications(), new Callback() {
+        notifierManager.set(emaType, new Callback() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "callback received...response="+response);
@@ -40,6 +44,7 @@ public class DeliveryManager {
                     case NotificationAcknowledge.OK:
                     case NotificationAcknowledge.CANCEL:
                     case NotificationAcknowledge.TIMEOUT:
+                    case NotificationAcknowledge.DELAY_CANCEL:
                         Log.d(TAG, "matched...runner=" + runnerManager+" response="+response);
                         notifierManager.stop();
                         runnerManager.start(response,type);
@@ -52,6 +57,17 @@ public class DeliveryManager {
             notifierManager.start();
         }else{
             runnerManager.start(NotificationAcknowledge.OK, type);
+        }
+    }
+    protected void log(EMAType emaType, String type){
+        if(type.equals("SYSTEM")) {
+            LogInfo logInfo = new LogInfo();
+            logInfo.setOperation(LogInfo.OP_DELIVER);
+            logInfo.setId(emaType.getId());
+            logInfo.setType(emaType.getType());
+            logInfo.setTimestamp(DateTime.getDateTime());
+            logInfo.setMessage("trying to deliver...");
+            LoggerManager.getInstance(context).insert(logInfo);
         }
     }
 

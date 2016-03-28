@@ -70,6 +70,7 @@ public class RunnerMonitor {
         survey.trigger_type = type;
         switch (status) {
             case NotificationAcknowledge.OK:
+            case NotificationAcknowledge.DELAY_CANCEL:
                 Intent intent = context.getPackageManager().getLaunchIntentForPackage(application.getPackage_name());
                 intent.setAction(application.getPackage_name());
                 intent.putExtra("file_name", application.getFile_name());

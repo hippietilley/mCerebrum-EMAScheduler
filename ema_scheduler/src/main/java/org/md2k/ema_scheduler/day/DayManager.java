@@ -7,19 +7,14 @@ import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
-import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.datakitapi.source.platform.Platform;
-import org.md2k.datakitapi.source.platform.PlatformBuilder;
-import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.ema_scheduler.scheduler.SchedulerManager;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 
 /**
  * Created by monowar on 3/14/16.
@@ -90,25 +85,6 @@ public class DayManager {
         if (calendar.get(Calendar.DAY_OF_MONTH) != calendarNow.get(Calendar.DAY_OF_MONTH))
             return false;
         return true;
-    }
-
-    DataSourceBuilder createDataSourceBuilderDayStart() {
-        Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.DAY_START).setPlatform(platform);
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Day Start");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Represents when day started");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeLong.class.getName());
-        ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
-        HashMap<String, String> dataDescriptor = new HashMap<>();
-        dataDescriptor.put(METADATA.NAME, "Day Start");
-        dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
-        dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(Long.MAX_VALUE));
-        dataDescriptor.put(METADATA.UNIT, "millisecond");
-        dataDescriptor.put(METADATA.DESCRIPTION, "Contains day start time in millisecond");
-        dataDescriptor.put(METADATA.DATA_TYPE, long.class.getName());
-        dataDescriptors.add(dataDescriptor);
-        dataSourceBuilder = dataSourceBuilder.setDataDescriptors(dataDescriptors);
-        return dataSourceBuilder;
     }
 
 

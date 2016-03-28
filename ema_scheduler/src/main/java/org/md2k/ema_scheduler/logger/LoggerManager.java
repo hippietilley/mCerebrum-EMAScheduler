@@ -15,6 +15,7 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,6 +25,7 @@ import java.util.HashMap;
  * Created by monowar on 3/14/16.
  */
 public class LoggerManager {
+    private static final String TAG = LoggerManager.class.getSimpleName();
     private static LoggerManager instance;
     Context context;
     DataKitAPI dataKitAPI;
@@ -61,8 +63,9 @@ public class LoggerManager {
     public void insert(LogInfo logInfo){
         Gson gson=new Gson();
         String string=gson.toJson(logInfo);
+        Log.d(TAG, "insert()..." + string);
         DataTypeString dataTypeString=new DataTypeString(DateTime.getDateTime(), string);
-        dataKitAPI.insert(dataSourceClientLogger,dataTypeString);
+        dataKitAPI.insert(dataSourceClientLogger, dataTypeString);
         logInfos.add(logInfo);
     }
     private void readLogInfosFromDataKit() {
@@ -108,6 +111,17 @@ public class LoggerManager {
         }
         return logInfosTemp;
     }
+    public LogInfo getLogInfoLast(String operation, String type, String id) {
+        LogInfo logInfo=null;
+        for (int i = 0; i < logInfos.size(); i++) {
+            if (!logInfos.get(i).getOperation().equals(operation)) continue;
+            if (!logInfos.get(i).getType().equals(type)) continue;
+            if (!logInfos.get(i).getId().equals(id)) continue;
+            if (logInfo == null || logInfo.getTimestamp() < logInfos.get(i).getTimestamp())
+                logInfo = logInfos.get(i);
+        }
+        return logInfo;
+    }
     public ArrayList<LogInfo> getLogInfos(String operation, String type, String id, long startTime, long endTime){
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
         for(int i=0;i<logInfos.size();i++){
@@ -119,6 +133,9 @@ public class LoggerManager {
             logInfosTemp.add(logInfos.get(i));
         }
         return logInfosTemp;
+    }
+    public static void clear(){
+        instance=null;
     }
 
 }

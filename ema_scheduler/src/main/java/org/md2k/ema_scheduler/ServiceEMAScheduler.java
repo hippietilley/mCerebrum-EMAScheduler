@@ -11,6 +11,7 @@ import org.md2k.datakitapi.messagehandler.OnExceptionListener;
 import org.md2k.datakitapi.status.Status;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.day.DayManager;
+import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
 
 /**
@@ -50,6 +51,7 @@ public class ServiceEMAScheduler extends Service {
         super.onCreate();
         Log.d(TAG, "onCreate()");
         Configuration.clear();
+        LoggerManager.clear();
         configuration = Configuration.getInstance();
         if (configuration.getEma_types() == null) {
             Toast.makeText(getApplicationContext(), "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
@@ -61,15 +63,15 @@ public class ServiceEMAScheduler extends Service {
 
     private void connectDataKit() {
         Log.d(TAG, "connectDataKit()...");
-        dataKitAPI = DataKitAPI.getInstance(getApplicationContext());
+        dataKitAPI = DataKitAPI.getInstance(ServiceEMAScheduler.this);
         dataKitAPI.connect(new OnConnectionListener() {
             @Override
             public void onConnected() {
                 Toast.makeText(getApplicationContext(), "In EMAScheduler .. DataKit connected...", Toast.LENGTH_LONG).show();
                 Log.d(TAG, "datakit connected...");
-
+                LoggerManager.getInstance(getApplicationContext());
                 dayManager = new DayManager(getApplicationContext());
-                startScheduler();
+                dayManager.start();
             }
         }, new OnExceptionListener() {
             @Override
@@ -80,20 +82,12 @@ public class ServiceEMAScheduler extends Service {
             }
         });
     }
-
-    void startScheduler() {
-        Log.d(TAG,"startScheduler()...");
-        dayManager.start();
-    }
-
-    void stopScheduler() {
-        dayManager.stop();
-    }
-
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()...");
-        stopScheduler();
+        dayManager.stop();
+        Configuration.clear();
+        LoggerManager.clear();
         Log.d(TAG, "...stopScheduler()");
         if (dataKitAPI != null && dataKitAPI.isConnected()) dataKitAPI.disconnect();
         Log.d(TAG, "...DataKit disconnect()");

@@ -23,54 +23,52 @@ public class SchedulerManager {
     public SchedulerManager(Context context, DayManager dayManager) {
         Log.d(TAG, "SchedulerManager()...");
         this.context = context;
-        this.dayManager=dayManager;
+        this.dayManager = dayManager;
         configuration = Configuration.getInstance();
-        scheduler=new ArrayList<>();
-        isStarted=false;
+        scheduler = new ArrayList<>();
+        isStarted = false;
         prepareScheduler();
     }
 
     private void prepareScheduler() {
         Log.d(TAG, "prepareScheduler()...");
         for (int i = 0; i < configuration.getEma_types().length; i++) {
-            Log.d(TAG, "prepareScheduler()...emaType ID="+configuration.getEma_types()[i].getId());
-            if(configuration.getEma_types()[i].getId()==null) continue;
-            switch(configuration.getEma_types()[i].getId()){
+            Log.d(TAG, "prepareScheduler()...emaType ID=" + configuration.getEma_types()[i].getId());
+            if (configuration.getEma_types()[i].getId() == null) continue;
+            if (!configuration.getEma_types()[i].isEnable()) continue;
+            Log.d(TAG, "prepareScheduler()...emaType ID=" + configuration.getEma_types()[i].getId()+"....success");
+            switch (configuration.getEma_types()[i].getId()) {
                 case EMAType.ID_RANDOM_EMA:
-                    scheduler.add(new RandomEMAScheduler(context, configuration.getEma_types()[i], dayManager));
-                    break;
-                case EMAType.ID_SMOKING_EMA:
-                    scheduler.add(new SmokingEMAScheduler(context, configuration.getEma_types()[i], dayManager));
-                    break;
-                case EMAType.ID_END_OF_DAY_EMA:
-                    scheduler.add(new EndOfDayEMAScheduler(context, configuration.getEma_types()[i], dayManager));
+//                    scheduler.add(new RandomEMAScheduler(context, configuration.getEma_types()[i], dayManager));
                     break;
                 case EMAType.ID_EMI:
-                    scheduler.add(new EMIScheduler(context, configuration.getEma_types()[i], dayManager));
+//                    scheduler.add(new EMIScheduler(context, configuration.getEma_types()[i], dayManager));
                     break;
                 default:
+                    scheduler.add(new EventEMAScheduler(context, configuration.getEma_types()[i], dayManager));
                     break;
             }
         }
     }
 
     public void start() {
-        if(isStarted) return;
-        isStarted=true;
+        if (isStarted) return;
+        isStarted = true;
         Log.d(TAG, "start()...");
         for (int i = 0; i < scheduler.size(); i++)
             scheduler.get(i).start();
     }
 
     public void stop() {
-        if(!isStarted) return;
-        isStarted=false;
+        if (!isStarted) return;
+        isStarted = false;
         Log.d(TAG, "stop()...");
         for (int i = 0; i < scheduler.size(); i++)
             scheduler.get(i).stop();
     }
-    public void reset(){
-        for(int i=0;i<scheduler.size();i++)
+
+    public void reset() {
+        for (int i = 0; i < scheduler.size(); i++)
             scheduler.get(i).reset();
     }
 }

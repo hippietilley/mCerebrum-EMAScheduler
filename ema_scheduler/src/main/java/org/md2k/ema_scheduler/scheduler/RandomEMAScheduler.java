@@ -10,6 +10,7 @@ import org.md2k.ema_scheduler.configuration.SchedulerRule;
 import org.md2k.ema_scheduler.day.DayManager;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.logger.LogSchedule;
+import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -18,6 +19,7 @@ import java.util.Random;
  * Created by monowar on 3/14/16.
  */
 public class RandomEMAScheduler extends Scheduler {
+    private static final String TAG = RandomEMAScheduler.class.getSimpleName();
     Handler handler;
     Runnable runnableDeliver = new Runnable() {
         @Override
@@ -34,6 +36,7 @@ public class RandomEMAScheduler extends Scheduler {
 
     public RandomEMAScheduler(Context context, EMAType emaType, DayManager dayManager) {
         super(context, emaType, dayManager);
+        Log.d(TAG, "RandomEMAScheduler()...");
         handler = new Handler();
 
     }
@@ -56,12 +59,12 @@ public class RandomEMAScheduler extends Scheduler {
 
     void schedule() {
         long curTime = DateTime.getDateTime();
-        int indexWindow = windowManager.getWindowIndex(curTime);
+        int indexWindow = blockManager.getWindowIndex(curTime);
         if (indexWindow == -1) return;
-        long windowStartTime = windowManager.getWindowStartTime(curTime);
-        long windowEndTime = windowManager.getWindowEndTime(curTime);
+        long windowStartTime = blockManager.getWindowStartTime(curTime);
+        long windowEndTime = blockManager.getWindowEndTime(curTime);
         if (isDeliveredAlready(windowStartTime, windowEndTime, indexWindow)) {
-            long nextWindowStartTime = windowManager.getNextWindowStartTime(curTime);
+            long nextWindowStartTime = blockManager.getNextWindowStartTime(curTime);
             if (nextWindowStartTime != -1)
                 handler.postDelayed(runnableSchedule, nextWindowStartTime - curTime);
         } else {
@@ -92,7 +95,7 @@ public class RandomEMAScheduler extends Scheduler {
                     handler.post(runnableSchedule);
                 }
                 break;
-            case SchedulerRule.TYPE_WHEN_POSSIBLE:
+            case SchedulerRule.TYPE_IMMEDIATE:
                 sendToLogInfo(DateTime.getDateTime()+60000);
                 handler.removeCallbacks(runnableSchedule);
                 handler.removeCallbacks(runnableDeliver);
@@ -121,10 +124,10 @@ public class RandomEMAScheduler extends Scheduler {
 
     long getTimeFromType(String type) {
         switch (type) {
-            case SchedulerRule.TIME_WINDOW_START:
-                return windowManager.getWindowStartTime(DateTime.getDateTime());
-            case SchedulerRule.TIME_WINDOW_END:
-                return windowManager.getWindowEndTime(DateTime.getDateTime());
+            case SchedulerRule.TIME_BLOCK_START:
+                return blockManager.getWindowStartTime(DateTime.getDateTime());
+            case SchedulerRule.TIME_BLOCK_END:
+                return blockManager.getWindowEndTime(DateTime.getDateTime());
             case SchedulerRule.TIME_LAST_SCHEDULE:
                 long lastScheduleTime = -1;
                 ArrayList<LogInfo> logInfos = loggerManager.getLogInfos(LogInfo.OP_SCHEDULE, emaType.getType(), emaType.getId());
@@ -140,7 +143,7 @@ public class RandomEMAScheduler extends Scheduler {
 
     boolean isDeliveredAlready(long startTime, long endTime, int indexWindow) {
         ArrayList<LogInfo> logInfoArrayList = loggerManager.getLogInfos(LogInfo.OP_DELIVER, emaType.getType(), emaType.getId(), startTime, endTime);
-        if (logInfoArrayList.size() > windowManager.getWindows()[indexWindow].getCount())
+        if (logInfoArrayList.size() > blockManager.getWindows()[indexWindow].getTotal())
             return false;
         else return true;
     }

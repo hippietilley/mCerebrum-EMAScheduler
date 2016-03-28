@@ -12,7 +12,6 @@ import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.day.DayManager;
 import org.md2k.utilities.Report.Log;
@@ -45,7 +44,6 @@ public class SmokingEMAScheduler extends Scheduler {
     public SmokingEMAScheduler(Context context, EMAType emaType, DayManager dayManager) {
         super(context, emaType, dayManager);
         Log.d(TAG, "EventEMAScheduler()...");
-        conditionManager = new ConditionManager();
         handler = new Handler();
     }
 
@@ -83,7 +81,7 @@ public class SmokingEMAScheduler extends Scheduler {
                     Event event = gson.fromJson(dataTypeString.getSample(), Event.class);
                     Log.d(TAG, "receivedEventData()...");
                     if (event.getEvent().equals(Event.SMOKING))
-                        if(conditionManager.isValid()){
+                        if(conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions())){
                             Log.d(TAG, "condition valid...");
                             startDelivery();
                             Log.d(TAG,"after delivery...");
