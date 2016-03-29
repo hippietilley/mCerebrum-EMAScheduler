@@ -8,7 +8,6 @@ import org.md2k.datakitapi.source.datasource.DataSource;
 public class SchedulerRule {
     public static final String TYPE_RANDOM="RANDOM";
     public static final String TYPE_IMMEDIATE ="IMMEDIATE";
-    public static final String TYPE_NOW="NOW";
     public static final String TIME_BLOCK_START ="BLOCK_START";
     public static final String TIME_BLOCK_END ="BLOCK_END";
     public static final String TIME_LAST_SCHEDULE="LAST_SCHEDULE";

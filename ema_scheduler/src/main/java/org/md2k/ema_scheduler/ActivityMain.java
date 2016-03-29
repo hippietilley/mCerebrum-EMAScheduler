@@ -15,10 +15,17 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.logger.LogInfo;
+import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
@@ -120,30 +127,54 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     void updateTable() {
-        //Todo Update Table
+        if(!DataKitAPI.getInstance(this).isConnected()) return;
+        long curTime=DateTime.getDateTime();
+        LogInfo logInfo;
+        String time, type, msg;
+        LoggerManager loggerManager=LoggerManager.getInstance(this);
+        for(int i=loggerManager.getLogInfos().size()-1;i>=0;i--){
+            logInfo=loggerManager.getLogInfos().get(i);
+            if(curTime-logInfo.getTimestamp()>=4*60*60*1000) continue;
+            time=formatTime(logInfo.getTimestamp());
+            if(logInfo.getOperation()!=null && logInfo.getId()!=null) {
+                type = logInfo.getOperation().toLowerCase() + ":" + logInfo.getId().toLowerCase();
+                msg = logInfo.getMessage().toLowerCase();
+                addRow(time, type, msg);
+            }
+        }
     }
-
+    String formatTime(long timestamp) {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(timestamp);
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            Date currenTimeZone = calendar.getTime();
+            return sdf.format(currenTimeZone);
+        } catch (Exception e) {
+        }
+        return "";
+    }
     void createTable() {
         TableLayout ll = (TableLayout) findViewById(R.id.tableLayout);
         ll.removeAllViews();
         ll.addView(createDefaultRow());
     }
 
-    void addRow() {
+    void addRow(String time, String type, String msg) {
         TableLayout ll = (TableLayout) findViewById(R.id.tableLayout);
+//        ll.setColumnShrinkable(1,true);
+//        ll.setColumnShrinkable(2,true);
+//        ll.setColumnShrinkable(0, false);
         TableRow row = new TableRow(this);
         TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
         row.setLayoutParams(lp);
         TextView tvDate = new TextView(this);
-//        tvDate.setText(platform.toLowerCase());
-        TextView tvTime = new TextView(this);
-//        tvTime.setText("0");
+        tvDate.setText(time);
         TextView tvType = new TextView(this);
-        //tvType.setText("0");
+        tvType.setText(type);
         TextView tvStatus = new TextView(this);
-        //tvStatus.setText("0");
+        tvStatus.setText(msg);
         row.addView(tvDate);
-        row.addView(tvTime);
         row.addView(tvType);
         row.addView(tvStatus);
         row.setBackgroundResource(R.drawable.border);
@@ -154,13 +185,9 @@ public class ActivityMain extends AppCompatActivity {
     TableRow createDefaultRow() {
         TableRow row = new TableRow(this);
         TextView tvDate = new TextView(this);
-        tvDate.setText("Date");
+        tvDate.setText("Date/Time");
         tvDate.setTypeface(null, Typeface.BOLD);
         tvDate.setTextColor(getResources().getColor(R.color.teal_A700));
-        TextView tvTime = new TextView(this);
-        tvTime.setText("Time");
-        tvTime.setTypeface(null, Typeface.BOLD);
-        tvTime.setTextColor(getResources().getColor(R.color.teal_A700));
         TextView tvType = new TextView(this);
         tvType.setText("Type");
         tvType.setTypeface(null, Typeface.BOLD);
@@ -170,7 +197,6 @@ public class ActivityMain extends AppCompatActivity {
         tvStatus.setTypeface(null, Typeface.BOLD);
         tvStatus.setTextColor(getResources().getColor(R.color.teal_A700));
         row.addView(tvDate);
-        row.addView(tvTime);
         row.addView(tvType);
         row.addView(tvStatus);
         return row;

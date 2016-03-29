@@ -85,7 +85,8 @@ public class ServiceEMAScheduler extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()...");
-        dayManager.stop();
+        if(dayManager!=null)
+            dayManager.stop();
         Configuration.clear();
         LoggerManager.clear();
         Log.d(TAG, "...stopScheduler()");

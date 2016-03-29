@@ -33,7 +33,7 @@ public class DrivingDetectorManager extends Condition {
         DataSourceBuilder dataSourceBuilder=new DataSourceBuilder().setType(DataSourceType.LOCATION).setApplication(applicationBuilder.build());
         ArrayList<DataSourceClient> dataSourceClientArrayList=dataKitAPI.find(dataSourceBuilder);
         if(dataSourceClientArrayList.size()!=0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), curTime - lastXMinute, curTime);
+            ArrayList<DataType> dataTypes = dataKitAPI.queryHFlastN(dataSourceClientArrayList.get(0), 240);
             for(int i=0;i<dataTypes.size();i++){
                 if(dataTypes.get(i) instanceof DataTypeDoubleArray) {
                     double[] samples = ((DataTypeDoubleArray) dataTypes.get(i)).getSample();

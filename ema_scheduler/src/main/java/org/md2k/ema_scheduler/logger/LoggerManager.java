@@ -69,8 +69,8 @@ public class LoggerManager {
         logInfos.add(logInfo);
     }
     private void readLogInfosFromDataKit() {
-        long startTimestamp = getToday();
         long endTimestamp = DateTime.getDateTime();
+        long startTimestamp = endTimestamp-24*60*60*1000;
         logInfos=new ArrayList<>();
         Gson gson=new Gson();
         ArrayList<DataType> dataTypes=dataKitAPI.query(dataSourceClientLogger, startTimestamp, endTimestamp);

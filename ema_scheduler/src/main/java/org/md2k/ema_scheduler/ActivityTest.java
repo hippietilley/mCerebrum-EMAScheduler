@@ -42,6 +42,7 @@ public class ActivityTest extends AppCompatActivity {
         if(packageName.length()==0) return -1;
         EMAType emaTypes[]=configuration.getEma_types();
         for(int i=0;i<emaTypes.length;i++){
+            if(emaTypes[i].getApplication()==null) continue;
             if(emaTypes[i].getApplication().getPackage_name().equals(packageName)) return i;
         }
         return -1;

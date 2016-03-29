@@ -14,7 +14,6 @@ import org.md2k.ema_scheduler.scheduler.SchedulerManager;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 /**
  * Created by monowar on 3/14/16.
@@ -28,65 +27,41 @@ public class DayManager {
     DataSourceClient dataSourceClientDayEnd;
     SchedulerManager schedulerManager;
     Handler handler;
-    Runnable runnableListenDayStart =new Runnable() {
-        @Override
-        public void run() {
-            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
-            Log.d(TAG, "runnableListenDayStart()...dataSourceClients.size()="+dataSourceClients.size());
-            if(dataSourceClients.size()==0)
-                handler.postDelayed(runnableListenDayStart,1000);
-            else{
-                readDayStartFromDataKit();
-                subscribeDayStart();
-            }
-        }
-    };
-    Runnable runnableListenDayEnd =new Runnable() {
-        @Override
-        public void run() {
-            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_END));
-            Log.d(TAG, "runnableListenDayEnd()...dataSourceCLients.size()="+dataSourceClients.size());
-            if(dataSourceClients.size()==0)
-                handler.postDelayed(runnableListenDayStart,1000);
-            else{
-                readDayEndFromDataKit();
-                subscribeDayEnd();
-            }
-        }
-    };
     public DayManager(Context context) {
         Log.d(TAG, "DayManager()...");
         this.context = context;
-        schedulerManager=new SchedulerManager(context, this);
+        schedulerManager=new SchedulerManager(context);
         handler=new Handler();
     }
 
     public void start(){
         Log.d(TAG, "start()...");
         dataKitAPI = DataKitAPI.getInstance(context);
-        handler.post(runnableListenDayStart);
-        handler.post(runnableListenDayEnd);
-        schedulerManager.start();
+        handler.post(runnableDay);
     }
 
     public void stop(){
         Log.d(TAG, "stop()...");
-        handler.removeCallbacks(runnableListenDayStart);
-        handler.removeCallbacks(runnableListenDayEnd);
+        handler.removeCallbacks(runnableDay);
         schedulerManager.stop();
     }
 
-    boolean isToday(long timestamp) {
-        Calendar calendar = Calendar.getInstance();
-        Calendar calendarNow = Calendar.getInstance();
-        calendar.setTimeInMillis(timestamp);
-        if (calendar.get(Calendar.YEAR) != calendarNow.get(Calendar.YEAR)) return false;
-        if (calendar.get(Calendar.MONTH) != calendarNow.get(Calendar.MONTH)) return false;
-        if (calendar.get(Calendar.DAY_OF_MONTH) != calendarNow.get(Calendar.DAY_OF_MONTH))
-            return false;
-        return true;
-    }
-
+    Runnable runnableDay =new Runnable() {
+        @Override
+        public void run() {
+            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
+            Log.d(TAG, "runnableListenDayStart()...dataSourceClients.size()="+dataSourceClients.size());
+            if(dataSourceClients.size()==0)
+                handler.postDelayed(runnableDay,1000);
+            else{
+                readDayStartFromDataKit();
+                readDayEndFromDataKit();
+                subscribeDayStart();
+                subscribeDayEnd();
+                schedulerManager.start(dayStartTime, dayEndTime);
+            }
+        }
+    };
 
     public void subscribeDayStart() {
         Log.d(TAG, "subscribeDayStart()...");
@@ -96,7 +71,7 @@ public class DayManager {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
                 dayStartTime = dataTypeLong.getSample();
                 Log.d(TAG, "subscribeDayStart()...received..dayStartTime=" + dayStartTime);
-                resetScheduler();
+                schedulerManager.setDayStartTimestamp(dayStartTime);
             }
         });
     }
@@ -109,15 +84,9 @@ public class DayManager {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
                 dayEndTime = dataTypeLong.getSample();
                 Log.d(TAG, "subscribeDayEnd()...received..dayEndTime=" + dayEndTime);
+                schedulerManager.setDayEndTimestamp(dayEndTime);
             }
         });
-    }
-    void resetScheduler(){
-//        long curTime= DateTime.getDateTime();
-///        Log.d(TAG,"resetScheduler()...dayStartTime="+dayStartTime+" curTime="+curTime+" dayEndTime="+dayEndTime);
-//        if(dayStartTime!=-1 && dayStartTime<curTime && isToday(dayStartTime) && (dayStartTime>dayEndTime || curTime<dayEndTime))
-//            schedulerManager.start();
-        schedulerManager.reset();
     }
 
     private void readDayStartFromDataKit() {
@@ -132,8 +101,7 @@ public class DayManager {
             if (dataTypes.size() != 0) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                 dayStartTime = dataTypeLong.getSample();
-                Log.d(TAG,"readDayStartFromDataKit()...dayStartTime="+dayEndTime);
-                resetScheduler();
+                Log.d(TAG, "readDayStartFromDataKit()...dayStartTime=" + dayEndTime);
             }
         }
     }
@@ -151,7 +119,6 @@ public class DayManager {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                 dayEndTime = dataTypeLong.getSample();
                 Log.d(TAG,"readDayEndFromDataKit()...dayEndTime="+dayEndTime);
-
             }
         }
     }

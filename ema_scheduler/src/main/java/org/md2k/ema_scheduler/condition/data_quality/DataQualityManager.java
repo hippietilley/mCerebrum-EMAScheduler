@@ -26,6 +26,7 @@ public class DataQualityManager extends Condition {
     }
 
     public boolean isValid(ConfigCondition configCondition) {
+
         long lastXMinute = Long.parseLong(configCondition.getValues().get(0));
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(1));
         DataSource dataSource = configCondition.getData_source();

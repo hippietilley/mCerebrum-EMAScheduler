@@ -8,11 +8,13 @@ import org.md2k.ema_scheduler.condition.data_quality.DataQualityManager;
 import org.md2k.ema_scheduler.condition.last_ema_emi.LastEmaEmiManager;
 import org.md2k.ema_scheduler.condition.not_active.NotActiveManager;
 import org.md2k.ema_scheduler.condition.not_driving.DrivingDetectorManager;
+import org.md2k.ema_scheduler.condition.privacy.PrivacyManager;
 import org.md2k.ema_scheduler.condition.valid_block.ValidBlockManager;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.logger.LoggerManager;
+import org.md2k.utilities.Report.Log;
 
 import java.util.HashMap;
 
@@ -26,6 +28,8 @@ public class ConditionManager {
     public static final String TYPE_LAST_EMA_EMI="LAST_EMA_EMI";
     public static final String TYPE_NOT_ACTIVE="NOT_ACTIVE";
     public static final String TYPE_NOT_DRIVING="NOT_DRIVING";
+    public static final String TYPE_PRIVACY="PRIVACY";
+    private static final String TAG = ConditionManager.class.getSimpleName();
     HashMap<String, Condition> conditionHashMap;
     Configuration configuration;
     Context context;
@@ -57,15 +61,18 @@ public class ConditionManager {
                 return new NotActiveManager(context);
             case TYPE_VALID_BLOCK:
                 return new ValidBlockManager(context);
+            case TYPE_PRIVACY:
+                return new PrivacyManager(context);
         }
         return null;
     }
     public boolean isValid(String[] conditions){
         if(conditions==null) return true;
         for (String condition : conditions) {
+            Log.d(TAG, "condition=" + condition);
             ConfigCondition configCondition = configuration.getConditions(condition);
-//            if (!conditionHashMap.get(condition).isValid(configCondition))
-//                return false;
+            if (!conditionHashMap.get(condition).isValid(configCondition))
+                return false;
         }
         log();
         return true;

@@ -3,6 +3,7 @@ package org.md2k.ema_scheduler.runner;
 import android.content.Context;
 
 import org.md2k.ema_scheduler.configuration.Application;
+import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.utilities.Report.Log;
 
 /**
@@ -22,9 +23,9 @@ public class RunnerManager {
         this.application=application;
     }
 
-    public void start(String status, String type) {
+    public void start(EMAType emaType, String status, String type) {
         Log.d(TAG, "start()...status=" + status + " filename=" + application.getId());
-            runnerMonitor.start(status, application, type);
+            runnerMonitor.start(emaType, status, application, type);
     }
     public void stop(){
         runnerMonitor.clear();

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Handler;
 
 import org.md2k.ema_scheduler.configuration.EMAType;
-import org.md2k.ema_scheduler.day.DayManager;
 import org.md2k.utilities.Report.Log;
 
 /**
@@ -14,15 +13,15 @@ public class EMIScheduler extends Scheduler {
     private static final String TAG = EMIScheduler.class.getSimpleName();
     Handler handler;
 
-    public EMIScheduler(Context context, EMAType emaType, DayManager dayManager) {
-        super(context, emaType, dayManager);
+    public EMIScheduler(Context context, EMAType emaType) {
+        super(context, emaType);
         Log.d(TAG, "EMIScheduler()...");
         handler = new Handler();
     }
 
     @Override
-    public void start() {
-        super.start();
+    public void start(long dayStartTimestamp, long dayEndTimestamp) {
+        super.start(dayStartTimestamp, dayEndTimestamp);
         Log.d(TAG, "start()...");
     }
 
@@ -30,8 +29,14 @@ public class EMIScheduler extends Scheduler {
     public void stop() {
         Log.d(TAG, "stop()...");
     }
+
     @Override
-    public void reset(){
+    public void setDayStartTimestamp(long dayStartTimestamp) {
+
+    }
+
+    @Override
+    public void setDayEndTimestamp(long dayEndTimestamp) {
 
     }
 

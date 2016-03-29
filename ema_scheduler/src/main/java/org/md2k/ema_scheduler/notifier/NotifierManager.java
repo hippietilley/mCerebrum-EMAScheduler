@@ -47,6 +47,7 @@ public class NotifierManager {
         @Override
         public void run() {
             Log.d(TAG, "runnableNotify...");
+            logNotify("notifying..." + String.valueOf(notifyNo + 1));
             NotificationRequest notificationRequestSelected[] = findNotification(notifications[notifyNo].getTypes());
             insertDataToDataKit(notificationRequestSelected);
             Log.d(TAG, "notifications length=" + notifications.length + " now=" + notifyNo);
@@ -105,7 +106,6 @@ public class NotifierManager {
                     NotificationAcknowledge notificationAcknowledge = gson.fromJson(dataTypeString.getSample(), collectionType);
                     Log.d(TAG, "notification_acknowledge = " + notificationAcknowledge.getStatus());
                     stop();
-                    log(notificationAcknowledge.getStatus());
                     switch (notificationAcknowledge.getStatus()) {
 
                         case NotificationAcknowledge.DELAY:
@@ -113,12 +113,14 @@ public class NotifierManager {
                             long delay = notificationAcknowledge.getNotificationRequest().getResponse_option().getDelay_time();
                             delayEnable = false;
                             Log.d(TAG, "delay = " + delay);
+                            logNotificationResponse("DELAY: "+String.valueOf(delay));
                             handler.postDelayed(runnableNotify, delay);
                             break;
                         case NotificationAcknowledge.OK:
                         case NotificationAcknowledge.CANCEL:
                         case NotificationAcknowledge.TIMEOUT:
                         case NotificationAcknowledge.DELAY_CANCEL:
+                            logNotificationResponse(notificationAcknowledge.getStatus());
                             callbackDelivery.onResponse(notificationAcknowledge.getStatus());
                             clear();
                             break;
@@ -141,7 +143,6 @@ public class NotifierManager {
 
     public void start() {
         Log.d(TAG, "start()...");
-        log();
         delayEnable = true;
         if (notifications.length == 0) return;
         Log.d(TAG, "Notification length=" + notifications.length);
@@ -191,22 +192,22 @@ public class NotifierManager {
 
     }
 
-    protected void log() {
+    protected void logNotify(String message) {
         LogInfo logInfo = new LogInfo();
         logInfo.setOperation(LogInfo.OP_NOTIFY);
         logInfo.setId(emaType.getId());
         logInfo.setType(emaType.getType());
         logInfo.setTimestamp(DateTime.getDateTime());
-        logInfo.setMessage("notifying...");
+        logInfo.setMessage(message);
         LoggerManager.getInstance(context).insert(logInfo);
     }
-    protected void log(String notificationResult) {
+    protected void logNotificationResponse(String notificationResult) {
         LogInfo logInfo = new LogInfo();
-        logInfo.setOperation(LogInfo.OP_NOTIFY);
+        logInfo.setOperation(LogInfo.OP_NOTIFICATION_RESPONSE);
         logInfo.setId(emaType.getId());
         logInfo.setType(emaType.getType());
         logInfo.setTimestamp(DateTime.getDateTime());
-        logInfo.setMessage("notification feedback from user:"+notificationResult);
+        logInfo.setMessage(notificationResult);
         LoggerManager.getInstance(context).insert(logInfo);
     }
 

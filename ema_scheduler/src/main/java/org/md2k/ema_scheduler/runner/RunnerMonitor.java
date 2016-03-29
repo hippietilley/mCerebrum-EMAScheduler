@@ -19,6 +19,9 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.configuration.Application;
+import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.logger.LogInfo;
+import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.NotificationAcknowledge;
 
@@ -37,6 +40,7 @@ public class RunnerMonitor {
     Application application;
     Survey survey;
     DataSourceClient dataSourceClient;
+    EMAType emaType;
     Runnable runnableTimeOut = new Runnable() {
         @Override
         public void run() {
@@ -49,6 +53,7 @@ public class RunnerMonitor {
         }
     };
     private MyBroadcastReceiver myReceiver;
+    boolean isStart=false;
 
     public RunnerMonitor(Context context) {
         this.context = context;
@@ -59,10 +64,12 @@ public class RunnerMonitor {
         dataSourceClient = DataKitAPI.getInstance(context).register(dataSourceBuilder);
     }
 
-    public void start(String status, Application application, String type) {
+    public void start(EMAType emaType, String status, Application application, String type) {
+        isStart=true;
         context.registerReceiver(myReceiver, intentFilter);
         this.type = type;
         this.application = application;
+        this.emaType=emaType;
         survey = new Survey();
         survey.start_timestamp = DateTime.getDateTime();
         survey.id = application.getId();
@@ -80,6 +87,7 @@ public class RunnerMonitor {
                 context.startActivity(intent);
                 Log.d(TAG,"timeout="+application.getTimeout());
                 handler.postDelayed(runnableTimeOut, application.getTimeout());
+                log();
                 break;
             case NotificationAcknowledge.CANCEL:
                 survey.status="CANCELED_BY_USER_AT_PROMPT";
@@ -95,6 +103,17 @@ public class RunnerMonitor {
                 break;
         }
     }
+    protected void log(){
+        if(type.equals("SYSTEM")) {
+            LogInfo logInfo = new LogInfo();
+            logInfo.setOperation(LogInfo.OP_RUN);
+            logInfo.setId(emaType.getId());
+            logInfo.setType(emaType.getType());
+            logInfo.setTimestamp(DateTime.getDateTime());
+            logInfo.setMessage("starting app...");
+            LoggerManager.getInstance(context).insert(logInfo);
+        }
+    }
 
     void sendData() {
         Intent intent = new Intent();
@@ -106,10 +125,13 @@ public class RunnerMonitor {
 
     void clear() {
         Log.d(TAG, "clear()...");
-        handler.removeCallbacks(runnableTimeOut);
-        if (myReceiver != null)
-            context.unregisterReceiver(myReceiver);
+        if(isStart) {
+            handler.removeCallbacks(runnableTimeOut);
+            if (myReceiver != null)
+                context.unregisterReceiver(myReceiver);
+        }
         Log.d(TAG, "...clear()");
+        isStart=false;
 
     }
 

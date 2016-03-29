@@ -4,7 +4,6 @@ import android.content.Context;
 
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.configuration.EMAType;
-import org.md2k.ema_scheduler.day.DayManager;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -17,13 +16,11 @@ public class SchedulerManager {
     Context context;
     Configuration configuration;
     ArrayList<Scheduler> scheduler;
-    DayManager dayManager;
     boolean isStarted;
 
-    public SchedulerManager(Context context, DayManager dayManager) {
+    public SchedulerManager(Context context) {
         Log.d(TAG, "SchedulerManager()...");
         this.context = context;
-        this.dayManager = dayManager;
         configuration = Configuration.getInstance();
         scheduler = new ArrayList<>();
         isStarted = false;
@@ -39,24 +36,33 @@ public class SchedulerManager {
             Log.d(TAG, "prepareScheduler()...emaType ID=" + configuration.getEma_types()[i].getId()+"....success");
             switch (configuration.getEma_types()[i].getId()) {
                 case EMAType.ID_RANDOM_EMA:
-//                    scheduler.add(new RandomEMAScheduler(context, configuration.getEma_types()[i], dayManager));
+                    scheduler.add(new RandomEMAScheduler(context, configuration.getEma_types()[i]));
                     break;
                 case EMAType.ID_EMI:
-//                    scheduler.add(new EMIScheduler(context, configuration.getEma_types()[i], dayManager));
+                    scheduler.add(new EMIScheduler(context, configuration.getEma_types()[i]));
                     break;
                 default:
-                    scheduler.add(new EventEMAScheduler(context, configuration.getEma_types()[i], dayManager));
+                    scheduler.add(new EventEMAScheduler(context, configuration.getEma_types()[i]));
                     break;
             }
         }
     }
+    public void setDayStartTimestamp(long dayStartTimestamp){
+        for (int i = 0; i < scheduler.size(); i++)
+            scheduler.get(i).setDayStartTimestamp(dayStartTimestamp);
+    }
+    public void setDayEndTimestamp(long dayEndTimestamp){
+        for (int i = 0; i < scheduler.size(); i++)
+            scheduler.get(i).setDayEndTimestamp(dayEndTimestamp);
 
-    public void start() {
+    }
+
+    public void start(long dayStartTimestamp, long dayEndTimestamp) {
         if (isStarted) return;
         isStarted = true;
         Log.d(TAG, "start()...");
         for (int i = 0; i < scheduler.size(); i++)
-            scheduler.get(i).start();
+            scheduler.get(i).start(dayStartTimestamp, dayEndTimestamp);
     }
 
     public void stop() {
@@ -65,10 +71,5 @@ public class SchedulerManager {
         Log.d(TAG, "stop()...");
         for (int i = 0; i < scheduler.size(); i++)
             scheduler.get(i).stop();
-    }
-
-    public void reset() {
-        for (int i = 0; i < scheduler.size(); i++)
-            scheduler.get(i).reset();
     }
 }
