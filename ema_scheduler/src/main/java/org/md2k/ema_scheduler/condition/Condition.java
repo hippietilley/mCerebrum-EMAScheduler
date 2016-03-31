@@ -2,7 +2,6 @@ package org.md2k.ema_scheduler.condition;
 
 import android.content.Context;
 
-import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 import org.md2k.ema_scheduler.logger.LogInfo;
@@ -13,12 +12,10 @@ import org.md2k.ema_scheduler.logger.LoggerManager;
  */
 public abstract class Condition {
     private static final String TAG = Condition.class.getSimpleName();
-    protected DataKitAPI dataKitAPI;
     protected Context context;
     public abstract boolean isValid(ConfigCondition configCondition);
     protected Condition(Context context){
         this.context=context;
-        dataKitAPI=DataKitAPI.getInstance(context);
     }
     protected void log(ConfigCondition configCondition, String message){
         LogInfo logInfo=new LogInfo();

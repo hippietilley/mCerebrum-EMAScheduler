@@ -8,13 +8,9 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.configuration.SchedulerRule;
 import org.md2k.ema_scheduler.logger.LogInfo;
-import org.md2k.ema_scheduler.logger.LogSchedule;
 import org.md2k.utilities.Report.Log;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Random;
 
 /**
@@ -109,7 +105,7 @@ public class RandomEMAScheduler extends Scheduler {
             long blockStartTime = blockManager.getBlockStartTime(dayStartTimestamp, curTime);
             long blockEndTime = blockManager.getBlockEndTime(dayStartTimestamp, curTime);
             int curScheduleIndex= getCurScheduleIndex(blockStartTime, blockEndTime);
-            if (conditionManager.isValid(emaType.getScheduler_rules()[curScheduleIndex].getConditions()))
+            if (conditionManager.isValid(emaType.getScheduler_rules()[curScheduleIndex].getConditions(), emaType.getType(), emaType.getId()))
                 startDelivery();
             schedule();
         }
@@ -122,18 +118,6 @@ public class RandomEMAScheduler extends Scheduler {
     };
 
 
-    void sendToLogInfo(long scheduledTime) {
-        LogSchedule logSchedule = new LogSchedule();
-        logSchedule.setScheduleTimestamp(scheduledTime);
-        LogInfo logInfo = new LogInfo();
-        logInfo.setId(emaType.getId());
-        logInfo.setType(emaType.getType());
-        logInfo.setTimestamp(DateTime.getDateTime());
-        logInfo.setOperation(LogInfo.OP_SCHEDULE);
-        logInfo.setLogSchedule(logSchedule);
-        logInfo.setMessage("scheduled at: "+formatTime(scheduledTime));
-        loggerManager.insert(logInfo);
-    }
     void logWhenSchedulerRun(String message) {
         LogInfo logInfo = new LogInfo();
         logInfo.setId(emaType.getId());
@@ -144,17 +128,6 @@ public class RandomEMAScheduler extends Scheduler {
         loggerManager.insert(logInfo);
     }
 
-    String formatTime(long timestamp) {
-        try {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(timestamp);
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-            Date currenTimeZone = calendar.getTime();
-            return sdf.format(currenTimeZone);
-        } catch (Exception e) {
-        }
-        return "";
-    }
 
     long getRandomNumber(long range) {
         int intRange = (int) (range / (1000 * 60));

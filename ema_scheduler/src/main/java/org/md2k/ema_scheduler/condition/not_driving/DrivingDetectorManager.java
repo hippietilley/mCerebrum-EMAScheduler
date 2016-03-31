@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.condition.not_driving;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
 import org.md2k.datakitapi.datatype.DataTypeFloatArray;
@@ -23,6 +24,7 @@ public class DrivingDetectorManager extends Condition {
         super(context);
     }
     public boolean isValid(ConfigCondition configCondition){
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         long lastXMinute = Long.parseLong(configCondition.getValues().get(0));
         double limitPercentage=Double.parseDouble(configCondition.getValues().get(1));
         int notDriving=0;

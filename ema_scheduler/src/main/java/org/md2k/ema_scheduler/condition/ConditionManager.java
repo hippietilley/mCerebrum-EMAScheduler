@@ -66,20 +66,26 @@ public class ConditionManager {
         }
         return null;
     }
-    public boolean isValid(String[] conditions){
+    public boolean isValid(String[] conditions, String type, String id){
         if(conditions==null) return true;
         for (String condition : conditions) {
             Log.d(TAG, "condition=" + condition);
             ConfigCondition configCondition = configuration.getConditions(condition);
-            if (!conditionHashMap.get(condition).isValid(configCondition))
+            if (!conditionHashMap.get(condition).isValid(configCondition)) {
+                Log.d(TAG,"condition="+condition+" false");
                 return false;
+            }else{
+                Log.d(TAG,"condition="+condition+" true");
+            }
         }
-        log();
+        log(type,id);
         return true;
     }
-    protected void log(){
+    protected void log(String type, String id){
         LogInfo logInfo=new LogInfo();
         logInfo.setOperation(LogInfo.OP_CONDITION);
+        logInfo.setId(id);
+        logInfo.setType(type);
         logInfo.setTimestamp(DateTime.getDateTime());
         logInfo.setMessage("true: all conditions okay");
         LoggerManager.getInstance(context).insert(logInfo);

@@ -58,8 +58,8 @@ public class ActivityMain extends AppCompatActivity {
         buttonService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ServiceEMAScheduler.class);
-                if (Apps.isServiceRunning(getBaseContext(), ServiceEMAScheduler.class.getName())) {
+                Intent intent = new Intent(ActivityMain.this, ServiceEMAScheduler.class);
+                if (Apps.isServiceRunning(ActivityMain.this, ServiceEMAScheduler.class.getName())) {
                     stopService(intent);
                 } else {
                     startService(intent);
@@ -68,13 +68,10 @@ public class ActivityMain extends AppCompatActivity {
         });
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
- //       Intent intent = new Intent(this, ServiceEMARunner.class);
-//        startService(intent);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
     }
@@ -127,11 +124,11 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     void updateTable() {
-        if(!DataKitAPI.getInstance(this).isConnected()) return;
+        if(!DataKitAPI.getInstance(getApplicationContext()).isConnected()) return;
         long curTime=DateTime.getDateTime();
         LogInfo logInfo;
         String time, type, msg;
-        LoggerManager loggerManager=LoggerManager.getInstance(this);
+        LoggerManager loggerManager=LoggerManager.getInstance(getApplicationContext());
         for(int i=loggerManager.getLogInfos().size()-1;i>=0;i--){
             logInfo=loggerManager.getLogInfos().get(i);
             if(curTime-logInfo.getTimestamp()>=4*60*60*1000) continue;
@@ -200,10 +197,5 @@ public class ActivityMain extends AppCompatActivity {
         row.addView(tvType);
         row.addView(tvStatus);
         return row;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 }

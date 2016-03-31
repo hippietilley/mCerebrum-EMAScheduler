@@ -32,6 +32,12 @@
             android:exported="true"
             android:label="EMASchedulerTest"
             android:screenOrientation="portrait" />
+        <activity
+            android:name="org.md2k.ema_scheduler.incentive.ActivityIncentive"
+            android:enabled="true"
+            android:exported="true"
+            android:label="Incentive"
+            android:screenOrientation="portrait" />
 
     </application>
 

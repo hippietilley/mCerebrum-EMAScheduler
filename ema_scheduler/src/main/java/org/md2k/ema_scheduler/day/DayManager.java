@@ -71,7 +71,13 @@ public class DayManager {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
                 dayStartTime = dataTypeLong.getSample();
                 Log.d(TAG, "subscribeDayStart()...received..dayStartTime=" + dayStartTime);
-                schedulerManager.setDayStartTimestamp(dayStartTime);
+                Thread t=new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        schedulerManager.setDayStartTimestamp(dayStartTime);
+                    }
+                });
+                t.start();
             }
         });
     }
@@ -84,7 +90,13 @@ public class DayManager {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
                 dayEndTime = dataTypeLong.getSample();
                 Log.d(TAG, "subscribeDayEnd()...received..dayEndTime=" + dayEndTime);
-                schedulerManager.setDayEndTimestamp(dayEndTime);
+                Thread t=new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        schedulerManager.setDayEndTimestamp(dayEndTime);
+                    }
+                });
+                t.start();
             }
         });
     }

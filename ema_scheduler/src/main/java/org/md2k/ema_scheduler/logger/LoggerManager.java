@@ -18,7 +18,6 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 
 /**
@@ -34,6 +33,7 @@ public class LoggerManager {
     ArrayList<LogInfo> logInfos;
 
     private LoggerManager(Context context) {
+        Log.d(TAG,"LoggerManager()...");
         this.context = context;
         dataKitAPI = DataKitAPI.getInstance(context);
         dataSourceBuilderLogger = createDataSourceBuilderLogger();
@@ -42,20 +42,11 @@ public class LoggerManager {
     }
 
     public static LoggerManager getInstance(Context context) {
+        Log.d(TAG,"getInstance()...instance="+instance);
         if (instance == null)
             instance = new LoggerManager(context);
         return instance;
     }
-
-    long getToday() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE,0);
-        calendar.set(Calendar.SECOND,0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTimeInMillis();
-    }
-
     private void registerLogInfo() {
         dataSourceClientLogger = dataKitAPI.register(dataSourceBuilderLogger);
     }
@@ -69,6 +60,7 @@ public class LoggerManager {
         logInfos.add(logInfo);
     }
     private void readLogInfosFromDataKit() {
+        Log.d(TAG,"readLogInfosFromDataKit...");
         long endTimestamp = DateTime.getDateTime();
         long startTimestamp = endTimestamp-24*60*60*1000;
         logInfos=new ArrayList<>();
@@ -79,6 +71,7 @@ public class LoggerManager {
             LogInfo logInfo=gson.fromJson(dataTypeString.getSample(),LogInfo.class);
             logInfos.add(logInfo);
         }
+        Log.d(TAG, "readLogInfosFromDataKit...size=" + logInfos.size());
     }
 
     DataSourceBuilder createDataSourceBuilderLogger() {
@@ -102,6 +95,7 @@ public class LoggerManager {
         return logInfos;
     }
     public ArrayList<LogInfo> getLogInfos(String operation, String type, String id){
+        Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+")");
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
         for(int i=0;i<logInfos.size();i++){
             if(!logInfos.get(i).getOperation().equals(operation)) continue;
@@ -109,20 +103,36 @@ public class LoggerManager {
             if(!logInfos.get(i).getId().equals(id)) continue;
             logInfosTemp.add(logInfos.get(i));
         }
+        Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+") size="+logInfosTemp.size());
         return logInfosTemp;
     }
     public LogInfo getLogInfoLast(String operation, String type, String id) {
         LogInfo logInfo=null;
+        Log.d(TAG,"getLogInfoLast("+operation+" "+type+" "+id+")");
         for (int i = 0; i < logInfos.size(); i++) {
-            if (!logInfos.get(i).getOperation().equals(operation)) continue;
-            if (!logInfos.get(i).getType().equals(type)) continue;
-            if (!logInfos.get(i).getId().equals(id)) continue;
+            if (operation!=null && !logInfos.get(i).getOperation().equals(operation)) continue;
+            if (type!=null && !logInfos.get(i).getType().equals(type)) continue;
+            if (id!=null && !logInfos.get(i).getId().equals(id)) continue;
+            if (logInfo == null || logInfo.getTimestamp() < logInfos.get(i).getTimestamp())
+                logInfo = logInfos.get(i);
+        }
+        return logInfo;
+    }
+    public LogInfo getLogInfoLast(String operation, String type, String id, String message) {
+        LogInfo logInfo=null;
+        Log.d(TAG,"getLogInfoLast("+operation+" "+type+" "+id+")");
+        for (int i = 0; i < logInfos.size(); i++) {
+            if (operation!=null && !logInfos.get(i).getOperation().equals(operation)) continue;
+            if (type!=null && !logInfos.get(i).getType().equals(type)) continue;
+            if (id!=null && !logInfos.get(i).getId().equals(id)) continue;
+            if(message!=null && !logInfos.get(i).getMessage().equals(message)) continue;
             if (logInfo == null || logInfo.getTimestamp() < logInfos.get(i).getTimestamp())
                 logInfo = logInfos.get(i);
         }
         return logInfo;
     }
     public ArrayList<LogInfo> getLogInfos(String operation, String type, String id, long startTime, long endTime){
+        Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+" "+startTime+" "+endTime+")");
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
         for(int i=0;i<logInfos.size();i++){
             if(operation!=null && !logInfos.get(i).getOperation().equals(operation)) continue;
@@ -132,9 +142,11 @@ public class LoggerManager {
             if(endTime!=-1 && logInfos.get(i).getTimestamp()>endTime) continue;
             logInfosTemp.add(logInfos.get(i));
         }
+        Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+" "+startTime+" "+endTime+") size="+logInfosTemp.size());
         return logInfosTemp;
     }
     public static void clear(){
+        Log.d(TAG,"clear()...");
         instance=null;
     }
 

@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.condition.data_quality;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeIntArray;
 import org.md2k.datakitapi.source.datasource.DataSource;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
  * Created by monowar on 3/26/16.
  */
 public class DataQualityManager extends Condition {
+    public static final String TAG=DataQualityManager.class.getSimpleName();
     public static final int QUALITY_WINDOW = 5000;
 
     public DataQualityManager(Context context) {
@@ -26,6 +28,8 @@ public class DataQualityManager extends Condition {
     }
 
     public boolean isValid(ConfigCondition configCondition) {
+        if(true) return true;
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
 
         long lastXMinute = Long.parseLong(configCondition.getValues().get(0));
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(1));

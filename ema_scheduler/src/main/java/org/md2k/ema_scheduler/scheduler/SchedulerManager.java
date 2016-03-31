@@ -41,8 +41,16 @@ public class SchedulerManager {
                 case EMAType.ID_EMI:
                     scheduler.add(new EMIScheduler(context, configuration.getEma_types()[i]));
                     break;
+                case EMAType.ID_END_OF_DAY_EMA:
+                    scheduler.add(new EndOfDayEMAScheduler(context, configuration.getEma_types()[i]));
+                    break;
+                case EMAType.ID_SMOKING_EMA:
+                    scheduler.add(new SmokingEMAScheduler(context, configuration.getEma_types()[i]));
+                    break;
+                case EMAType.ID_STRESS_EMA:
+                    scheduler.add(new StressEMAScheduler(context, configuration.getEma_types()[i]));
+                    break;
                 default:
-                    scheduler.add(new EventEMAScheduler(context, configuration.getEma_types()[i]));
                     break;
             }
         }

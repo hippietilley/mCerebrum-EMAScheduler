@@ -18,6 +18,7 @@ public class LastEmaEmiManager extends Condition {
     }
 
     public boolean isValid(ConfigCondition configCondition) {
+        if(true) return true;
         LoggerManager loggerManager= LoggerManager.getInstance(context);
         LogInfo logInfo=loggerManager.getLogInfoLast(LogInfo.OP_DELIVER, configCondition.getSource().getType(), configCondition.getSource().getId());
         if(logInfo==null) {

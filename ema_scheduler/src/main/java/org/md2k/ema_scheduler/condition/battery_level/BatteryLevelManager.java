@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.condition.battery_level;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
 import org.md2k.datakitapi.source.datasource.DataSource;
@@ -21,6 +22,7 @@ public class BatteryLevelManager extends Condition {
     }
 
     public boolean isValid(ConfigCondition configCondition) {
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(0));
         DataSource dataSource = configCondition.getData_source();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);

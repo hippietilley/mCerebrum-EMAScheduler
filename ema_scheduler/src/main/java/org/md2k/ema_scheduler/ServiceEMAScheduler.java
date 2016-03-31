@@ -50,11 +50,9 @@ public class ServiceEMAScheduler extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate()");
-        Configuration.clear();
-        LoggerManager.clear();
         configuration = Configuration.getInstance();
         if (configuration.getEma_types() == null) {
-            Toast.makeText(getApplicationContext(), "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
+            Toast.makeText(ServiceEMAScheduler.this, "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
             stopSelf();
         } else {
             connectDataKit();
@@ -67,8 +65,11 @@ public class ServiceEMAScheduler extends Service {
         dataKitAPI.connect(new OnConnectionListener() {
             @Override
             public void onConnected() {
-                Toast.makeText(getApplicationContext(), "In EMAScheduler .. DataKit connected...", Toast.LENGTH_LONG).show();
+                Toast.makeText(ServiceEMAScheduler.this, "In EMAScheduler .. DataKit connected...", Toast.LENGTH_LONG).show();
                 Log.d(TAG, "datakit connected...");
+                Configuration.clear();
+                LoggerManager.clear();
+                configuration = Configuration.getInstance();
                 LoggerManager.getInstance(getApplicationContext());
                 dayManager = new DayManager(getApplicationContext());
                 dayManager.start();
@@ -82,10 +83,11 @@ public class ServiceEMAScheduler extends Service {
             }
         });
     }
+
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()...");
-        if(dayManager!=null)
+        if (dayManager != null)
             dayManager.stop();
         Configuration.clear();
         LoggerManager.clear();

@@ -1,0 +1,45 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ActivityMain">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView3"
+        android:layout_gravity="center_horizontal"
+        android:textSize="30dp"
+        android:paddingTop="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView_msg"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView_current_incentive"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total Earned: $x"
+        android:id="@+id/textView4"
+        android:layout_gravity="center_horizontal"
+        android:textSize="30dp"
+        android:paddingTop="40dp" />
+
+</LinearLayout>

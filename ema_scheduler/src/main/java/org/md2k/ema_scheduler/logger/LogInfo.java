@@ -12,12 +12,14 @@ public class LogInfo {
     public static final String OP_RUN="RUN";
     public static final String OP_SCHEDULER_RUN="SCHEDULER_RUN";
     public static final String OP_CONDITION="CONDITION";
+    public static final String OP_EMI_INFO="EMI_INFO";
     String operation;
     String type;
     String id;
     String message;
     long timestamp;
     LogSchedule logSchedule;
+    EMIInfo emiInfo;
 
     public String getType() {
         return type;
@@ -65,5 +67,13 @@ public class LogInfo {
 
     public void setLogSchedule(LogSchedule logSchedule) {
         this.logSchedule = logSchedule;
+    }
+
+    public EMIInfo getEmiInfo() {
+        return emiInfo;
+    }
+
+    public void setEmiInfo(EMIInfo emiInfo) {
+        this.emiInfo = emiInfo;
     }
 }

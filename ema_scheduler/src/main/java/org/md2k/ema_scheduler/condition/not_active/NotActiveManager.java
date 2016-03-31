@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.condition.not_active;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeDouble;
 import org.md2k.datakitapi.source.datasource.DataSource;
@@ -22,6 +23,7 @@ public class NotActiveManager extends Condition{
     public boolean isValid(ConfigCondition configCondition){
         int sampleNo=Integer.parseInt(configCondition.getValues().get(0));
         int value = Integer.parseInt(configCondition.getValues().get(1));
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         DataSource dataSource = configCondition.getData_source();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);
         ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(dataSourceBuilder);

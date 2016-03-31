@@ -7,7 +7,8 @@ public class EMAType {
     public static final String TYPE_EMA = "EMA";
     public static final String TYPE_EMI = "EMI";
     public static final String ID_RANDOM_EMA="RANDOM_EMA";
-    public static final String ID_EVENT_CONTINGENT_EMA ="EVENT_CONTINGENT_EMA";
+    public static final String ID_SMOKING_EMA ="SMOKING_EMA";
+    public static final String ID_STRESS_EMA ="STRESS_EMA";
     public static final String ID_END_OF_DAY_EMA="END_OF_DAY_EMA";
     public static final String ID_EMI="EMI";
     String id;

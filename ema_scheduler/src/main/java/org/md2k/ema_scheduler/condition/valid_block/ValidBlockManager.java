@@ -29,6 +29,7 @@ public class ValidBlockManager extends Condition {
         super(context);
     }
     public boolean isValid(ConfigCondition configCondition) {
+        if(true) return true;
         long curTime=DateTime.getDateTime();
         long dayStart=getDay(DataSourceType.DAY_START);
         long dayEnd=getDay(DataSourceType.DAY_END);
@@ -69,6 +70,7 @@ public class ValidBlockManager extends Condition {
 
     long getDay(String dataSourceType){
         long day=-1;
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         dataKitAPI=DataKitAPI.getInstance(context);
         DataSourceBuilder dataSourceBuilder=new DataSourceBuilder().setType(dataSourceType);
         ArrayList<DataSourceClient> dataSourceClients=dataKitAPI.find(dataSourceBuilder);
