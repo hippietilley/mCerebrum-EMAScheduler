@@ -20,6 +20,7 @@ public class LogInfo {
     long timestamp;
     LogSchedule logSchedule;
     EMIInfo emiInfo;
+    String status;
 
     public String getType() {
         return type;
@@ -75,5 +76,13 @@ public class LogInfo {
 
     public void setEmiInfo(EMIInfo emiInfo) {
         this.emiInfo = emiInfo;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

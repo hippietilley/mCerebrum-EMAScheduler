@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.md2k.ema_scheduler.configuration.Application;
 import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.delivery.Callback;
 import org.md2k.utilities.Report.Log;
 
 /**
@@ -15,9 +16,9 @@ public class RunnerManager {
     RunnerMonitor runnerMonitor;
     Application application;
 
-    public RunnerManager(Context context) {
+    public RunnerManager(Context context, Callback callback) {
         this.context = context;
-        runnerMonitor=new RunnerMonitor(context);
+        runnerMonitor=new RunnerMonitor(context, callback);
     }
     public void set(Application application){
         this.application=application;

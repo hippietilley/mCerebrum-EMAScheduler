@@ -4,12 +4,12 @@ import android.content.Context;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeIntArray;
+import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
-import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.Constants;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 import org.md2k.utilities.data_format.DATA_QUALITY;
@@ -28,34 +28,12 @@ public class DataQualityManager extends Condition {
     }
 
     public boolean isValid(ConfigCondition configCondition) {
-        if(true) return true;
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
-
+        if(Constants.DEBUG) return true;
         long lastXMinute = Long.parseLong(configCondition.getValues().get(0));
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(1));
         DataSource dataSource = configCondition.getData_source();
-        long curTime = DateTime.getDateTime();
-        int goodQuality = 0;
-        int curQuality = -1;
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);
-        dataSourceBuilder.setType(DataSourceType.STATUS);
-        ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(dataSourceBuilder);
-        if (dataSourceClientArrayList.size() != 0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), curTime - lastXMinute, curTime);
-            for (int i = 0; i < dataTypes.size(); i++) {
-                int[] samples = ((DataTypeIntArray) dataTypes.get(i)).getSample();
-                if (samples.length == 2) {
-                    if (dataSource.getType().equals(DataSourceType.RESPIRATION)) {
-                        curQuality = samples[0];
-                    } else if (dataSource.getType().equals(DataSourceType.ECG)) {
-                        curQuality = samples[1];
-                    }
-                } else curQuality = samples[0];
-                if (curQuality == DATA_QUALITY.GOOD)
-                    goodQuality++;
-            }
-        }
-        double percentage=100.0*((double)goodQuality*(double)QUALITY_WINDOW)/((double)lastXMinute);
+        double percentage=getDataQuality(dataSourceBuilder,lastXMinute);
         if (percentage >= limitPercentage) {
             log(configCondition,"true: good_quality:"+String.valueOf(percentage));
             return true;
@@ -64,5 +42,21 @@ public class DataQualityManager extends Condition {
             log(configCondition,"false: good_quality:"+String.valueOf(percentage));
             return false;
         }
+    }
+    public double getDataQuality(DataSourceBuilder dataSourceBuilder, long lastXMinute){
+        long curTime = DateTime.getDateTime();
+        int goodQuality = 0;
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
+        ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(dataSourceBuilder);
+        if (dataSourceClientArrayList.size() != 0) {
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), curTime - lastXMinute, curTime);
+            for (int i = 0; i < dataTypes.size(); i++) {
+                int curQuality = ((DataTypeInt) dataTypes.get(i)).getSample();
+                if (curQuality == DATA_QUALITY.GOOD)
+                    goodQuality++;
+            }
+        }
+        return 100.0*((double)goodQuality*(double)QUALITY_WINDOW)/((double)lastXMinute);
+
     }
 }

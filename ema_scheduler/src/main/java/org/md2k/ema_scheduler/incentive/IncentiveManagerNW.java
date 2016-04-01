@@ -38,11 +38,21 @@ public class IncentiveManagerNW {
         if(logInfo.getId().equals("END_OF_DAY_EMA"))
             return 1.0;
         else{
+  //          DataQualityManager dataQualityManager=new DataQualityManager();
             LogInfo logInfoStart= LoggerManager.getInstance(context).getLogInfoLast(LogInfo.OP_RUN, null, null, RunnerMonitor.TYPE_START);
-            if(logInfo.getTimestamp()-logInfoStart.getTimestamp()<5*60*1000)
+            if(logInfo.getTimestamp()-logInfoStart.getTimestamp()<=5*60*1000)
                 return 0.75;
             else return 0.50;
 
         }
     }
+/*
+    public double getDataQuality(){
+        DataSourceBuilder dataSourceBuilder=new DataSourceBuilder().setType(DataSourceType.DATA_QUALITY).setId(DataSourceType.RESPIRATION);
+        DataQualityManager dataQualityManager=new DataQualityManager(context);
+
+//        dataQualityManager.getDataQuality(dataSourceBuilder,lastXMinutes);
+
+    }
+*/
 }

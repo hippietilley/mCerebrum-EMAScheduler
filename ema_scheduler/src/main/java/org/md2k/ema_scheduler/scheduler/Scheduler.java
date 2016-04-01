@@ -47,9 +47,9 @@ abstract public class Scheduler {
     abstract public void setDayStartTimestamp(long dayStartTimestamp);
     abstract public void setDayEndTimestamp(long dayEndTimestamp);
 
-    public void startDelivery(){
+    public boolean startDelivery(){
         Log.d(TAG, "startDelivery...emaType="+emaType.getType()+" emaId="+emaType.getId());
-        deliveryManager.start(emaType, true, "SYSTEM");
+        return deliveryManager.start(emaType, true, "SYSTEM");
     }
     public void stopDelivery(){
         Log.d(TAG, "stopDelivery...");

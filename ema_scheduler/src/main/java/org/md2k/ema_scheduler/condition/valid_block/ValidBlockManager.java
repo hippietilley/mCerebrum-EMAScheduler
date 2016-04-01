@@ -9,6 +9,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.Constants;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.Block;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
@@ -29,7 +30,7 @@ public class ValidBlockManager extends Condition {
         super(context);
     }
     public boolean isValid(ConfigCondition configCondition) {
-        if(true) return true;
+        if(Constants.DEBUG) return true;
         long curTime=DateTime.getDateTime();
         long dayStart=getDay(DataSourceType.DAY_START);
         long dayEnd=getDay(DataSourceType.DAY_END);

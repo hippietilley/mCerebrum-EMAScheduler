@@ -20,6 +20,7 @@ import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.configuration.Application;
 import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.delivery.Callback;
 import org.md2k.ema_scheduler.incentive.ActivityIncentive;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.logger.LoggerManager;
@@ -48,6 +49,8 @@ public class RunnerMonitor {
     Survey survey;
     DataSourceClient dataSourceClient;
     EMAType emaType;
+    Callback callback;
+
     Runnable runnableTimeOut = new Runnable() {
         @Override
         public void run() {
@@ -62,8 +65,10 @@ public class RunnerMonitor {
     private MyBroadcastReceiver myReceiver;
     boolean isStart=false;
 
-    public RunnerMonitor(Context context) {
+    public RunnerMonitor(Context context, Callback callback) {
         this.context = context;
+        this.callback=callback;
+
         myReceiver = new MyBroadcastReceiver();
         intentFilter = new IntentFilter("org.md2k.ema_scheduler.response");
         handler = new Handler();
@@ -167,6 +172,7 @@ public class RunnerMonitor {
         Log.d(TAG, "survey=" + json);
         DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), json);
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeString);
+        callback.onResponse(survey.status);
 //        Toast.makeText(this, "Information is Saved", Toast.LENGTH_SHORT).show();
     }
 

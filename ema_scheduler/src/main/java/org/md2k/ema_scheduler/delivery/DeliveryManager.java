@@ -24,10 +24,18 @@ public class DeliveryManager {
     Context context;
     NotifierManager notifierManager;
     RunnerManager runnerManager;
+    boolean isRunning;
+
     private DeliveryManager(Context context) {
         this.context = context;
-        runnerManager = new RunnerManager(context);
+        runnerManager = new RunnerManager(context, new Callback() {
+            @Override
+            public void onResponse(String response) {
+                isRunning=false;
+            }
+        });
         notifierManager=new NotifierManager(context);
+        isRunning=false;
     }
 
     public static DeliveryManager getInstance(Context context){
@@ -48,13 +56,17 @@ public class DeliveryManager {
         return emis.get(random.nextInt(emis.size()));
     }
 
-    public void start(EMAType emaType, boolean isNotifyRequired, final String type){
+    public boolean start(EMAType emaType, boolean isNotifyRequired, final String type){
+        if(isRunning){
+//            log(emaType,"Not started..another one is running");
+            return false;
+        }
         Log.d(TAG, "start()...emaType=" + emaType.getType() + " id=" + emaType.getId());
         log(emaType,type);
         if(emaType.getId().equals("EMI")){
             emaType=findEMIType();
             logRandom(emaType,type);
-            if(emaType==null) return;
+            if(emaType==null) return false;
         }
         runnerManager.set(emaType.getApplication());
         Log.d(TAG,"runner="+runnerManager);
@@ -76,11 +88,13 @@ public class DeliveryManager {
                 }
             }
         });
+        isRunning=true;
         if(isNotifyRequired){
             notifierManager.start();
         }else{
             runnerManager.start(emaType, NotificationAcknowledge.OK, type);
         }
+        return true;
     }
     protected void log(EMAType emaType, String type){
         if(type.equals("SYSTEM")) {
@@ -113,5 +127,6 @@ public class DeliveryManager {
             notifierManager.stop();
             notifierManager.clear();
         }
+        isRunning=false;
     }
 }

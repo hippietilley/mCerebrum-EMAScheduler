@@ -97,6 +97,7 @@ public class StressEMAScheduler extends Scheduler {
     }
 
     public void unsubscribeEvent() {
-        DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);
+        if(dataSourceClient!=null)
+            DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);
     }
 }
