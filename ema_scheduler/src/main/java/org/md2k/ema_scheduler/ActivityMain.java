@@ -15,6 +15,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
+
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.logger.LogInfo;
@@ -26,6 +28,8 @@ import org.md2k.utilities.UI.ActivityCopyright;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
+import io.fabric.sdk.android.Fabric;
 
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
@@ -52,6 +56,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
         final Button buttonService = (Button) findViewById(R.id.button_app_status);
 
