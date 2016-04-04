@@ -49,7 +49,7 @@ public class ValidBlockManager extends Condition {
                 int count=0;
                 if(blockStartTime<=curTime && curTime<blockEndTime){
                     int limitEMA=Integer.parseInt(configCondition.getValues().get(0));
-                    ArrayList<LogInfo> logInfos=LoggerManager.getInstance(context).getLogInfos(LogInfo.OP_DELIVER,configCondition.getSource().getType(), configCondition.getSource().getId());
+                    ArrayList<LogInfo> logInfos=LoggerManager.getInstance(context).getLogInfos(LogInfo.OP_DELIVER,LogInfo.STATUS_DELIVER_SUCCESS, configCondition.getSource().getType(), configCondition.getSource().getId());
                     for(int j=0;j<logInfos.size();j++){
                         if(blockStartTime<=logInfos.get(j).getTimestamp() && logInfos.get(j).getTimestamp()<blockEndTime)
                             count++;
@@ -72,7 +72,6 @@ public class ValidBlockManager extends Condition {
     long getDay(String dataSourceType){
         long day=-1;
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
-        dataKitAPI=DataKitAPI.getInstance(context);
         DataSourceBuilder dataSourceBuilder=new DataSourceBuilder().setType(dataSourceType);
         ArrayList<DataSourceClient> dataSourceClients=dataKitAPI.find(dataSourceBuilder);
 

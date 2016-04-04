@@ -5,6 +5,7 @@ import android.content.Context;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.battery_level.BatteryLevelManager;
 import org.md2k.ema_scheduler.condition.data_quality.DataQualityManager;
+import org.md2k.ema_scheduler.condition.ema_answer.EmaAnswerManager;
 import org.md2k.ema_scheduler.condition.last_ema_emi.LastEmaEmiManager;
 import org.md2k.ema_scheduler.condition.not_active.NotActiveManager;
 import org.md2k.ema_scheduler.condition.not_driving.DrivingDetectorManager;
@@ -29,6 +30,8 @@ public class ConditionManager {
     public static final String TYPE_NOT_ACTIVE="NOT_ACTIVE";
     public static final String TYPE_NOT_DRIVING="NOT_DRIVING";
     public static final String TYPE_PRIVACY="PRIVACY";
+    public static final String TYPE_EMA_ANSWER="EMA_ANSWER";
+
     private static final String TAG = ConditionManager.class.getSimpleName();
     HashMap<String, Condition> conditionHashMap;
     Configuration configuration;
@@ -47,6 +50,9 @@ public class ConditionManager {
             conditionHashMap.put(configCondition.getId(), createCondition(context, configCondition.getType()));
         }
     }
+    public static void clear(){
+        instance=null;
+    }
     Condition createCondition(Context context, String type){
         switch(type){
             case TYPE_PHONE_BATTERY:
@@ -63,6 +69,8 @@ public class ConditionManager {
                 return new ValidBlockManager(context);
             case TYPE_PRIVACY:
                 return new PrivacyManager(context);
+            case TYPE_EMA_ANSWER:
+                return new EmaAnswerManager(context);
         }
         return null;
     }

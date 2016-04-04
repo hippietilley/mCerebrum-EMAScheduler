@@ -20,6 +20,8 @@ public class EMAType {
     Block[] blocks;
     SchedulerRule[] scheduler_rules;
     Notification[] notifications;
+    IncentiveRule[] incentive_rules;
+
 
     public String getId() {
         return id;
@@ -55,5 +57,9 @@ public class EMAType {
 
     public boolean isEnable() {
         return enable;
+    }
+
+    public IncentiveRule[] getIncentive_rules() {
+        return incentive_rules;
     }
 }

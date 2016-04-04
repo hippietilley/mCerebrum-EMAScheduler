@@ -58,11 +58,11 @@ public class DeliveryManager {
 
     public boolean start(EMAType emaType, boolean isNotifyRequired, final String type){
         if(isRunning){
-//            log(emaType,"Not started..another one is running");
+            log(LogInfo.STATUS_DELIVER_ALREADY_RUNNING, emaType,"Not started..another one is running");
             return false;
         }
         Log.d(TAG, "start()...emaType=" + emaType.getType() + " id=" + emaType.getId());
-        log(emaType,type);
+        log(LogInfo.STATUS_DELIVER_SUCCESS, emaType,type);
         if(emaType.getId().equals("EMI")){
             emaType=findEMIType();
             logRandom(emaType,type);
@@ -96,13 +96,14 @@ public class DeliveryManager {
         }
         return true;
     }
-    protected void log(EMAType emaType, String type){
+    protected void log(String status, EMAType emaType, String type){
         if(type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_DELIVER);
             logInfo.setId(emaType.getId());
             logInfo.setType(emaType.getType());
             logInfo.setTimestamp(DateTime.getDateTime());
+            logInfo.setStatus(status);
             logInfo.setMessage("trying to deliver...");
             LoggerManager.getInstance(context).insert(logInfo);
         }

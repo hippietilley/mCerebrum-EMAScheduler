@@ -55,7 +55,7 @@ abstract public class Scheduler {
         Log.d(TAG, "stopDelivery...");
         deliveryManager.stop();
     }
-    protected void sendToLogInfo(long scheduledTime) {
+    protected void sendToLogInfo(String status, long scheduledTime) {
         LogSchedule logSchedule = new LogSchedule();
         logSchedule.setScheduleTimestamp(scheduledTime);
         LogInfo logInfo = new LogInfo();
@@ -63,6 +63,7 @@ abstract public class Scheduler {
         logInfo.setType(emaType.getType());
         logInfo.setTimestamp(DateTime.getDateTime());
         logInfo.setOperation(LogInfo.OP_SCHEDULE);
+        logInfo.setStatus(status);
         logInfo.setLogSchedule(logSchedule);
         logInfo.setMessage("scheduled at: " + formatTime(scheduledTime));
         loggerManager.insert(logInfo);
@@ -78,15 +79,4 @@ abstract public class Scheduler {
         }
         return "";
     }
-
-/*    public void log(String message){
-        LogInfo logInfo=new LogInfo();
-        logInfo.setOperation(LogInfo.OP_SCHEDULE);
-        logInfo.setType(emaType.getType());
-        logInfo.setId(emaType.getId());
-        logInfo.setTimestamp(DateTime.getDateTime());
-        logInfo.setMessage(message);
-        loggerManager.insert(logInfo);
-    }
-    */
 }

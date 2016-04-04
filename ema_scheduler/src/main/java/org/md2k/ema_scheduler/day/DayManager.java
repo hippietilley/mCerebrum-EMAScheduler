@@ -10,6 +10,7 @@ import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
+import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.ema_scheduler.scheduler.SchedulerManager;
 import org.md2k.utilities.Report.Log;
 
@@ -58,6 +59,7 @@ public class DayManager {
                 readDayEndFromDataKit();
                 subscribeDayStart();
                 subscribeDayEnd();
+                LoggerManager.getInstance(context).reset(dayStartTime);
                 schedulerManager.start(dayStartTime, dayEndTime);
             }
         }
@@ -71,9 +73,10 @@ public class DayManager {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
                 dayStartTime = dataTypeLong.getSample();
                 Log.d(TAG, "subscribeDayStart()...received..dayStartTime=" + dayStartTime);
-                Thread t=new Thread(new Runnable() {
+                Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        LoggerManager.getInstance(context).reset(dayStartTime);
                         schedulerManager.setDayStartTimestamp(dayStartTime);
                     }
                 });
@@ -90,7 +93,7 @@ public class DayManager {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
                 dayEndTime = dataTypeLong.getSample();
                 Log.d(TAG, "subscribeDayEnd()...received..dayEndTime=" + dayEndTime);
-                Thread t=new Thread(new Runnable() {
+                Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         schedulerManager.setDayEndTimestamp(dayEndTime);
@@ -106,14 +109,14 @@ public class DayManager {
         ArrayList<DataSourceClient> dataSourceClients;
         dayStartTime = -1;
         dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
-        Log.d(TAG,"readDayStartFromDataKit()...find..dataSourceClient.size()="+dataSourceClients.size());
+        Log.d(TAG, "readDayStartFromDataKit()...find..dataSourceClient.size()=" + dataSourceClients.size());
         if (dataSourceClients.size() > 0) {
             dataSourceClientDayStart = dataSourceClients.get(0);
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart, 1);
             if (dataTypes.size() != 0) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                 dayStartTime = dataTypeLong.getSample();
-                Log.d(TAG, "readDayStartFromDataKit()...dayStartTime=" + dayEndTime);
+                Log.d(TAG, "readDayStartFromDataKit()...dayStartTime=" + dayStartTime);
             }
         }
     }
@@ -123,7 +126,7 @@ public class DayManager {
         dayEndTime = -1;
         ArrayList<DataSourceClient> dataSourceClients;
         dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_END));
-        Log.d(TAG,"readDayEndFromDataKit()...find..dataSourceClient.size()="+dataSourceClients.size());
+        Log.d(TAG, "readDayEndFromDataKit()...find..dataSourceClient.size()=" + dataSourceClients.size());
         if (dataSourceClients.size() > 0) {
             dataSourceClientDayEnd = dataSourceClients.get(0);
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd, 1);

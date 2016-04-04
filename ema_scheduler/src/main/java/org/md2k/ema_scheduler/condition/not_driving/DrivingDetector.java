@@ -1,7 +1,5 @@
 package org.md2k.ema_scheduler.condition.not_driving;
 
-import org.md2k.datakitapi.time.DateTime;
-
 /**
  * Created by hsarker on 10/1/2015.
  */
@@ -21,34 +19,12 @@ public class DrivingDetector {
     public static final double maxStopSignTime = 5*60*1000; // 5 minute
     public static final double maxGpsMissingTime = 30*1000; // 30 second
 
-    double lastSpeed = -1;
-    long lastReceivedSampleGPS=-1;
-    long lastDrivingSampleGPS=-1;
 
-    public void setSpeed(double speed) {
-        long currentTimestamp = DateTime.getDateTime();
-        this.lastSpeed = speed;
-        this.lastReceivedSampleGPS = currentTimestamp;
-        if(speed>maxGaitSpeed) {
-            this.lastDrivingSampleGPS = currentTimestamp;
-        }
-    }
-
-    public DrivingStatus getDrivingStatus() {
-        long currentTimestamp = DateTime.getDateTime();
-        if(this.lastReceivedSampleGPS==-1 || currentTimestamp-this.lastReceivedSampleGPS > maxGpsMissingTime) {
+    public DrivingStatus getDrivingStatus(long lastTimestamp, long currentTimestamp, double speed) {
+        if(lastTimestamp==-1 || currentTimestamp-lastTimestamp > maxGpsMissingTime) {
             return DrivingStatus.UNKNOWN;
         }
-        if(this.lastDrivingSampleGPS==-1) {
-            return DrivingStatus.NOT_DRIVING;
-        }
-        if(currentTimestamp-this.lastDrivingSampleGPS < maxStopSignTime) {
-            if(this.lastSpeed>maxGaitSpeed) {
-                return DrivingStatus.DRIVING;
-            } else {
-                return DrivingStatus.DRIVING_STOP_SIGN;
-            }
-        }
-        return DrivingStatus.NOT_DRIVING;
+        if(speed>maxGaitSpeed) return DrivingStatus.DRIVING;
+        else return DrivingStatus.NOT_DRIVING;
     }
 }

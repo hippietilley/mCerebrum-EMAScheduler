@@ -16,6 +16,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.scheduler.emi.ProbabilityEMI;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.DayTypeInfo;
@@ -96,27 +97,31 @@ public class EMIScheduler extends Scheduler {
             }
         }
     };
+    public void prepareAndDeliver(DataType dataType){
+        if(!isValidDay()) return;
+        sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
+        double sample = ((DataTypeDouble) dataType).getSample();
+        if(sample==0)
+            isStress=false;
+        else isStress=true;
+        Thread t=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                conditionManager = ConditionManager.getInstance(context);
+                if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId()))
+                    deliverIfProbability();
+            }
+        });
+        t.start();
+
+    }
     public void subscribeStress() {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         Log.d(TAG, "subscribeDayStart()...");
         dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
             @Override
             public void onReceived(DataType dataType) {
-                if(!isValidDay()) return;
-                sendToLogInfo(DateTime.getDateTime());
-                double sample = ((DataTypeDouble) dataType).getSample();
-                if(sample==0)
-                    isStress=false;
-                else isStress=true;
-                Thread t=new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        conditionManager = ConditionManager.getInstance(context);
-                        if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId()))
-                            deliverIfProbability();
-                    }
-                });
-                t.start();
+                prepareAndDeliver(dataType);
             }
         });
     }

@@ -22,7 +22,7 @@ public class LastEmaEmiManager extends Condition {
         if(Constants.DEBUG) return true;
 
         LoggerManager loggerManager= LoggerManager.getInstance(context);
-        LogInfo logInfo=loggerManager.getLogInfoLast(LogInfo.OP_DELIVER, configCondition.getSource().getType(), configCondition.getSource().getId());
+        LogInfo logInfo=loggerManager.getLogInfoLast(LogInfo.OP_DELIVER, LogInfo.STATUS_DELIVER_SUCCESS, configCondition.getSource().getType(), configCondition.getSource().getId());
         if(logInfo==null) {
             log(configCondition, "true: not triggered yet");
             return true;

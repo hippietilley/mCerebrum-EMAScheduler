@@ -4,15 +4,29 @@ package org.md2k.ema_scheduler.logger;
  * Created by monowar on 3/14/16.
  */
 public class LogInfo {
-    public static final String OP_MESSAGE="MESSAGE";
     public static final String OP_SCHEDULE="SCHEDULE";
     public static final String OP_DELIVER="DELIVER";
-    public static final String OP_NOTIFY="NOTIFY";
+    public static final String OP_NOTIFICATION="NOTIFICATION";
     public static final String OP_NOTIFICATION_RESPONSE="NOTIFICATION_RESPONSE";
     public static final String OP_RUN="RUN";
-    public static final String OP_SCHEDULER_RUN="SCHEDULER_RUN";
     public static final String OP_CONDITION="CONDITION";
     public static final String OP_EMI_INFO="EMI_INFO";
+    public static final String STATUS_SCHEDULER_DELIVERED="ALREADY_DELIVERED";
+    public static final String STATUS_SCHEDULER_RUNNING="APPLICATION_RUNNING";
+    public static final String STATUS_SCHEDULER_SCHEDULED="SCHEDULED";
+    public static final String STATUS_SCHEDULER_NO_VALID_BLOCK="NO_VALID_BLOCK";
+    public static final String STATUS_DELIVER_ALREADY_RUNNING="ALREADY_RUNNING";
+    public static final String STATUS_DELIVER_SUCCESS="DELIVERED";
+    public static final String STATUS_NOTIFICATION_NOTIFYING="NOTIFY";
+    public static final String STATUS_NOTIFICATION_RESPONSE_DELAY="DELAY";
+
+    public static final String STATUS_RUN_MISSED="MISSED";
+    public static final String STATUS_RUN_COMPLETED="COMPLETED";
+    public static final String STATUS_RUN_ABANDONED_BY_TIMEOUT ="ABANDONED_BY_TIMEOUT";
+    public static final String STATUS_RUN_ABANDONED_BY_USER="ABANDONED_BY_USER";
+    public static final String STATUS_RUN_START="START";
+
+
     String operation;
     String type;
     String id;

@@ -47,7 +47,7 @@ public class NotifierManager {
         @Override
         public void run() {
             Log.d(TAG, "runnableNotify...");
-            logNotify("notifying..." + String.valueOf(notifyNo + 1));
+            logNotify(LogInfo.STATUS_NOTIFICATION_NOTIFYING, "notifying..." + String.valueOf(notifyNo + 1));
             NotificationRequest notificationRequestSelected[] = findNotification(notifications[notifyNo].getTypes());
             insertDataToDataKit(notificationRequestSelected);
             Log.d(TAG, "notifications length=" + notifications.length + " now=" + notifyNo);
@@ -116,18 +116,18 @@ public class NotifierManager {
                                     long delay = notificationAcknowledge.getNotificationRequest().getResponse_option().getDelay_time();
                                     delayEnable = false;
                                     Log.d(TAG, "delay = " + delay);
-                                    logNotificationResponse("User select DELAY: " + String.valueOf(delay/(1000*60))+" Minute");
+                                    logNotificationResponse(LogInfo.STATUS_NOTIFICATION_RESPONSE_DELAY, "User select DELAY: " + String.valueOf(delay/(1000*60))+" Minute");
                                     handler.postDelayed(runnableNotify, delay);
                                     break;
                                 case NotificationAcknowledge.OK:
                                 case NotificationAcknowledge.CANCEL:
                                 case NotificationAcknowledge.DELAY_CANCEL:
-                                    logNotificationResponse("User select "+notificationAcknowledge.getStatus());
+                                    logNotificationResponse(notificationAcknowledge.getStatus(), "User select "+notificationAcknowledge.getStatus());
                                     callbackDelivery.onResponse(notificationAcknowledge.getStatus());
                                     clear();
                                     break;
                                 case NotificationAcknowledge.TIMEOUT:
-                                    logNotificationResponse("notification: "+notificationAcknowledge.getStatus());
+                                    logNotificationResponse(notificationAcknowledge.getStatus(), "notification: "+notificationAcknowledge.getStatus());
                                     callbackDelivery.onResponse(notificationAcknowledge.getStatus());
                                     clear();
                                     break;
@@ -202,22 +202,24 @@ public class NotifierManager {
 
     }
 
-    protected void logNotify(String message) {
+    protected void logNotify(String status, String message) {
         LogInfo logInfo = new LogInfo();
-        logInfo.setOperation(LogInfo.OP_NOTIFY);
+        logInfo.setOperation(LogInfo.OP_NOTIFICATION);
         logInfo.setId(emaType.getId());
         logInfo.setType(emaType.getType());
         logInfo.setTimestamp(DateTime.getDateTime());
+        logInfo.setStatus(status);
         logInfo.setMessage(message);
         LoggerManager.getInstance(context).insert(logInfo);
     }
 
-    protected void logNotificationResponse(String notificationResult) {
+    protected void logNotificationResponse(String status, String notificationResult) {
         LogInfo logInfo = new LogInfo();
         logInfo.setOperation(LogInfo.OP_NOTIFICATION_RESPONSE);
         logInfo.setId(emaType.getId());
         logInfo.setType(emaType.getType());
         logInfo.setTimestamp(DateTime.getDateTime());
+        logInfo.setStatus(status);
         logInfo.setMessage(notificationResult);
         LoggerManager.getInstance(context).insert(logInfo);
     }

@@ -74,7 +74,7 @@ public class ProbabilityEMI {
     }
 
     private int getRemainingTimeInMinute(long getStartTime) {
-        return (int) ((DateTime.getDateTime() - getStartTime) / (1000 * 60));
+        return (int) (12*60-((DateTime.getDateTime() - getStartTime) / (1000 * 60)));
 
     }
 

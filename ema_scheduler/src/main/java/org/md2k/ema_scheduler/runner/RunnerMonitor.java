@@ -21,7 +21,7 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.configuration.Application;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.delivery.Callback;
-import org.md2k.ema_scheduler.incentive.ActivityIncentive;
+import org.md2k.ema_scheduler.incentive.IncentiveManager;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
@@ -32,11 +32,6 @@ import org.md2k.utilities.data_format.NotificationAcknowledge;
  */
 public class RunnerMonitor {
     public static final long NO_RESPONSE_TIME = 35000;
-    public static final String TYPE_MISSED="MISSED";
-    public static final String TYPE_COMPLETED="COMPLETED";
-    public static final String TYPE_ABANDONED_BY_TIMEOUT ="ABANDONED_BY_TIMEOUT";
-    public static final String TYPE_ABANDONED_BY_USER="ABANDONED_BY_USER";
-    public static final String TYPE_START="START";
 
     private static final String TAG = RunnerMonitor.class.getSimpleName();
     IntentFilter intentFilter;
@@ -99,31 +94,32 @@ public class RunnerMonitor {
                 context.startActivity(intent);
                 Log.d(TAG,"timeout="+application.getTimeout());
                 handler.postDelayed(runnableTimeOut, application.getTimeout());
-                log(TYPE_START);
+                log(LogInfo.STATUS_RUN_START, "EMA Starts");
                 break;
             case NotificationAcknowledge.CANCEL:
-                survey.status=TYPE_ABANDONED_BY_USER;
+                survey.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;
                 survey.end_timestamp=DateTime.getDateTime();
-                log(TYPE_ABANDONED_BY_USER);
+                log(LogInfo.STATUS_RUN_ABANDONED_BY_USER, "EMA abandoned by user at prompt");
                 saveToDataKit();
                 clear();
                 break;
             case NotificationAcknowledge.TIMEOUT:
-                survey.status=TYPE_MISSED;
+                survey.status=LogInfo.STATUS_RUN_MISSED;
                 survey.end_timestamp=DateTime.getDateTime();
-                log(TYPE_MISSED);
+                log(LogInfo.STATUS_RUN_MISSED, "EMA is timed out..at prompt..MISSED");
                 saveToDataKit();
                 clear();
                 break;
         }
     }
-    protected void log(String message){
+    protected void log(String status, String message){
         if(type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_RUN);
             logInfo.setId(emaType.getId());
             logInfo.setType(emaType.getType());
             logInfo.setTimestamp(DateTime.getDateTime());
+            logInfo.setStatus(status);
             logInfo.setMessage(message);
             LoggerManager.getInstance(context).insert(logInfo);
         }
@@ -158,11 +154,10 @@ public class RunnerMonitor {
         return dataSourceBuilder;
     }
     void showIncentive(){
-        if(survey.id.equals("EMI")) return;
-        Intent dialogIntent = new Intent(context, ActivityIncentive.class);
-//        if(survey.status.equals(TYPE_COMPLETED))
-        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(dialogIntent);
+        if(!survey.status.equals((LogInfo.STATUS_RUN_COMPLETED))) return;
+        if(emaType.getIncentive_rules()==null) return;
+        IncentiveManager incentiveManager=new IncentiveManager(context, emaType);
+        incentiveManager.start();
     }
 
     void saveToDataKit() {
@@ -186,7 +181,7 @@ public class RunnerMonitor {
                 survey.end_timestamp = DateTime.getDateTime();
                 survey.question_answers = answer;
                 survey.status = status;
-                log(survey.status);
+                log(survey.status, survey.status);
                 saveToDataKit();
                 clear();
             } else if (type.equals("STATUS_MESSAGE")) {

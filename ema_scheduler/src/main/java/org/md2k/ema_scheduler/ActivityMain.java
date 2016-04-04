@@ -129,22 +129,23 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     void updateTable() {
-        if(!DataKitAPI.getInstance(getApplicationContext()).isConnected()) return;
-        long curTime=DateTime.getDateTime();
+        if (!DataKitAPI.getInstance(getApplicationContext()).isConnected()) return;
+        long curTime = DateTime.getDateTime();
         LogInfo logInfo;
         String time, type, msg;
-        LoggerManager loggerManager=LoggerManager.getInstance(getApplicationContext());
-        for(int i=loggerManager.getLogInfos().size()-1;i>=0;i--){
-            logInfo=loggerManager.getLogInfos().get(i);
-            if(curTime-logInfo.getTimestamp()>=4*60*60*1000) continue;
-            time=formatTime(logInfo.getTimestamp());
-            if(logInfo.getOperation()!=null && logInfo.getId()!=null) {
-                type = logInfo.getOperation().toLowerCase() + ":" + logInfo.getId().toLowerCase();
+        LoggerManager loggerManager = LoggerManager.getInstance(getApplicationContext());
+        for (int i = loggerManager.getLogInfos().size() - 1; i >= 0; i--) {
+            logInfo = loggerManager.getLogInfos().get(i);
+            if (curTime - logInfo.getTimestamp() >= 24 * 60 * 60 * 1000) continue;
+            time = formatTime(logInfo.getTimestamp());
+            if (logInfo.getOperation() != null && logInfo.getId() != null) {
+                type = logInfo.getOperation().toLowerCase() + ":" + logInfo.getId().toLowerCase()+":"+logInfo.getStatus();
                 msg = logInfo.getMessage().toLowerCase();
                 addRow(time, type, msg);
             }
         }
     }
+
     String formatTime(long timestamp) {
         try {
             Calendar calendar = Calendar.getInstance();
@@ -156,6 +157,7 @@ public class ActivityMain extends AppCompatActivity {
         }
         return "";
     }
+
     void createTable() {
         TableLayout ll = (TableLayout) findViewById(R.id.tableLayout);
         ll.removeAllViews();

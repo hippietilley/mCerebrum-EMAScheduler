@@ -44,7 +44,7 @@ public class RandomEMAScheduler extends Scheduler {
         int indexBlock = blockManager.getBlockIndex(dayStartTimestamp, curTime);
         Log.d(TAG,"schedule()...indexBlock="+indexBlock);
         if (indexBlock == -1) {
-            logWhenSchedulerRun("schedule()...no valid block");
+            logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_NO_VALID_BLOCK, "schedule()...no valid block");
             return;
         }
         long blockStartTime = blockManager.getBlockStartTime(dayStartTimestamp, curTime);
@@ -54,24 +54,23 @@ public class RandomEMAScheduler extends Scheduler {
             long nextWindowStartTime = blockManager.getNextBlockStartTime(dayStartTimestamp, curTime);
             Log.d(TAG,"schedule()...next block=nextWindowStartTime");
             if (nextWindowStartTime != -1) {
-                logWhenSchedulerRun("schedule()...alreadyDelivered, next call="+formatTime(nextWindowStartTime));
+                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_DELIVERED, "schedule()...alreadyDelivered, next call="+formatTime(nextWindowStartTime));
                 handler.postDelayed(runnableSchedule, nextWindowStartTime - curTime);
             }else{
-                logWhenSchedulerRun("schedule()...alreadyDelivered, no valid block after this");
+                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_DELIVERED, "schedule()...alreadyDelivered, no valid block after this");
             }
         } else {
             scheduleNow(blockStartTime, blockEndTime);
         }
     }
     int getCurScheduleIndex(long blockStartTime, long blockEndTime){
-        int curScheduleIndex = loggerManager.getLogInfos(LogInfo.OP_SCHEDULE, emaType.getType(), emaType.getId(), blockStartTime, blockEndTime).size();
+        int curScheduleIndex = loggerManager.getLogInfos(LogInfo.OP_SCHEDULE, LogInfo.STATUS_DELIVER_SUCCESS, emaType.getType(), emaType.getId(), blockStartTime, blockEndTime).size();
         if (curScheduleIndex >= emaType.getScheduler_rules().length)
             curScheduleIndex = emaType.getScheduler_rules().length - 1;
         return curScheduleIndex;
     }
 
     void scheduleNow(long blockStartTime, long blockEndTime) {
-        logWhenSchedulerRun("schedule()...determining next trigger time...");
         int curScheduleIndex= getCurScheduleIndex(blockStartTime, blockEndTime);
         long curTime=DateTime.getDateTime();
         switch (emaType.getScheduler_rules()[curScheduleIndex].getType()) {
@@ -79,7 +78,7 @@ public class RandomEMAScheduler extends Scheduler {
                 long startTimestamp = getTimeFromType(emaType.getScheduler_rules()[curScheduleIndex].getStart_time());
                 long endTimestamp = getTimeFromType(emaType.getScheduler_rules()[curScheduleIndex].getEnd_time());
                 long scheduledTime = startTimestamp + getRandomNumber((endTimestamp - startTimestamp) / emaType.getScheduler_rules()[curScheduleIndex].getDivide());
-                sendToLogInfo(scheduledTime);
+                sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, scheduledTime);
                 if (scheduledTime > curTime) {
                     handler.removeCallbacks(runnableSchedule);
                     handler.removeCallbacks(runnableDeliver);
@@ -91,7 +90,7 @@ public class RandomEMAScheduler extends Scheduler {
                 }
                 break;
             case SchedulerRule.TYPE_IMMEDIATE:
-                sendToLogInfo(curTime+60000);
+                sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, curTime+60000);
                 handler.removeCallbacks(runnableSchedule);
                 handler.removeCallbacks(runnableDeliver);
                 handler.postDelayed(runnableDeliver, 60000);
@@ -118,12 +117,13 @@ public class RandomEMAScheduler extends Scheduler {
     };
 
 
-    void logWhenSchedulerRun(String message) {
+    void logWhenSchedulerRun(String status, String message) {
         LogInfo logInfo = new LogInfo();
         logInfo.setId(emaType.getId());
         logInfo.setType(emaType.getType());
         logInfo.setTimestamp(DateTime.getDateTime());
-        logInfo.setOperation(LogInfo.OP_SCHEDULER_RUN);
+        logInfo.setOperation(LogInfo.OP_SCHEDULE);
+        logInfo.setStatus(status);
         logInfo.setMessage(message);
         loggerManager.insert(logInfo);
     }
@@ -143,7 +143,7 @@ public class RandomEMAScheduler extends Scheduler {
                 return blockManager.getBlockEndTime(dayStartTimestamp, DateTime.getDateTime());
             case SchedulerRule.TIME_LAST_SCHEDULE:
                 long lastScheduleTime = -1;
-                ArrayList<LogInfo> logInfos = loggerManager.getLogInfos(LogInfo.OP_SCHEDULE, emaType.getType(), emaType.getId());
+                ArrayList<LogInfo> logInfos = loggerManager.getLogInfos(LogInfo.OP_SCHEDULE, LogInfo.STATUS_DELIVER_SUCCESS, emaType.getType(), emaType.getId());
                 for (int i = 0; i < logInfos.size(); i++) {
                     if (logInfos.get(i).getLogSchedule().getScheduleTimestamp() > lastScheduleTime) {
                         lastScheduleTime = logInfos.get(i).getLogSchedule().getScheduleTimestamp();
@@ -155,7 +155,7 @@ public class RandomEMAScheduler extends Scheduler {
     }
 
     boolean isDeliveredAlready(long startTime, long endTime, int indexWindow) {
-        ArrayList<LogInfo> logInfoArrayList = loggerManager.getLogInfos(LogInfo.OP_DELIVER, emaType.getType(), emaType.getId(), startTime, endTime);
+        ArrayList<LogInfo> logInfoArrayList = loggerManager.getLogInfos(LogInfo.OP_DELIVER, LogInfo.STATUS_DELIVER_SUCCESS,  emaType.getType(), emaType.getId(), startTime, endTime);
         if (logInfoArrayList.size() >= blockManager.getBlocks()[indexWindow].getTotal())
             return true;
         else return false;
@@ -184,7 +184,7 @@ public class RandomEMAScheduler extends Scheduler {
 
     long retrieveLastTriggerTime() {
         long curTimestamp = DateTime.getDateTime();
-        ArrayList<LogInfo> logInfoArrayList = loggerManager.getLogInfos(LogInfo.OP_SCHEDULE, emaType.getType(), emaType.getId());
+        ArrayList<LogInfo> logInfoArrayList = loggerManager.getLogInfos(LogInfo.OP_SCHEDULE, LogInfo.STATUS_DELIVER_SUCCESS, emaType.getType(), emaType.getId());
         for (int i = 0; i < logInfoArrayList.size(); i++) {
             if (logInfoArrayList.get(i).getLogSchedule().getScheduleTimestamp() > curTimestamp)
                 return logInfoArrayList.get(i).getLogSchedule().getScheduleTimestamp() - curTimestamp;

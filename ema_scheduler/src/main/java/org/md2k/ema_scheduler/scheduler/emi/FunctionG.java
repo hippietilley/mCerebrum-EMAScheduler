@@ -35,8 +35,11 @@ public class FunctionG {
                         value=Double.parseDouble(items.get(1));
                     }
                     else value=Double.parseDouble(items.get(2));
+                    break;
                 }
             }
+            reader.close();
+            file.close();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }

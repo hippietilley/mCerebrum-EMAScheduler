@@ -6,6 +6,7 @@ import android.os.Handler;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.utilities.Report.Log;
 
 /**
@@ -40,7 +41,7 @@ public class EndOfDayEMAScheduler extends Scheduler {
 
     @Override
     public void setDayEndTimestamp(long dayEndTimestamp) {
-        sendToLogInfo(DateTime.getDateTime());
+        sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
         conditionManager = ConditionManager.getInstance(context);
         if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId())) {
             Log.d(TAG, "condition valid...");

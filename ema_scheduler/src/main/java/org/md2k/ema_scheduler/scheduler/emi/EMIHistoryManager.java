@@ -36,7 +36,7 @@ public class EMIHistoryManager {
     }
 
     public ArrayList<EMIInfo> getEmiHistories(boolean isStress, long dayStartTime, long curTime){
-        ArrayList<LogInfo> logInfos=LoggerManager.getInstance(context).getLogInfos(LogInfo.OP_EMI_INFO,type,id,dayStartTime, curTime);
+        ArrayList<LogInfo> logInfos=LoggerManager.getInstance(context).getLogInfos(LogInfo.OP_EMI_INFO,null, type,id,dayStartTime, curTime);
         ArrayList<EMIInfo> emiInfos=new ArrayList<>();
         for(int i=0;i< logInfos.size();i++){
             if(logInfos.get(i).getEmiInfo().isStress==isStress)

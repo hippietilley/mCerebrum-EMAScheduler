@@ -9,6 +9,7 @@ import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.datakitapi.messagehandler.OnExceptionListener;
 import org.md2k.datakitapi.status.Status;
+import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.day.DayManager;
 import org.md2k.ema_scheduler.logger.LoggerManager;
@@ -91,6 +92,7 @@ public class ServiceEMAScheduler extends Service {
             dayManager.stop();
         Configuration.clear();
         LoggerManager.clear();
+        ConditionManager.clear();
         Log.d(TAG, "...stopScheduler()");
         if (dataKitAPI != null && dataKitAPI.isConnected()) dataKitAPI.disconnect();
         Log.d(TAG, "...DataKit disconnect()");

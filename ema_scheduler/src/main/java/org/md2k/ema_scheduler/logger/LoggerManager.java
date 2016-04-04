@@ -38,7 +38,7 @@ public class LoggerManager {
         dataKitAPI = DataKitAPI.getInstance(context);
         dataSourceBuilderLogger = createDataSourceBuilderLogger();
         registerLogInfo();
-        readLogInfosFromDataKit();
+        readLogInfosFromDataKit(DateTime.getDateTime());
     }
 
     public static LoggerManager getInstance(Context context) {
@@ -50,6 +50,12 @@ public class LoggerManager {
     private void registerLogInfo() {
         dataSourceClientLogger = dataKitAPI.register(dataSourceBuilderLogger);
     }
+    public void clearLog(){
+        logInfos.clear();
+    }
+    public void reset(long dayStartTime){
+        readLogInfosFromDataKit(dayStartTime);
+    }
 
     public void insert(LogInfo logInfo){
         Gson gson=new Gson();
@@ -59,10 +65,9 @@ public class LoggerManager {
         dataKitAPI.insert(dataSourceClientLogger, dataTypeString);
         logInfos.add(logInfo);
     }
-    private void readLogInfosFromDataKit() {
+    private void readLogInfosFromDataKit(long startTimestamp) {
         Log.d(TAG,"readLogInfosFromDataKit...");
         long endTimestamp = DateTime.getDateTime();
-        long startTimestamp = endTimestamp-24*60*60*1000;
         logInfos=new ArrayList<>();
         Gson gson=new Gson();
         ArrayList<DataType> dataTypes=dataKitAPI.query(dataSourceClientLogger, startTimestamp, endTimestamp);
@@ -94,11 +99,12 @@ public class LoggerManager {
     public ArrayList<LogInfo> getLogInfos() {
         return logInfos;
     }
-    public ArrayList<LogInfo> getLogInfos(String operation, String type, String id){
+    public ArrayList<LogInfo> getLogInfos(String operation, String status, String type, String id){
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+")");
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
         for(int i=0;i<logInfos.size();i++){
             if(!logInfos.get(i).getOperation().equals(operation)) continue;
+            if(!logInfos.get(i).getStatus().equals(status)) continue;
             if(!logInfos.get(i).getType().equals(type)) continue;
             if(!logInfos.get(i).getId().equals(id)) continue;
             logInfosTemp.add(logInfos.get(i));
@@ -106,11 +112,12 @@ public class LoggerManager {
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+") size="+logInfosTemp.size());
         return logInfosTemp;
     }
-    public LogInfo getLogInfoLast(String operation, String type, String id) {
+    public LogInfo getLogInfoLast(String operation, String status, String type, String id) {
         LogInfo logInfo=null;
         Log.d(TAG,"getLogInfoLast("+operation+" "+type+" "+id+")");
         for (int i = 0; i < logInfos.size(); i++) {
             if (operation!=null && !logInfos.get(i).getOperation().equals(operation)) continue;
+            if(status!=null && !logInfos.get(i).getStatus().equals(status)) continue;
             if (type!=null && !logInfos.get(i).getType().equals(type)) continue;
             if (id!=null && !logInfos.get(i).getId().equals(id)) continue;
             if (logInfo == null || logInfo.getTimestamp() < logInfos.get(i).getTimestamp())
@@ -118,24 +125,12 @@ public class LoggerManager {
         }
         return logInfo;
     }
-    public LogInfo getLogInfoLast(String operation, String type, String id, String message) {
-        LogInfo logInfo=null;
-        Log.d(TAG,"getLogInfoLast("+operation+" "+type+" "+id+")");
-        for (int i = 0; i < logInfos.size(); i++) {
-            if (operation!=null && !logInfos.get(i).getOperation().equals(operation)) continue;
-            if (type!=null && !logInfos.get(i).getType().equals(type)) continue;
-            if (id!=null && !logInfos.get(i).getId().equals(id)) continue;
-            if(message!=null && !logInfos.get(i).getMessage().equals(message)) continue;
-            if (logInfo == null || logInfo.getTimestamp() < logInfos.get(i).getTimestamp())
-                logInfo = logInfos.get(i);
-        }
-        return logInfo;
-    }
-    public ArrayList<LogInfo> getLogInfos(String operation, String type, String id, long startTime, long endTime){
+    public ArrayList<LogInfo> getLogInfos(String operation, String status, String type, String id, long startTime, long endTime){
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+" "+startTime+" "+endTime+")");
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
         for(int i=0;i<logInfos.size();i++){
             if(operation!=null && !logInfos.get(i).getOperation().equals(operation)) continue;
+            if(status!=null && !logInfos.get(i).getStatus().equals(status)) continue;
             if(type!=null && !logInfos.get(i).getType().equals(type)) continue;
             if(id!=null && !logInfos.get(i).getId().equals(id)) continue;
             if(startTime!=-1 && logInfos.get(i).getTimestamp()<startTime) continue;
