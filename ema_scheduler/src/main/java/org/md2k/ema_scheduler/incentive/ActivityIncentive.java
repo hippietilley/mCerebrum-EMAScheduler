@@ -1,7 +1,7 @@
 package org.md2k.ema_scheduler.incentive;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,12 +13,14 @@ import org.md2k.ema_scheduler.R;
 
 public class ActivityIncentive extends AppCompatActivity {
     private static final String TAG = ActivityIncentive.class.getSimpleName();
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incentive);
         setCancelButton();
+        handler=new Handler();
         String messages[]=getIntent().getStringArrayExtra("messages");
         double total_incentive=getIntent().getDoubleExtra("total_incentive",0);
         if(messages[0]!=null && messages[0].length()!=0)
@@ -27,9 +29,16 @@ public class ActivityIncentive extends AppCompatActivity {
             ((TextView)findViewById(R.id.textView_message_2)).setText(messages[1]);
         if(messages[2]!=null && messages[2].length()!=0)
             ((TextView)findViewById(R.id.textView_message_3)).setText(messages[2]+" "+String.format("%.2f",total_incentive));
+        handler.postDelayed(runnableClose, 10000);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
+    Runnable runnableClose=new Runnable() {
+        @Override
+        public void run() {
+            finish();
+        }
+    };
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_settings, menu);
@@ -37,7 +46,6 @@ public class ActivityIncentive extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
@@ -48,6 +56,7 @@ public class ActivityIncentive extends AppCompatActivity {
     private void setCancelButton() {
         final Button button = (Button) findViewById(R.id.button_1);
         button.setText("Close");
+        handler.removeCallbacks(runnableClose);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 finish();

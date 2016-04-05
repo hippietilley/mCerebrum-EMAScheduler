@@ -53,8 +53,15 @@ public class RunnerMonitor {
                 handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
             else {
                 sendData();
+                handler.postDelayed(runnableWaitThenSave,5000);
                 //clear();
             }
+        }
+    };
+    Runnable runnableWaitThenSave=new Runnable() {
+        @Override
+        public void run() {
+            saveData(null, NotificationAcknowledge.TIMEOUT);
         }
     };
     private MyBroadcastReceiver myReceiver;
@@ -178,18 +185,23 @@ public class RunnerMonitor {
             if (type.equals("RESULT")) {
                 String answer = intent.getStringExtra("ANSWER");
                 String status = intent.getStringExtra("STATUS");
-                survey.end_timestamp = DateTime.getDateTime();
-                survey.question_answers = answer;
-                survey.status = status;
-                log(survey.status, survey.status);
-                saveToDataKit();
-                clear();
+                handler.removeCallbacks(runnableWaitThenSave);
+                saveData(answer, status);
             } else if (type.equals("STATUS_MESSAGE")) {
                 lastResponseTime = intent.getLongExtra("TIMESTAMP", -1);
                 message = intent.getStringExtra("MESSAGE");
                 Log.d(TAG, "data received... lastResponseTime=" + lastResponseTime + " message=" + message);
             }
         }
+    }
+    public void saveData(String answer, String status){
+        survey.end_timestamp = DateTime.getDateTime();
+        survey.question_answers = answer;
+        survey.status = status;
+        log(survey.status, survey.status);
+        saveToDataKit();
+        clear();
+
     }
 
 }

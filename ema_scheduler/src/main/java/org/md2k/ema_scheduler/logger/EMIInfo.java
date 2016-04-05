@@ -14,4 +14,5 @@ public class EMIInfo {
     public String message;
     public double sumLambda;
     public int remainingTimeInMinute;
+    public double random;
 }

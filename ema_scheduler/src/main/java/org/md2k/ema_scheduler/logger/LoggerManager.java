@@ -130,7 +130,7 @@ public class LoggerManager {
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
         for(int i=0;i<logInfos.size();i++){
             if(operation!=null && !logInfos.get(i).getOperation().equals(operation)) continue;
-            if(status!=null && !logInfos.get(i).getStatus().equals(status)) continue;
+            if(status!=null && logInfos.get(i).getStatus()!=null && !logInfos.get(i).getStatus().equals(status)) continue;
             if(type!=null && !logInfos.get(i).getType().equals(type)) continue;
             if(id!=null && !logInfos.get(i).getId().equals(id)) continue;
             if(startTime!=-1 && logInfos.get(i).getTimestamp()<startTime) continue;

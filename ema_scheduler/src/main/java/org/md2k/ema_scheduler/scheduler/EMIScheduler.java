@@ -70,7 +70,7 @@ public class EMIScheduler extends Scheduler {
         DayTypeInfo dayTypeInfo;
         ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(dataSourceBuilder);
         if (dataSourceClientArrayList.size() != 0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.queryHFlastN(dataSourceClientArrayList.get(0), 1);
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), 1);
             if (dataTypes.size() == 0) {
                 isPreQuit = true;
             } else {
@@ -99,8 +99,9 @@ public class EMIScheduler extends Scheduler {
     };
     public void prepareAndDeliver(DataType dataType){
         if(!isValidDay()) return;
-        sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
         double sample = ((DataTypeDouble) dataType).getSample();
+        if(!(sample==0 || sample==2)) return;
+        sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
         if(sample==0)
             isStress=false;
         else isStress=true;
@@ -113,7 +114,6 @@ public class EMIScheduler extends Scheduler {
             }
         });
         t.start();
-
     }
     public void subscribeStress() {
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
