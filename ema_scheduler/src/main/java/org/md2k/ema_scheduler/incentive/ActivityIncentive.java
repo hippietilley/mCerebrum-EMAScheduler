@@ -19,8 +19,8 @@ public class ActivityIncentive extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incentive);
-        setCancelButton();
         handler=new Handler();
+        setCancelButton();
         String messages[]=getIntent().getStringArrayExtra("messages");
         double total_incentive=getIntent().getDoubleExtra("total_incentive",0);
         if(messages[0]!=null && messages[0].length()!=0)
@@ -56,9 +56,9 @@ public class ActivityIncentive extends AppCompatActivity {
     private void setCancelButton() {
         final Button button = (Button) findViewById(R.id.button_1);
         button.setText("Close");
-        handler.removeCallbacks(runnableClose);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                handler.removeCallbacks(runnableClose);
                 finish();
             }
         });

@@ -61,7 +61,7 @@ public class RunnerMonitor {
     Runnable runnableWaitThenSave=new Runnable() {
         @Override
         public void run() {
-            saveData(null, NotificationAcknowledge.TIMEOUT);
+            saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
         }
     };
     private MyBroadcastReceiver myReceiver;
