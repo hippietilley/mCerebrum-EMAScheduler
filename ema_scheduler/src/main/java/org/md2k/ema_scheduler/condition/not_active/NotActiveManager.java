@@ -21,7 +21,7 @@ public class NotActiveManager extends Condition{
         super(context);
     }
     public boolean isValid(ConfigCondition configCondition){
-        if(true) return true;
+        //if(true) return true;
         int sampleNo=Integer.parseInt(configCondition.getValues().get(0));
         int value = Integer.parseInt(configCondition.getValues().get(1));
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
