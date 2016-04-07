@@ -141,14 +141,18 @@ public class NotifierManager {
     }
 
     public void clear() {
-        Log.d(TAG, "clear()...");
-        handler.removeCallbacks(runnableNotify);
-        handlerSubscribe.removeCallbacks(runnableSubscribe);
-        if (dataSourceClientAcknowledges != null)
-            for (int i = 0; i < dataSourceClientAcknowledges.size(); i++)
-                DataKitAPI.getInstance(context).unsubscribe(dataSourceClientAcknowledges.get(i));
-        dataSourceClientAcknowledges = null;
-        Log.d(TAG, "...clear()");
+        try {
+            Log.d(TAG, "clear()...");
+            handler.removeCallbacks(runnableNotify);
+            handlerSubscribe.removeCallbacks(runnableSubscribe);
+            if (dataSourceClientAcknowledges != null)
+                for (int i = 0; i < dataSourceClientAcknowledges.size(); i++)
+                    DataKitAPI.getInstance(context).unsubscribe(dataSourceClientAcknowledges.get(i));
+            dataSourceClientAcknowledges = null;
+            Log.d(TAG, "...clear()");
+        }catch (Exception e){
+
+        }
     }
 
     public void start() {
