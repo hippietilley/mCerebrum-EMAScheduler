@@ -53,7 +53,7 @@ public class RunnerMonitor {
                 handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
             else {
                 sendData();
-                handler.postDelayed(runnableWaitThenSave,5000);
+                handler.postDelayed(runnableWaitThenSave,3000);
                 //clear();
             }
         }
@@ -197,6 +197,8 @@ public class RunnerMonitor {
     public void saveData(String answer, String status){
         survey.end_timestamp = DateTime.getDateTime();
         survey.question_answers = answer;
+        if(status==null) survey.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;
+        else
         survey.status = status;
         log(survey.status, survey.status);
         saveToDataKit();

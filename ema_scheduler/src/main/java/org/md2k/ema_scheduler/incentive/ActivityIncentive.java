@@ -25,10 +25,15 @@ public class ActivityIncentive extends AppCompatActivity {
         double total_incentive=getIntent().getDoubleExtra("total_incentive",0);
         if(messages[0]!=null && messages[0].length()!=0)
             ((TextView)findViewById(R.id.textView_message_1)).setText(messages[0]);
+        else ((TextView)findViewById(R.id.textView_message_1)).setText("");
         if(messages[1]!=null && messages[1].length()!=0)
             ((TextView)findViewById(R.id.textView_message_2)).setText(messages[1]);
+        else
+            ((TextView)findViewById(R.id.textView_message_2)).setText("");
         if(messages[2]!=null && messages[2].length()!=0)
             ((TextView)findViewById(R.id.textView_message_3)).setText(messages[2]+" "+String.format("%.2f",total_incentive));
+        else
+            ((TextView)findViewById(R.id.textView_message_3)).setText("");
         handler.postDelayed(runnableClose, 10000);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

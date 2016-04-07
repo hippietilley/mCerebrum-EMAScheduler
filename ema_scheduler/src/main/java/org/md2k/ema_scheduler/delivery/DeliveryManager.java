@@ -130,4 +130,7 @@ public class DeliveryManager {
         }
         isRunning=false;
     }
+    public static void clear(){
+        instance=null;
+    }
 }
