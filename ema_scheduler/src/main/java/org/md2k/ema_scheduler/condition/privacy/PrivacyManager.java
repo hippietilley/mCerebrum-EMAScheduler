@@ -6,7 +6,7 @@ import com.google.gson.Gson;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -41,9 +41,9 @@ public class PrivacyManager extends Condition{
                 log(configCondition, "true: datapoint not found");
                 return true;
             }
-            String sample = ((DataTypeString)dataTypes.get(0)).getSample();
-            Gson gson=new Gson();
-            PrivacyData privacyData=gson.fromJson(sample,PrivacyData.class);
+            DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+            Gson gson = new Gson();
+            PrivacyData privacyData = gson.fromJson(dataTypeJSONObject.getSample().toString(), PrivacyData.class);
             if (privacyData.isStatus() == false) {
                 Log.d(TAG,"status=false");
                 return true;

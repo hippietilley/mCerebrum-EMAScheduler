@@ -8,7 +8,7 @@ import com.google.gson.Gson;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeDouble;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -74,9 +74,9 @@ public class EMIScheduler extends Scheduler {
             if (dataTypes.size() == 0) {
                 isPreQuit = true;
             } else {
-                DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
+                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
                 Gson gson = new Gson();
-                dayTypeInfo = gson.fromJson(dataTypeString.getSample(), DayTypeInfo.class);
+                dayTypeInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
                 if(dayTypeInfo.getDay_type()==DayTypeInfo.PRE_QUIT_INT)
                     isPreQuit=true;
                 else isPreQuit=false;

@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -19,7 +21,6 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.configuration.IncentiveRule;
-import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,8 +63,8 @@ public class IncentiveManager {
         Gson gson = new Gson();
         ArrayList<DataType> dataTypes = DataKitAPI.getInstance(context).query(dataSourceClient, 1);
         if (dataTypes.size() == 0) return 0;
-        DataTypeString dataTypeString = (DataTypeString) dataTypes.get(0);
-        Incentive incentive = gson.fromJson(dataTypeString.getSample(), Incentive.class);
+        DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(0);
+        Incentive incentive = gson.fromJson(dataTypeJSONObject.getSample().toString(), Incentive.class);
         return incentive.getTotalIncentive();
     }
 
@@ -75,10 +76,9 @@ public class IncentiveManager {
         incentive.incentive=incentiveRule.getIncentive();
         incentive.totalIncentive=getLastTotalIncentive()+incentive.getIncentive();
         Gson gson = new Gson();
-        String string = gson.toJson(incentive);
-        Log.d(TAG, "insert()..." + string);
-        DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), string);
-        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeString);
+        JsonObject sample = new JsonParser().parse(gson.toJson(incentive)).getAsJsonObject();
+        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
     }
     private void register() {
         dataSourceClient = DataKitAPI.getInstance(context).register(createDataSourceBuilderLogger());
@@ -88,7 +88,7 @@ public class IncentiveManager {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.INCENTIVE).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Incentive");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Represents the log of EMA Scheduler");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeString.class.getName());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
         HashMap<String, String> dataDescriptor = new HashMap<>();
         dataDescriptor.put(METADATA.NAME, "Incentive");

@@ -7,9 +7,11 @@ import android.content.IntentFilter;
 import android.os.Handler;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -154,10 +156,10 @@ public class RunnerMonitor {
 
     DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.SURVEY).setPlatform(platform);
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Survey");
+        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EMA).setPlatform(platform);
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "EMA");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "EMA & EMI Question and answers");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeString.class.getName());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
         return dataSourceBuilder;
     }
     void showIncentive(){
@@ -170,10 +172,9 @@ public class RunnerMonitor {
     void saveToDataKit() {
         showIncentive();
         Gson gson = new Gson();
-        String json = gson.toJson(survey);
-        Log.d(TAG, "survey=" + json);
-        DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), json);
-        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeString);
+        JsonObject sample = new JsonParser().parse(gson.toJson(survey)).getAsJsonObject();
+        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
         callback.onResponse(survey.status);
 //        Toast.makeText(this, "Information is Saved", Toast.LENGTH_SHORT).show();
     }

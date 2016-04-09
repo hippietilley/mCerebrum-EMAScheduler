@@ -3,10 +3,12 @@ package org.md2k.ema_scheduler.logger;
 import android.content.Context;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -59,10 +61,9 @@ public class LoggerManager {
 
     public void insert(LogInfo logInfo){
         Gson gson=new Gson();
-        String string=gson.toJson(logInfo);
-        Log.d(TAG, "insert()..." + string);
-        DataTypeString dataTypeString=new DataTypeString(DateTime.getDateTime(), string);
-        dataKitAPI.insert(dataSourceClientLogger, dataTypeString);
+        JsonObject sample = new JsonParser().parse(gson.toJson(logInfo)).getAsJsonObject();
+        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        dataKitAPI.insert(dataSourceClientLogger, dataTypeJSONObject);
         logInfos.add(logInfo);
     }
     private void readLogInfosFromDataKit(long startTimestamp) {
@@ -72,8 +73,8 @@ public class LoggerManager {
         Gson gson=new Gson();
         ArrayList<DataType> dataTypes=dataKitAPI.query(dataSourceClientLogger, startTimestamp, endTimestamp);
         for(int i=0;i<dataTypes.size();i++){
-            DataTypeString dataTypeString= (DataTypeString) dataTypes.get(i);
-            LogInfo logInfo=gson.fromJson(dataTypeString.getSample(),LogInfo.class);
+            DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataTypes.get(i);
+            LogInfo logInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), LogInfo.class);
             logInfos.add(logInfo);
         }
         Log.d(TAG, "readLogInfosFromDataKit...size=" + logInfos.size());
@@ -84,7 +85,7 @@ public class LoggerManager {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.LOG).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Log");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "Represents the log of EMA Scheduler");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeString.class.getName());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
         HashMap<String, String> dataDescriptor = new HashMap<>();
         dataDescriptor.put(METADATA.NAME, "Log");

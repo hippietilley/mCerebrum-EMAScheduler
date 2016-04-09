@@ -4,11 +4,12 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -24,7 +25,6 @@ import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.NotificationAcknowledge;
 import org.md2k.utilities.data_format.NotificationRequest;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
@@ -101,12 +101,9 @@ public class NotifierManager {
                     Thread t = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            DataTypeString dataTypeString = (DataTypeString) dataType;
-                            Log.d(TAG, "dataTypeString=" + dataTypeString.getSample());
+                            DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataType;
                             Gson gson = new Gson();
-                            Type collectionType = new TypeToken<NotificationAcknowledge>() {
-                            }.getType();
-                            NotificationAcknowledge notificationAcknowledge = gson.fromJson(dataTypeString.getSample(), collectionType);
+                            NotificationAcknowledge notificationAcknowledge = gson.fromJson(dataTypeJSONObject.getSample().toString(), NotificationAcknowledge.class);
                             Log.d(TAG, "notification_acknowledge = " + notificationAcknowledge.getStatus());
                             stop();
                             switch (notificationAcknowledge.getStatus()) {
@@ -174,9 +171,9 @@ public class NotifierManager {
             if (isDelayOk == true && delayEnable == false)
                 notificationRequest.getResponse_option().setDelay(false);
             Gson gson = new Gson();
-            String json = gson.toJson(notificationRequest);
-            DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), json);
-            dataKitAPI.insert(dataSourceClientRequest, dataTypeString);
+            JsonObject sample = new JsonParser().parse(gson.toJson(notificationRequest)).getAsJsonObject();
+            DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+            dataKitAPI.insert(dataSourceClientRequest, dataTypeJSONObject);
             if (isDelayOk == true && delayEnable == false && notificationRequest.getResponse_option() != null)
                 notificationRequest.getResponse_option().setDelay(true);
         }

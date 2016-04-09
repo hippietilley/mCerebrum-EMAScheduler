@@ -8,6 +8,7 @@ import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.ema_scheduler.Constants;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 
@@ -22,6 +23,7 @@ public class BatteryLevelManager extends Condition {
     }
 
     public boolean isValid(ConfigCondition configCondition) {
+        if(Constants.DEBUG) return true;
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(0));
         DataSource dataSource = configCondition.getData_source();
