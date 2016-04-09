@@ -7,9 +7,13 @@ import android.content.IntentFilter;
 import android.os.Handler;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
-import org.md2k.datakitapi.datatype.DataTypeString;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -41,7 +45,7 @@ public class RunnerMonitor {
     String message;
     String type;
     Application application;
-    Survey survey;
+    EMA ema;
     DataSourceClient dataSourceClient;
     EMAType emaType;
     Callback callback;
@@ -84,11 +88,11 @@ public class RunnerMonitor {
         this.type = type;
         this.application = application;
         this.emaType=emaType;
-        survey = new Survey();
-        survey.start_timestamp = DateTime.getDateTime();
-        survey.id = application.getId();
-        survey.name = application.getName();
-        survey.trigger_type = type;
+        ema = new EMA();
+        ema.start_timestamp = DateTime.getDateTime();
+        ema.id = application.getId();
+        ema.name = application.getName();
+        ema.trigger_type = type;
         switch (status) {
             case NotificationAcknowledge.OK:
             case NotificationAcknowledge.DELAY_CANCEL:
@@ -104,15 +108,15 @@ public class RunnerMonitor {
                 log(LogInfo.STATUS_RUN_START, "EMA Starts");
                 break;
             case NotificationAcknowledge.CANCEL:
-                survey.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;
-                survey.end_timestamp=DateTime.getDateTime();
+                ema.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;
+                ema.end_timestamp=DateTime.getDateTime();
                 log(LogInfo.STATUS_RUN_ABANDONED_BY_USER, "EMA abandoned by user at prompt");
                 saveToDataKit();
                 clear();
                 break;
             case NotificationAcknowledge.TIMEOUT:
-                survey.status=LogInfo.STATUS_RUN_MISSED;
-                survey.end_timestamp=DateTime.getDateTime();
+                ema.status=LogInfo.STATUS_RUN_MISSED;
+                ema.end_timestamp=DateTime.getDateTime();
                 log(LogInfo.STATUS_RUN_MISSED, "EMA is timed out..at prompt..MISSED");
                 saveToDataKit();
                 clear();
@@ -154,14 +158,14 @@ public class RunnerMonitor {
 
     DataSourceBuilder createDataSourceBuilder() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.SURVEY).setPlatform(platform);
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Survey");
+        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EMA).setPlatform(platform);
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "EMA");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "EMA & EMI Question and answers");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeString.class.getName());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
         return dataSourceBuilder;
     }
     void showIncentive(){
-        if(!survey.status.equals((LogInfo.STATUS_RUN_COMPLETED))) return;
+        if(!ema.status.equals((LogInfo.STATUS_RUN_COMPLETED))) return;
         if(emaType.getIncentive_rules()==null) return;
         IncentiveManager incentiveManager=new IncentiveManager(context, emaType);
         incentiveManager.start();
@@ -170,11 +174,11 @@ public class RunnerMonitor {
     void saveToDataKit() {
         showIncentive();
         Gson gson = new Gson();
-        String json = gson.toJson(survey);
-        Log.d(TAG, "survey=" + json);
-        DataTypeString dataTypeString = new DataTypeString(DateTime.getDateTime(), json);
-        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeString);
-        callback.onResponse(survey.status);
+        String json = gson.toJson(ema);
+        JsonObject sample = new JsonParser().parse(gson.toJson(ema)).getAsJsonObject();
+        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
+        callback.onResponse(ema.status);
 //        Toast.makeText(this, "Information is Saved", Toast.LENGTH_SHORT).show();
     }
 
@@ -185,8 +189,11 @@ public class RunnerMonitor {
             if (type.equals("RESULT")) {
                 String answer = intent.getStringExtra("ANSWER");
                 String status = intent.getStringExtra("STATUS");
+                JsonParser parser = new JsonParser();
+                JsonElement tradeElement = parser.parse(answer);
+                JsonArray question_answer = tradeElement.getAsJsonArray();
                 handler.removeCallbacks(runnableWaitThenSave);
-                saveData(answer, status);
+                saveData(question_answer, status);
             } else if (type.equals("STATUS_MESSAGE")) {
                 lastResponseTime = intent.getLongExtra("TIMESTAMP", -1);
                 message = intent.getStringExtra("MESSAGE");
@@ -194,13 +201,13 @@ public class RunnerMonitor {
             }
         }
     }
-    public void saveData(String answer, String status){
-        survey.end_timestamp = DateTime.getDateTime();
-        survey.question_answers = answer;
-        if(status==null) survey.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;
+    public void saveData(JsonArray answer, String status){
+        ema.end_timestamp = DateTime.getDateTime();
+        ema.question_answers = answer;
+        if(status==null) ema.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;
         else
-        survey.status = status;
-        log(survey.status, survey.status);
+        ema.status = status;
+        log(ema.status, ema.status);
         saveToDataKit();
         clear();
 
