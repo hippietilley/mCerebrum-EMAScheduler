@@ -11,8 +11,7 @@ public class LogInfo {
     public static final String OP_RUN="RUN";
     public static final String OP_CONDITION="CONDITION";
     public static final String OP_EMI_INFO="EMI_INFO";
-    public static final String STATUS_SCHEDULER_DELIVERED="ALREADY_DELIVERED";
-    public static final String STATUS_SCHEDULER_RUNNING="APPLICATION_RUNNING";
+    public static final String STATUS_SCHEDULER_ALREADY_DELIVERED ="ALREADY_DELIVERED";
     public static final String STATUS_SCHEDULER_SCHEDULED="SCHEDULED";
     public static final String STATUS_SCHEDULER_NO_VALID_BLOCK="NO_VALID_BLOCK";
     public static final String STATUS_DELIVER_ALREADY_RUNNING="ALREADY_RUNNING";

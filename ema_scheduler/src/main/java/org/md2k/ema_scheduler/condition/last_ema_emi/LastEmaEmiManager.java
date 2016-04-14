@@ -3,7 +3,6 @@ package org.md2k.ema_scheduler.condition.last_ema_emi;
 import android.content.Context;
 
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.ema_scheduler.Constants;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 import org.md2k.ema_scheduler.logger.LogInfo;
@@ -19,7 +18,7 @@ public class LastEmaEmiManager extends Condition {
     }
 
     public boolean isValid(ConfigCondition configCondition) {
-        if(Constants.DEBUG) return true;
+//        if(Constants.DEBUG) return true;
 
         LoggerManager loggerManager= LoggerManager.getInstance(context);
         LogInfo logInfo=loggerManager.getLogInfoLast(LogInfo.OP_DELIVER, LogInfo.STATUS_DELIVER_SUCCESS, configCondition.getSource().getType(), configCondition.getSource().getId());

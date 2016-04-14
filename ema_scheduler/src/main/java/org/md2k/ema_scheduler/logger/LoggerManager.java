@@ -63,8 +63,8 @@ public class LoggerManager {
         Gson gson=new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(logInfo)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
-        dataKitAPI.insert(dataSourceClientLogger, dataTypeJSONObject);
         logInfos.add(logInfo);
+        dataKitAPI.insert(dataSourceClientLogger, dataTypeJSONObject);
     }
     private void readLogInfosFromDataKit(long startTimestamp) {
         Log.d(TAG,"readLogInfosFromDataKit...");

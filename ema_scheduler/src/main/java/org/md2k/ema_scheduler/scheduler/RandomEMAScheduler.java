@@ -26,6 +26,8 @@ public class RandomEMAScheduler extends Scheduler {
 
     public void start(long dayStartTimestamp, long dayEndTimestamp) {
         super.start(dayStartTimestamp, dayEndTimestamp);
+        handler.removeCallbacks(runnableSchedule);
+        handler.removeCallbacks(runnableDeliver);
         Log.d(TAG, "RandomEMA start..."+dayStartTimestamp+" "+dayEndTimestamp);
         if(dayStartTimestamp==-1 || dayStartTimestamp<dayEndTimestamp) return;
         long triggerTime = retrieveLastTriggerTime();
@@ -40,6 +42,7 @@ public class RandomEMAScheduler extends Scheduler {
 
     void schedule() {
         Log.d(TAG,"schedule()...");
+        handler.removeCallbacks(runnableSchedule);
         long curTime = DateTime.getDateTime();
         int indexBlock = blockManager.getBlockIndex(dayStartTimestamp, curTime);
         Log.d(TAG,"schedule()...indexBlock="+indexBlock);
@@ -54,10 +57,10 @@ public class RandomEMAScheduler extends Scheduler {
             long nextWindowStartTime = blockManager.getNextBlockStartTime(dayStartTimestamp, curTime);
             Log.d(TAG,"schedule()...next block=nextWindowStartTime");
             if (nextWindowStartTime != -1) {
-                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_DELIVERED, "schedule()...alreadyDelivered, next call="+formatTime(nextWindowStartTime));
+                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_ALREADY_DELIVERED, "schedule()...alreadyDelivered, next call="+formatTime(nextWindowStartTime));
                 handler.postDelayed(runnableSchedule, nextWindowStartTime - curTime);
             }else{
-                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_DELIVERED, "schedule()...alreadyDelivered, no valid block after this");
+                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_ALREADY_DELIVERED, "schedule()...alreadyDelivered, no valid block after this");
             }
         } else {
             scheduleNow(blockStartTime, blockEndTime);
@@ -86,7 +89,7 @@ public class RandomEMAScheduler extends Scheduler {
                 }else{
                     handler.removeCallbacks(runnableSchedule);
                     handler.removeCallbacks(runnableDeliver);
-                    handler.post(runnableSchedule);
+                    schedule();
                 }
                 break;
             case SchedulerRule.TYPE_IMMEDIATE:

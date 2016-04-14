@@ -33,5 +33,5 @@ public class Constants {
     public static final String CONFIG_FILENAME = "config.json";
     public static final String NOTIFICATION_FILENAME = "notification.json";
     public static final String CONDITION_FILENAME = "condition.json";
-    public static final boolean DEBUG=true;
+    public static final boolean DEBUG=false;
 }
