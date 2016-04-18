@@ -14,6 +14,7 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.privacy.PrivacyData;
 
 import java.util.ArrayList;
 
@@ -46,19 +47,23 @@ public class PrivacyManager extends Condition{
             PrivacyData privacyData = gson.fromJson(dataTypeJSONObject.getSample().toString(), PrivacyData.class);
             if (privacyData.isStatus() == false) {
                 Log.d(TAG,"status=false");
+                log(configCondition, "true: status = false");
                 return true;
             }
             if(privacyData.getDuration().getValue()+privacyData.getStartTimeStamp()<= DateTime.getDateTime()) {
                 Log.d(TAG,"privacytime < currenttime");
+                log(configCondition, "true: privacytime (less than) currenttime");
                 return true;
             }
             for(int i=0;i<=privacyData.getPrivacyTypes().size();i++){
                 if(privacyData.getPrivacyTypes().get(i).getId().equals("ema_intervention")) {
                     Log.d(TAG,"ema privacy enabled.");
+                    log(configCondition, "false: ema privacy active");
                     return false;
                 }
             }
             Log.d(TAG,"passed");
+            log(configCondition, "true: privacy is not active");
             return true;
         } else {
             Log.d(TAG,"datasource not found");
