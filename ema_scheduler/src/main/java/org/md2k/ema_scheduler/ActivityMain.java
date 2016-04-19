@@ -136,7 +136,7 @@ public class ActivityMain extends AppCompatActivity {
         LoggerManager loggerManager = LoggerManager.getInstance(getApplicationContext());
         for (int i = loggerManager.getLogInfos().size() - 1; i >= 0; i--) {
             logInfo = loggerManager.getLogInfos().get(i);
-            if (curTime - logInfo.getTimestamp() >= 24 * 60 * 60 * 1000) continue;
+            if (curTime - logInfo.getTimestamp() >= 4 * 60 * 60 * 1000) continue;
             time = formatTime(logInfo.getTimestamp());
             if (logInfo.getOperation() != null && logInfo.getId() != null) {
                 type = logInfo.getOperation().toLowerCase() + ":" + logInfo.getId().toLowerCase()+":"+logInfo.getStatus();

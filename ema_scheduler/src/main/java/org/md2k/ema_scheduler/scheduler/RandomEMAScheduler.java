@@ -93,10 +93,14 @@ public class RandomEMAScheduler extends Scheduler {
                 }
                 break;
             case SchedulerRule.TYPE_IMMEDIATE:
-                sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, curTime+60000);
                 handler.removeCallbacks(runnableSchedule);
                 handler.removeCallbacks(runnableDeliver);
-                handler.postDelayed(runnableDeliver, 60000);
+                if (curTime + 60000 > blockEndTime) {
+                    handler.postDelayed(runnableSchedule, 60000);
+                }else {
+                    sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, curTime + 60000);
+                    handler.postDelayed(runnableDeliver, 60000);
+                }
                 break;
         }
     }

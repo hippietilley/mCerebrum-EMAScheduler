@@ -53,6 +53,8 @@ public class ServiceEMAScheduler extends Service {
         super.onCreate();
         Log.d(TAG, "onCreate()");
         configuration = Configuration.getInstance();
+        LoggerManager.clear();
+
         if (configuration.getEma_types() == null) {
             Toast.makeText(ServiceEMAScheduler.this, "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
             stopSelf();
