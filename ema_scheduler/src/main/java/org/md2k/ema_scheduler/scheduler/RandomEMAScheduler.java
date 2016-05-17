@@ -194,6 +194,7 @@ public class RandomEMAScheduler extends Scheduler {
         long curTimestamp = DateTime.getDateTime();
         ArrayList<LogInfo> logInfoArrayList = loggerManager.getLogInfos(LogInfo.OP_SCHEDULE, LogInfo.STATUS_SCHEDULER_SCHEDULED, emaType.getType(), emaType.getId());
         for (int i = 0; i < logInfoArrayList.size(); i++) {
+            if(logInfoArrayList.get(i).getLogSchedule()==null) continue;
             if (logInfoArrayList.get(i).getLogSchedule().getScheduleTimestamp() > curTimestamp)
                 return logInfoArrayList.get(i).getLogSchedule().getScheduleTimestamp() - curTimestamp;
         }

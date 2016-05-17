@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.md2k.ema_scheduler.Constants;
-import org.md2k.utilities.Files;
+import org.md2k.utilities.FileManager;
 import org.md2k.utilities.data_format.NotificationRequest;
 
 import java.io.BufferedReader;
@@ -61,7 +61,7 @@ public class Configuration{
     private void readEMATypes(){
         BufferedReader br;
         String filepath= Constants.CONFIG_DIRECTORY+Constants.CONFIG_FILENAME;
-        if(!Files.isExist(filepath))
+        if(!FileManager.isExist(filepath))
             ema_types=null;
         else {
             try {
@@ -79,7 +79,7 @@ public class Configuration{
     private void readNotifications(){
         BufferedReader br;
         String filepath= Constants.CONFIG_DIRECTORY+Constants.NOTIFICATION_FILENAME;
-        if(!Files.isExist(filepath))
+        if(!FileManager.isExist(filepath))
             notificationRequests =null;
         else {
             try {
@@ -97,7 +97,7 @@ public class Configuration{
     private void readConditions(){
         BufferedReader br;
         String filepath= Constants.CONFIG_DIRECTORY+Constants.CONDITION_FILENAME;
-        if(!Files.isExist(filepath))
+        if(!FileManager.isExist(filepath))
             conditions=null;
         else {
             try {
