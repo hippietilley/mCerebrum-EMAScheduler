@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.time.DateTime;
@@ -56,7 +58,16 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
+
+
+        // Set up Crashlytics, disabled for debug builds
+        Crashlytics crashlyticsKit = new Crashlytics.Builder()
+                .core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build())
+                .build();
+
+        // Initialize Fabric with the debug-disabled crashlytics.
+        Fabric.with(this, crashlyticsKit);
+
         setContentView(R.layout.activity_main);
         final Button buttonService = (Button) findViewById(R.id.button_app_status);
 
@@ -93,7 +104,7 @@ public class ActivityMain extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.action_report:
-//TODO: add report
+                //TODO: add report
                 break;
             case R.id.action_about:
                 intent = new Intent(this, ActivityAbout.class);
@@ -102,6 +113,8 @@ public class ActivityMain extends AppCompatActivity {
                     intent.putExtra(org.md2k.utilities.Constants.VERSION_NAME, this.getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
                 } catch (PackageManager.NameNotFoundException e) {
                     e.printStackTrace();
+                    Crashlytics.log(Log.ERROR, "EMA_Scheduler", "action_about intent incorrect");
+                    Crashlytics.logException(e);
                 }
                 startActivity(intent);
                 break;
