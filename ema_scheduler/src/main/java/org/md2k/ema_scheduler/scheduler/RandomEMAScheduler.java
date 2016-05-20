@@ -96,7 +96,7 @@ public class RandomEMAScheduler extends Scheduler {
                 handler.removeCallbacks(runnableSchedule);
                 handler.removeCallbacks(runnableDeliver);
                 if (curTime + 60000 > blockEndTime) {
-                    logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_SCHEDULED, "schedule()...not possible to send EMA in this block, next call=" + formatTime(curTime+60000));
+                    logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_NO_TIME_LEFT, "schedule()...not possible to send EMA in this block, next call=" + formatTime(curTime+60000));
                     handler.postDelayed(runnableSchedule, 60000);
                 }else {
                     sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, curTime + 60000);

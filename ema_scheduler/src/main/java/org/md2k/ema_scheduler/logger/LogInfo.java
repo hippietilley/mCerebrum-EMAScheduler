@@ -14,6 +14,7 @@ public class LogInfo {
     public static final String STATUS_SCHEDULER_ALREADY_DELIVERED ="ALREADY_DELIVERED";
     public static final String STATUS_SCHEDULER_SCHEDULED="SCHEDULED";
     public static final String STATUS_SCHEDULER_NO_VALID_BLOCK="NO_VALID_BLOCK";
+    public static final String STATUS_SCHEDULER_NO_TIME_LEFT="NO_TIME_LEFT";
     public static final String STATUS_DELIVER_ALREADY_RUNNING="ALREADY_RUNNING";
     public static final String STATUS_DELIVER_SUCCESS="DELIVERED";
     public static final String STATUS_NOTIFICATION_NOTIFYING="NOTIFY";
