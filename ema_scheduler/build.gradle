@@ -25,8 +25,8 @@ android {
         applicationId 'org.md2k.ema_scheduler'
         minSdkVersion 19
         targetSdkVersion 23
-        versionName '0.1.12'
-        versionCode 13
+        versionCode buildVersionCode()
+        versionName version
     }
     buildTypes {
         release {
