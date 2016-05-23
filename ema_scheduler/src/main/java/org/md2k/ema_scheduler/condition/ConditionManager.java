@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.condition;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.battery_level.BatteryLevelManager;
 import org.md2k.ema_scheduler.condition.data_quality.DataQualityManager;
@@ -74,7 +75,7 @@ public class ConditionManager {
         }
         return null;
     }
-    public boolean isValid(String[] conditions, String type, String id){
+    public boolean isValid(String[] conditions, String type, String id) throws DataKitException {
         if(conditions==null) return true;
         for (String condition : conditions) {
             Log.d(TAG, "condition=" + condition);
@@ -89,7 +90,7 @@ public class ConditionManager {
         log(type,id);
         return true;
     }
-    protected void log(String type, String id){
+    protected void log(String type, String id) throws DataKitException {
         LogInfo logInfo=new LogInfo();
         logInfo.setOperation(LogInfo.OP_CONDITION);
         logInfo.setId(id);

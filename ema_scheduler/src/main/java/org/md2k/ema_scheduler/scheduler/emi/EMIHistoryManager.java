@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.scheduler.emi;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.logger.EMIInfo;
 import org.md2k.ema_scheduler.logger.LogInfo;
@@ -25,7 +26,7 @@ public class EMIHistoryManager {
     }
 
 
-    public void insert(EMIInfo emiInfo){
+    public void insert(EMIInfo emiInfo) throws DataKitException {
         LogInfo logInfo=new LogInfo();
         logInfo.setOperation(LogInfo.OP_EMI_INFO);
         logInfo.setTimestamp(DateTime.getDateTime());

@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.scheduler;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.utilities.Report.Log;
@@ -18,7 +19,7 @@ public class SchedulerManager {
     ArrayList<Scheduler> scheduler;
     boolean isStarted;
 
-    public SchedulerManager(Context context) {
+    public SchedulerManager(Context context) throws DataKitException {
         Log.d(TAG, "SchedulerManager()...");
         this.context = context;
         configuration = Configuration.getInstance();
@@ -27,7 +28,7 @@ public class SchedulerManager {
         prepareScheduler();
     }
 
-    private void prepareScheduler() {
+    private void prepareScheduler() throws DataKitException {
         Log.d(TAG, "prepareScheduler()...");
         for (int i = 0; i < configuration.getEma_types().length; i++) {
             Log.d(TAG, "prepareScheduler()...emaType ID=" + configuration.getEma_types()[i].getId());
@@ -55,17 +56,17 @@ public class SchedulerManager {
             }
         }
     }
-    public void setDayStartTimestamp(long dayStartTimestamp){
+    public void setDayStartTimestamp(long dayStartTimestamp) throws DataKitException {
         for (int i = 0; i < scheduler.size(); i++)
             scheduler.get(i).setDayStartTimestamp(dayStartTimestamp);
     }
-    public void setDayEndTimestamp(long dayEndTimestamp){
+    public void setDayEndTimestamp(long dayEndTimestamp) throws DataKitException {
         for (int i = 0; i < scheduler.size(); i++)
             scheduler.get(i).setDayEndTimestamp(dayEndTimestamp);
 
     }
 
-    public void start(long dayStartTimestamp, long dayEndTimestamp) {
+    public void start(long dayStartTimestamp, long dayEndTimestamp) throws DataKitException {
         if (isStarted) return;
         isStarted = true;
         Log.d(TAG, "start()...");

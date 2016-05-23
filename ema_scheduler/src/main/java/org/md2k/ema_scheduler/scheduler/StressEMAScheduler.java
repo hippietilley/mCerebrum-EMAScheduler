@@ -1,15 +1,19 @@
 package org.md2k.ema_scheduler.scheduler;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeDouble;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.logger.LogInfo;
@@ -26,14 +30,14 @@ public class StressEMAScheduler extends Scheduler {
     DataSourceClient dataSourceClient;
     boolean isRunning;
 
-    public StressEMAScheduler(Context context, EMAType emaType) {
+    public StressEMAScheduler(Context context, EMAType emaType) throws DataKitException {
         super(context, emaType);
         Log.d(TAG, "SmokingEMAScheduler()...id=" + emaType.getId());
         handler = new Handler();
     }
 
     @Override
-    public void start(long dayStartTimestamp, long dayEndTimestamp) {
+    public void start(long dayStartTimestamp, long dayEndTimestamp) throws DataKitException {
         super.start(dayStartTimestamp, dayEndTimestamp);
         Log.d(TAG, "start()...");
         handler.removeCallbacks(runnableListenEvent);
@@ -59,9 +63,11 @@ public class StressEMAScheduler extends Scheduler {
     Runnable runnableListenEvent = new Runnable() {
         @Override
         public void run() {
+            try {
             DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
             Log.d(TAG, "runnableEventEMA()...id=" + emaType.getId() + " find..." + emaType.getScheduler_rules()[0].getData_source().getType());
-            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder(emaType.getScheduler_rules()[0].getData_source()));
+            ArrayList<DataSourceClient> dataSourceClients = null;
+                dataSourceClients = dataKitAPI.find(new DataSourceBuilder(emaType.getScheduler_rules()[0].getData_source()));
             Log.d(TAG, "runnableEventEMA()...id=" + emaType.getId() + " find..." + dataSourceClients.size() + "...done");
             if (dataSourceClients.size() == 0)
                 handler.postDelayed(runnableListenEvent, 1000);
@@ -69,10 +75,13 @@ public class StressEMAScheduler extends Scheduler {
                 dataSourceClient = dataSourceClients.get(0);
                 subscribeEvent();
             }
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+            }
         }
     };
 
-    public void subscribeEvent() {
+    public void subscribeEvent() throws DataKitException {
         Log.d(TAG, "subscribeEvent()...");
         isRunning = false;
         DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
@@ -83,12 +92,16 @@ public class StressEMAScheduler extends Scheduler {
                 Thread t=new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
-                        conditionManager = ConditionManager.getInstance(context);
-                        if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId())) {
-                            Log.d(TAG, "condition valid...");
-                            isRunning = false;
-                            startDelivery();
+                        try {
+                            sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
+                            conditionManager = ConditionManager.getInstance(context);
+                            if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId())) {
+                                Log.d(TAG, "condition valid...");
+                                isRunning = false;
+                                startDelivery();
+                            }
+                        } catch (DataKitException e) {
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
                         }
                     }
                 });

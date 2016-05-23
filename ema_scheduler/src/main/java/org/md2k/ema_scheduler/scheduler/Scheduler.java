@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.scheduler;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
@@ -29,14 +30,14 @@ abstract public class Scheduler {
     protected long dayStartTimestamp;
     protected long dayEndTimestamp;
 
-    public Scheduler(Context context, EMAType emaType){
+    public Scheduler(Context context, EMAType emaType) throws DataKitException {
         this.context=context;
         this.emaType=emaType;
         deliveryManager = DeliveryManager.getInstance(context);
         blockManager =new BlockManager(context, emaType.getBlocks());
     }
 
-     public void start(long dayStartTimestamp, long dayEndTimestamp){
+     public void start(long dayStartTimestamp, long dayEndTimestamp) throws DataKitException {
          loggerManager=LoggerManager.getInstance(context);
          conditionManager = ConditionManager.getInstance(context);
          this.dayStartTimestamp=dayStartTimestamp;
@@ -44,10 +45,10 @@ abstract public class Scheduler {
      }
 
     abstract public void stop();
-    abstract public void setDayStartTimestamp(long dayStartTimestamp);
-    abstract public void setDayEndTimestamp(long dayEndTimestamp);
+    abstract public void setDayStartTimestamp(long dayStartTimestamp) throws DataKitException;
+    abstract public void setDayEndTimestamp(long dayEndTimestamp) throws DataKitException;
 
-    public boolean startDelivery(){
+    public boolean startDelivery() throws DataKitException {
         Log.d(TAG, "startDelivery...emaType="+emaType.getType()+" emaId="+emaType.getId());
         return deliveryManager.start(emaType, true, "SYSTEM");
     }
@@ -55,7 +56,7 @@ abstract public class Scheduler {
         Log.d(TAG, "stopDelivery...");
         deliveryManager.stop();
     }
-    protected void sendToLogInfo(String status, long scheduledTime) {
+    protected void sendToLogInfo(String status, long scheduledTime) throws DataKitException {
         LogSchedule logSchedule = new LogSchedule();
         logSchedule.setScheduleTimestamp(scheduledTime);
         LogInfo logInfo = new LogInfo();

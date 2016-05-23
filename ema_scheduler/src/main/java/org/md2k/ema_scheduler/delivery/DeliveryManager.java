@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.delivery;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.configuration.EMAType;
@@ -26,7 +27,7 @@ public class DeliveryManager {
     RunnerManager runnerManager;
     boolean isRunning;
 
-    private DeliveryManager(Context context) {
+    private DeliveryManager(Context context) throws DataKitException {
         this.context = context;
         runnerManager = new RunnerManager(context, new Callback() {
             @Override
@@ -38,7 +39,7 @@ public class DeliveryManager {
         isRunning=false;
     }
 
-    public static DeliveryManager getInstance(Context context){
+    public static DeliveryManager getInstance(Context context) throws DataKitException {
         if(instance==null) instance=new DeliveryManager(context);
         return instance;
     }
@@ -56,7 +57,7 @@ public class DeliveryManager {
         return emis.get(random.nextInt(emis.size()));
     }
 
-    public boolean start(EMAType emaType, boolean isNotifyRequired, final String type){
+    public boolean start(EMAType emaType, boolean isNotifyRequired, final String type) throws DataKitException {
         if(isRunning){
             log(LogInfo.STATUS_DELIVER_ALREADY_RUNNING, emaType,"Not started..another one is running");
             return false;
@@ -73,7 +74,7 @@ public class DeliveryManager {
         final EMAType finalEmaType = emaType;
         notifierManager.set(emaType, new Callback() {
             @Override
-            public void onResponse(String response) {
+            public void onResponse(String response) throws DataKitException {
                 Log.d(TAG, "callback received...response=" + response);
                 switch (response) {
                     case NotificationAcknowledge.OK:
@@ -96,7 +97,7 @@ public class DeliveryManager {
         }
         return true;
     }
-    protected void log(String status, EMAType emaType, String type){
+    protected void log(String status, EMAType emaType, String type) throws DataKitException {
         if(type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_DELIVER);
@@ -108,7 +109,7 @@ public class DeliveryManager {
             LoggerManager.getInstance(context).insert(logInfo);
         }
     }
-    protected void logRandom(EMAType emaType, String type){
+    protected void logRandom(EMAType emaType, String type) throws DataKitException {
         if(type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_DELIVER);

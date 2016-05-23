@@ -2,9 +2,13 @@ package org.md2k.ema_scheduler.scheduler;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.configuration.SchedulerRule;
 import org.md2k.ema_scheduler.logger.LogInfo;
@@ -19,12 +23,12 @@ import java.util.Random;
 public class RandomEMAScheduler extends Scheduler {
     private static final String TAG = RandomEMAScheduler.class.getSimpleName();
     Handler handler;
-    public RandomEMAScheduler(Context context, EMAType emaType) {
+    public RandomEMAScheduler(Context context, EMAType emaType) throws DataKitException {
         super(context, emaType);
         handler = new Handler();
     }
 
-    public void start(long dayStartTimestamp, long dayEndTimestamp) {
+    public void start(long dayStartTimestamp, long dayEndTimestamp) throws DataKitException {
         super.start(dayStartTimestamp, dayEndTimestamp);
         handler.removeCallbacks(runnableSchedule);
         handler.removeCallbacks(runnableDeliver);
@@ -40,7 +44,7 @@ public class RandomEMAScheduler extends Scheduler {
         }
     }
 
-    void schedule() {
+    void schedule() throws DataKitException {
         Log.d(TAG,"schedule()...");
         handler.removeCallbacks(runnableSchedule);
         long curTime = DateTime.getDateTime();
@@ -73,7 +77,7 @@ public class RandomEMAScheduler extends Scheduler {
         return curScheduleIndex;
     }
 
-    void scheduleNow(long blockStartTime, long blockEndTime) {
+    void scheduleNow(long blockStartTime, long blockEndTime) throws DataKitException {
         int curScheduleIndex= getCurScheduleIndex(blockStartTime, blockEndTime);
         long curTime=DateTime.getDateTime();
         switch (emaType.getScheduler_rules()[curScheduleIndex].getType()) {
@@ -112,20 +116,29 @@ public class RandomEMAScheduler extends Scheduler {
             long blockStartTime = blockManager.getBlockStartTime(dayStartTimestamp, curTime);
             long blockEndTime = blockManager.getBlockEndTime(dayStartTimestamp, curTime);
             int curScheduleIndex= getCurScheduleIndex(blockStartTime, blockEndTime);
-            if (conditionManager.isValid(emaType.getScheduler_rules()[curScheduleIndex].getConditions(), emaType.getType(), emaType.getId()))
-                startDelivery();
-            schedule();
+            try {
+                if (conditionManager.isValid(emaType.getScheduler_rules()[curScheduleIndex].getConditions(), emaType.getType(), emaType.getId()))
+                    startDelivery();
+                schedule();
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+
+            }
         }
     };
     Runnable runnableSchedule = new Runnable() {
         @Override
         public void run() {
-            schedule();
+            try {
+                schedule();
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+            }
         }
     };
 
 
-    void logWhenSchedulerRun(String status, String message) {
+    void logWhenSchedulerRun(String status, String message) throws DataKitException {
         LogInfo logInfo = new LogInfo();
         logInfo.setId(emaType.getId());
         logInfo.setType(emaType.getType());
@@ -176,7 +189,7 @@ public class RandomEMAScheduler extends Scheduler {
     }
 
     @Override
-    public void setDayStartTimestamp(long dayStartTimestamp) {
+    public void setDayStartTimestamp(long dayStartTimestamp) throws DataKitException {
         stop();
         this.dayStartTimestamp=dayStartTimestamp;
         schedule();

@@ -3,6 +3,7 @@ package org.md2k.ema_scheduler.scheduler;
 import android.content.Context;
 import android.os.Handler;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
@@ -17,14 +18,14 @@ public class EndOfDayEMAScheduler extends Scheduler {
     Handler handler;
     boolean isRunning;
 
-    public EndOfDayEMAScheduler(Context context, EMAType emaType) {
+    public EndOfDayEMAScheduler(Context context, EMAType emaType) throws DataKitException {
         super(context, emaType);
         Log.d(TAG, "SmokingEMAScheduler()...id=" + emaType.getId());
         handler = new Handler();
     }
 
     @Override
-    public void start(long dayStartTimestamp, long dayEndTimestamp) {
+    public void start(long dayStartTimestamp, long dayEndTimestamp) throws DataKitException {
         super.start(dayStartTimestamp, dayEndTimestamp);
     }
 
@@ -40,7 +41,7 @@ public class EndOfDayEMAScheduler extends Scheduler {
     }
 
     @Override
-    public void setDayEndTimestamp(long dayEndTimestamp) {
+    public void setDayEndTimestamp(long dayEndTimestamp) throws DataKitException {
         sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
         conditionManager = ConditionManager.getInstance(context);
         if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId())) {

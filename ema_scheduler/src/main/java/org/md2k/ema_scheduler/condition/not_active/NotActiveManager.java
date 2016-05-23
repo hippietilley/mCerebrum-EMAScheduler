@@ -5,6 +5,7 @@ import android.content.Context;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeDouble;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -20,7 +21,7 @@ public class NotActiveManager extends Condition{
     public NotActiveManager(Context context){
         super(context);
     }
-    public boolean isValid(ConfigCondition configCondition){
+    public boolean isValid(ConfigCondition configCondition) throws DataKitException {
         //if(true) return true;
         int sampleNo=Integer.parseInt(configCondition.getValues().get(0));
         int value = Integer.parseInt(configCondition.getValues().get(1));

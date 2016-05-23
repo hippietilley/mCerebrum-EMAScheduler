@@ -5,6 +5,7 @@ import android.content.Context;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
@@ -28,7 +29,7 @@ public class ValidBlockManager extends Condition {
     public ValidBlockManager(Context context){
         super(context);
     }
-    public boolean isValid(ConfigCondition configCondition) {
+    public boolean isValid(ConfigCondition configCondition) throws DataKitException {
 //        if(Constants.DEBUG) return true;
         long curTime=DateTime.getDateTime();
         long dayStart=getDay(DataSourceType.DAY_START);
@@ -68,7 +69,7 @@ public class ValidBlockManager extends Condition {
         }
     }
 
-    long getDay(String dataSourceType){
+    long getDay(String dataSourceType) throws DataKitException {
         long day=-1;
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         DataSourceBuilder dataSourceBuilder=new DataSourceBuilder().setType(dataSourceType);

@@ -1,14 +1,17 @@
 package org.md2k.ema_scheduler;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
-import org.md2k.datakitapi.messagehandler.OnExceptionListener;
-import org.md2k.datakitapi.status.Status;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.day.DayManager;
@@ -54,37 +57,45 @@ public class ServiceEMAScheduler extends Service {
         Log.d(TAG, "onCreate()");
         configuration = Configuration.getInstance();
         LoggerManager.clear();
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(ServiceEMAScheduler.class.getSimpleName()));
 
         if (configuration.getEma_types() == null) {
             Toast.makeText(ServiceEMAScheduler.this, "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
             stopSelf();
         } else {
-            connectDataKit();
+            try {
+                connectDataKit();
+            } catch (DataKitException e) {
+                stopSelf();
+            }
         }
     }
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            stopSelf();
+        }
+    };
 
-    private void connectDataKit() {
+    private void connectDataKit() throws DataKitException {
         Log.d(TAG, "connectDataKit()...");
         dataKitAPI = DataKitAPI.getInstance(ServiceEMAScheduler.this);
         dataKitAPI.connect(new OnConnectionListener() {
             @Override
             public void onConnected() {
-                Toast.makeText(ServiceEMAScheduler.this, "In EMAScheduler .. DataKit connected...", Toast.LENGTH_LONG).show();
+//                Toast.makeText(ServiceEMAScheduler.this, "In EMAScheduler .. DataKit connected...", Toast.LENGTH_LONG).show();
                 Log.d(TAG, "datakit connected...");
                 Configuration.clear();
                 LoggerManager.clear();
                 DeliveryManager.clear();
                 configuration = Configuration.getInstance();
                 LoggerManager.getInstance(getApplicationContext());
-                dayManager = new DayManager(getApplicationContext());
-                dayManager.start();
-            }
-        }, new OnExceptionListener() {
-            @Override
-            public void onException(Status status) {
-                android.util.Log.d(TAG, "onException...");
-                Toast.makeText(ServiceEMAScheduler.this, "Notification Managr.. Stopped. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
-                stopSelf();
+                try {
+                    dayManager = new DayManager(getApplicationContext());
+                    dayManager.start();
+                } catch (DataKitException e) {
+                    stopSelf();
+                }
             }
         });
     }
@@ -100,10 +111,9 @@ public class ServiceEMAScheduler extends Service {
         Log.d(TAG, "...stopScheduler()");
         if (dataKitAPI != null && dataKitAPI.isConnected()) dataKitAPI.disconnect();
         Log.d(TAG, "...DataKit disconnect()");
-        if (dataKitAPI != null)
-            dataKitAPI.close();
         super.onDestroy();
     }
+
 
     @Override
     public IBinder onBind(Intent intent) {

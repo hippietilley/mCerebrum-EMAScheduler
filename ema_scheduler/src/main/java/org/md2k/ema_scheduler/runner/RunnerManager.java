@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.runner;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.ema_scheduler.configuration.Application;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.delivery.Callback;
@@ -16,7 +17,7 @@ public class RunnerManager {
     RunnerMonitor runnerMonitor;
     Application application;
 
-    public RunnerManager(Context context, Callback callback) {
+    public RunnerManager(Context context, Callback callback) throws DataKitException {
         this.context = context;
         runnerMonitor=new RunnerMonitor(context, callback);
     }
@@ -24,7 +25,7 @@ public class RunnerManager {
         this.application=application;
     }
 
-    public void start(EMAType emaType, String status, String type) {
+    public void start(EMAType emaType, String status, String type) throws DataKitException {
         Log.d(TAG, "start()...status=" + status + " filename=" + application.getId());
             runnerMonitor.start(emaType, status, application, type);
     }

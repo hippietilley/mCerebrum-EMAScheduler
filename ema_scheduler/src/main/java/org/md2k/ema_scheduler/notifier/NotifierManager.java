@@ -10,6 +10,7 @@ import com.google.gson.JsonParser;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -47,13 +48,17 @@ public class NotifierManager {
         @Override
         public void run() {
             Log.d(TAG, "runnableNotify...");
-            logNotify(LogInfo.STATUS_NOTIFICATION_NOTIFYING, "notifying..." + String.valueOf(notifyNo + 1));
-            NotificationRequest notificationRequestSelected[] = findNotification(notifications[notifyNo].getTypes());
-            insertDataToDataKit(notificationRequestSelected);
-            Log.d(TAG, "notifications length=" + notifications.length + " now=" + notifyNo);
-            notifyNo++;
-            if (notifyNo < notifications.length)
-                handler.postDelayed(this, (notifications[notifyNo].getTime() - notifications[notifyNo - 1].getTime()));
+            try {
+                logNotify(LogInfo.STATUS_NOTIFICATION_NOTIFYING, "notifying..." + String.valueOf(notifyNo + 1));
+                NotificationRequest notificationRequestSelected[] = findNotification(notifications[notifyNo].getTypes());
+                insertDataToDataKit(notificationRequestSelected);
+                Log.d(TAG, "notifications length=" + notifications.length + " now=" + notifyNo);
+                notifyNo++;
+                if (notifyNo < notifications.length)
+                    handler.postDelayed(this, (notifications[notifyNo].getTime() - notifications[notifyNo - 1].getTime()));
+            } catch (DataKitException e) {
+                e.printStackTrace();
+            }
         }
     };
     Runnable runnableSubscribe = new Runnable() {
@@ -61,17 +66,21 @@ public class NotifierManager {
         public void run() {
             Log.d(TAG, "runnableSubscribe...run()");
             DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.NOTIFICATION_ACKNOWLEDGE);
-            dataSourceClientAcknowledges = DataKitAPI.getInstance(context).find(dataSourceBuilder);
-            Log.d(TAG, "DataSourceClients...size=" + dataSourceClientAcknowledges.size());
-            if (dataSourceClientAcknowledges.size() == 0) {
-                handlerSubscribe.postDelayed(this, 1000);
-            } else {
-                subscribeNotificationAcknowledge();
+            try {
+                dataSourceClientAcknowledges = DataKitAPI.getInstance(context).find(dataSourceBuilder);
+                Log.d(TAG, "DataSourceClients...size=" + dataSourceClientAcknowledges.size());
+                if (dataSourceClientAcknowledges.size() == 0) {
+                    handlerSubscribe.postDelayed(this, 1000);
+                } else {
+                    subscribeNotificationAcknowledge();
+                }
+            } catch (DataKitException e) {
+                e.printStackTrace();
             }
         }
     };
 
-    public NotifierManager(Context context) {
+    public NotifierManager(Context context) throws DataKitException {
         Log.d(TAG, "NotifierManager()...");
         this.context = context;
         Log.d(TAG, "datakit register ... before register()");
@@ -92,7 +101,7 @@ public class NotifierManager {
         handlerSubscribe.post(runnableSubscribe);
     }
 
-    void subscribeNotificationAcknowledge() {
+    void subscribeNotificationAcknowledge() throws DataKitException {
         Log.d(TAG, "subscribeNotificationAcknowledge...");
         for (int i = 0; i < dataSourceClientAcknowledges.size(); i++) {
             DataKitAPI.getInstance(context).subscribe(dataSourceClientAcknowledges.get(i), new OnReceiveListener() {
@@ -101,33 +110,39 @@ public class NotifierManager {
                     Thread t = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataType;
-                            Gson gson = new Gson();
-                            NotificationAcknowledge notificationAcknowledge = gson.fromJson(dataTypeJSONObject.getSample().toString(), NotificationAcknowledge.class);
-                            Log.d(TAG, "notification_acknowledge = " + notificationAcknowledge.getStatus());
-                            stop();
-                            switch (notificationAcknowledge.getStatus()) {
+                            try {
 
-                                case NotificationAcknowledge.DELAY:
-                                    notifyNo = 0;
-                                    long delay = notificationAcknowledge.getNotificationRequest().getResponse_option().getDelay_time();
-                                    delayEnable = false;
-                                    Log.d(TAG, "delay = " + delay);
-                                    logNotificationResponse(LogInfo.STATUS_NOTIFICATION_RESPONSE_DELAY, "User select DELAY: " + String.valueOf(delay/(1000*60))+" Minute");
-                                    handler.postDelayed(runnableNotify, delay);
-                                    break;
-                                case NotificationAcknowledge.OK:
-                                case NotificationAcknowledge.CANCEL:
-                                case NotificationAcknowledge.DELAY_CANCEL:
-                                    logNotificationResponse(notificationAcknowledge.getStatus(), "User select "+notificationAcknowledge.getStatus());
-                                    callbackDelivery.onResponse(notificationAcknowledge.getStatus());
-                                    clear();
-                                    break;
-                                case NotificationAcknowledge.TIMEOUT:
-                                    logNotificationResponse(notificationAcknowledge.getStatus(), "notification: "+notificationAcknowledge.getStatus());
-                                    callbackDelivery.onResponse(notificationAcknowledge.getStatus());
-                                    clear();
-                                    break;
+                                DataTypeJSONObject dataTypeJSONObject = (DataTypeJSONObject) dataType;
+                                Gson gson = new Gson();
+                                NotificationAcknowledge notificationAcknowledge = gson.fromJson(dataTypeJSONObject.getSample().toString(), NotificationAcknowledge.class);
+                                Log.d(TAG, "notification_acknowledge = " + notificationAcknowledge.getStatus());
+                                stop();
+                                switch (notificationAcknowledge.getStatus()) {
+
+                                    case NotificationAcknowledge.DELAY:
+                                        notifyNo = 0;
+                                        long delay = notificationAcknowledge.getNotificationRequest().getResponse_option().getDelay_time();
+                                        delayEnable = false;
+                                        Log.d(TAG, "delay = " + delay);
+                                        logNotificationResponse(LogInfo.STATUS_NOTIFICATION_RESPONSE_DELAY, "User select DELAY: " + String.valueOf(delay / (1000 * 60)) + " Minute");
+                                        handler.postDelayed(runnableNotify, delay);
+                                        break;
+                                    case NotificationAcknowledge.OK:
+                                    case NotificationAcknowledge.CANCEL:
+                                    case NotificationAcknowledge.DELAY_CANCEL:
+                                        logNotificationResponse(notificationAcknowledge.getStatus(), "User select " + notificationAcknowledge.getStatus());
+                                        callbackDelivery.onResponse(notificationAcknowledge.getStatus());
+                                        clear();
+                                        break;
+                                    case NotificationAcknowledge.TIMEOUT:
+                                        logNotificationResponse(notificationAcknowledge.getStatus(), "notification: " + notificationAcknowledge.getStatus());
+                                        callbackDelivery.onResponse(notificationAcknowledge.getStatus());
+                                        clear();
+                                        break;
+                                }
+
+                            } catch (DataKitException e) {
+                                e.printStackTrace();
                             }
                         }
                     });
@@ -147,7 +162,7 @@ public class NotifierManager {
                     DataKitAPI.getInstance(context).unsubscribe(dataSourceClientAcknowledges.get(i));
             dataSourceClientAcknowledges = null;
             Log.d(TAG, "...clear()");
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
@@ -161,7 +176,7 @@ public class NotifierManager {
         handler.postDelayed(runnableNotify, notifications[notifyNo].getTime());
     }
 
-    private void insertDataToDataKit(NotificationRequest[] notificationRequests) {
+    private void insertDataToDataKit(NotificationRequest[] notificationRequests) throws DataKitException {
         Log.d(TAG, "insertDataToDataKit()...");
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
         for (NotificationRequest notificationRequest : notificationRequests) {
@@ -203,7 +218,7 @@ public class NotifierManager {
 
     }
 
-    protected void logNotify(String status, String message) {
+    protected void logNotify(String status, String message) throws DataKitException {
         LogInfo logInfo = new LogInfo();
         logInfo.setOperation(LogInfo.OP_NOTIFICATION);
         logInfo.setId(emaType.getId());
@@ -214,7 +229,7 @@ public class NotifierManager {
         LoggerManager.getInstance(context).insert(logInfo);
     }
 
-    protected void logNotificationResponse(String status, String notificationResult) {
+    protected void logNotificationResponse(String status, String notificationResult) throws DataKitException {
         LogInfo logInfo = new LogInfo();
         logInfo.setOperation(LogInfo.OP_NOTIFICATION_RESPONSE);
         logInfo.setId(emaType.getId());

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -14,6 +15,7 @@ import com.google.gson.JsonParser;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -22,6 +24,7 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.ema_scheduler.configuration.Application;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.delivery.Callback;
@@ -65,13 +68,17 @@ public class RunnerMonitor {
     Runnable runnableWaitThenSave=new Runnable() {
         @Override
         public void run() {
-            saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
+            try {
+                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+            }
         }
     };
     private MyBroadcastReceiver myReceiver;
     boolean isStart=false;
 
-    public RunnerMonitor(Context context, Callback callback) {
+    public RunnerMonitor(Context context, Callback callback) throws DataKitException {
         this.context = context;
         this.callback=callback;
 
@@ -82,7 +89,7 @@ public class RunnerMonitor {
         dataSourceClient = DataKitAPI.getInstance(context).register(dataSourceBuilder);
     }
 
-    public void start(EMAType emaType, String status, Application application, String type) {
+    public void start(EMAType emaType, String status, Application application, String type) throws DataKitException {
         isStart=true;
         context.registerReceiver(myReceiver, intentFilter);
         this.type = type;
@@ -123,7 +130,7 @@ public class RunnerMonitor {
                 break;
         }
     }
-    protected void log(String status, String message){
+    protected void log(String status, String message) throws DataKitException {
         if(type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_RUN);
@@ -164,14 +171,14 @@ public class RunnerMonitor {
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
         return dataSourceBuilder;
     }
-    void showIncentive(){
+    void showIncentive() throws DataKitException {
         if(!ema.status.equals((LogInfo.STATUS_RUN_COMPLETED))) return;
         if(emaType.getIncentive_rules()==null) return;
         IncentiveManager incentiveManager=new IncentiveManager(context, emaType);
         incentiveManager.start();
     }
 
-    void saveToDataKit() {
+    void saveToDataKit() throws DataKitException {
         showIncentive();
         Gson gson = new Gson();
         String json = gson.toJson(ema);
@@ -185,23 +192,27 @@ public class RunnerMonitor {
     public class MyBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String type = intent.getStringExtra("TYPE");
-            if (type.equals("RESULT")) {
-                String answer = intent.getStringExtra("ANSWER");
-                String status = intent.getStringExtra("STATUS");
-                JsonParser parser = new JsonParser();
-                JsonElement tradeElement = parser.parse(answer);
-                JsonArray question_answer = tradeElement.getAsJsonArray();
-                handler.removeCallbacks(runnableWaitThenSave);
-                saveData(question_answer, status);
-            } else if (type.equals("STATUS_MESSAGE")) {
-                lastResponseTime = intent.getLongExtra("TIMESTAMP", -1);
-                message = intent.getStringExtra("MESSAGE");
-                Log.d(TAG, "data received... lastResponseTime=" + lastResponseTime + " message=" + message);
+            try {
+                String type = intent.getStringExtra("TYPE");
+                if (type.equals("RESULT")) {
+                    String answer = intent.getStringExtra("ANSWER");
+                    String status = intent.getStringExtra("STATUS");
+                    JsonParser parser = new JsonParser();
+                    JsonElement tradeElement = parser.parse(answer);
+                    JsonArray question_answer = tradeElement.getAsJsonArray();
+                    handler.removeCallbacks(runnableWaitThenSave);
+                    saveData(question_answer, status);
+                } else if (type.equals("STATUS_MESSAGE")) {
+                    lastResponseTime = intent.getLongExtra("TIMESTAMP", -1);
+                    message = intent.getStringExtra("MESSAGE");
+                    Log.d(TAG, "data received... lastResponseTime=" + lastResponseTime + " message=" + message);
+                }
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
             }
         }
     }
-    public void saveData(JsonArray answer, String status){
+    public void saveData(JsonArray answer, String status) throws DataKitException {
         ema.end_timestamp = DateTime.getDateTime();
         ema.question_answers = answer;
         if(status==null) ema.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;

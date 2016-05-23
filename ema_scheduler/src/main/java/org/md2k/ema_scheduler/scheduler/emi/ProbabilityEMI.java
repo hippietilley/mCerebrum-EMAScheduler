@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.scheduler.emi;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.logger.EMIInfo;
 
@@ -78,7 +79,7 @@ public class ProbabilityEMI {
 
     }
 
-    public boolean isTrigger() {
+    public boolean isTrigger() throws DataKitException {
         getProbability();
         Random generator = new Random();
         double number = generator.nextDouble();

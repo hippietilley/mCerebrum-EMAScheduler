@@ -6,6 +6,7 @@ import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.datatype.DataTypeLong;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -33,7 +34,7 @@ public class DataQualityManager extends Condition {
         super(context);
     }
 
-    public boolean isValid(ConfigCondition configCondition) {
+    public boolean isValid(ConfigCondition configCondition) throws DataKitException {
         if (Constants.DEBUG) return true;
         long lastXTimeStamp = getLastXTimeStamp(configCondition);
         if (lastXTimeStamp == -1) return false;
@@ -50,7 +51,7 @@ public class DataQualityManager extends Condition {
         }
     }
 
-    public double getDataQuality(DataSourceBuilder dataSourceBuilder, long lastXTimeStamp) {
+    public double getDataQuality(DataSourceBuilder dataSourceBuilder, long lastXTimeStamp) throws DataKitException {
         long curTime = DateTime.getDateTime();
         int goodQuality = 0;
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
@@ -67,7 +68,7 @@ public class DataQualityManager extends Condition {
 
     }
 
-    long getLastXTimeStamp(ConfigCondition configCondition) {
+    long getLastXTimeStamp(ConfigCondition configCondition) throws DataKitException {
         long lastXTimeStamp = -1;
         if (configCondition.getValues().get(0).equals(DAY_START)) {
             lastXTimeStamp = getDay(DataSourceType.DAY_START);
@@ -84,7 +85,7 @@ public class DataQualityManager extends Condition {
         return logInfo.getTimestamp();
     }
 
-    long getDay(String dataSourceType) {
+    long getDay(String dataSourceType) throws DataKitException {
         long day = -1;
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(dataSourceType);

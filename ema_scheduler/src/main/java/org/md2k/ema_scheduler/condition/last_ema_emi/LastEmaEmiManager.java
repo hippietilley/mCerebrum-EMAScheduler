@@ -2,6 +2,7 @@ package org.md2k.ema_scheduler.condition.last_ema_emi;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
@@ -17,7 +18,7 @@ public class LastEmaEmiManager extends Condition {
         super(context);
     }
 
-    public boolean isValid(ConfigCondition configCondition) {
+    public boolean isValid(ConfigCondition configCondition) throws DataKitException {
 //        if(Constants.DEBUG) return true;
 
         LoggerManager loggerManager= LoggerManager.getInstance(context);

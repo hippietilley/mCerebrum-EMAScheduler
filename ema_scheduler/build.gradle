@@ -1,3 +1,6 @@
+version = '0.2.0'
+apply from: 'versioning.gradle'
+
 buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }

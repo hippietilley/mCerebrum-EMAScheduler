@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -27,7 +28,7 @@ public class PrivacyManager extends Condition{
     public PrivacyManager(Context context){
         super(context);
     }
-    public boolean isValid(ConfigCondition configCondition){
+    public boolean isValid(ConfigCondition configCondition) throws DataKitException {
 //        if(true) return true;
         Log.d(TAG,"isValid()...");
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
@@ -55,7 +56,7 @@ public class PrivacyManager extends Condition{
                 log(configCondition, "true: privacytime (less than) currenttime");
                 return true;
             }
-            for(int i=0;i<=privacyData.getPrivacyTypes().size();i++){
+            for(int i=0;i<privacyData.getPrivacyTypes().size();i++){
                 if(privacyData.getPrivacyTypes().get(i).getId().equals("ema_intervention")) {
                     Log.d(TAG,"ema privacy enabled.");
                     log(configCondition, "false: ema privacy active");

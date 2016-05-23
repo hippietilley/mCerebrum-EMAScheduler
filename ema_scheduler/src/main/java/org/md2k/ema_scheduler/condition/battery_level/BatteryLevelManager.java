@@ -5,6 +5,7 @@ import android.content.Context;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -22,7 +23,7 @@ public class BatteryLevelManager extends Condition {
         super(context);
     }
 
-    public boolean isValid(ConfigCondition configCondition) {
+    public boolean isValid(ConfigCondition configCondition) throws DataKitException {
         if(Constants.DEBUG) return true;
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(0));

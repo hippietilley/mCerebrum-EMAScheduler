@@ -1,15 +1,19 @@
 package org.md2k.ema_scheduler.day;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
+import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.ema_scheduler.scheduler.SchedulerManager;
 import org.md2k.utilities.Report.Log;
@@ -28,44 +32,50 @@ public class DayManager {
     DataSourceClient dataSourceClientDayEnd;
     SchedulerManager schedulerManager;
     Handler handler;
-    public DayManager(Context context) {
+
+    public DayManager(Context context) throws DataKitException {
         Log.d(TAG, "DayManager()...");
         this.context = context;
-        schedulerManager=new SchedulerManager(context);
-        handler=new Handler();
+        schedulerManager = new SchedulerManager(context);
+        handler = new Handler();
     }
 
-    public void start(){
+    public void start() {
         Log.d(TAG, "start()...");
         dataKitAPI = DataKitAPI.getInstance(context);
         handler.post(runnableDay);
     }
 
-    public void stop(){
+    public void stop() {
         Log.d(TAG, "stop()...");
         handler.removeCallbacks(runnableDay);
         schedulerManager.stop();
     }
 
-    Runnable runnableDay =new Runnable() {
+    Runnable runnableDay = new Runnable() {
         @Override
         public void run() {
-            ArrayList<DataSourceClient> dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
-            Log.d(TAG, "runnableListenDayStart()...dataSourceClients.size()="+dataSourceClients.size());
-            if(dataSourceClients.size()==0)
-                handler.postDelayed(runnableDay,1000);
-            else{
-                readDayStartFromDataKit();
-                readDayEndFromDataKit();
-                subscribeDayStart();
-                subscribeDayEnd();
-                LoggerManager.getInstance(context).reset(dayStartTime);
-                schedulerManager.start(dayStartTime, dayEndTime);
+            ArrayList<DataSourceClient> dataSourceClients = null;
+            try {
+                dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
+                Log.d(TAG, "runnableListenDayStart()...dataSourceClients.size()=" + dataSourceClients.size());
+                if (dataSourceClients.size() == 0)
+                    handler.postDelayed(runnableDay, 1000);
+                else {
+                    readDayStartFromDataKit();
+                    readDayEndFromDataKit();
+                    subscribeDayStart();
+                    subscribeDayEnd();
+                    LoggerManager.getInstance(context).reset(dayStartTime);
+                    schedulerManager.start(dayStartTime, dayEndTime);
+                }
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
             }
         }
     };
 
-    public void subscribeDayStart() {
+    public void subscribeDayStart() throws DataKitException {
         Log.d(TAG, "subscribeDayStart()...");
         dataKitAPI.subscribe(dataSourceClientDayStart, new OnReceiveListener() {
             @Override
@@ -76,8 +86,13 @@ public class DayManager {
                 Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        LoggerManager.getInstance(context).reset(dayStartTime);
-                        schedulerManager.setDayStartTimestamp(dayStartTime);
+                        try {
+                            LoggerManager.getInstance(context).reset(dayStartTime);
+                            schedulerManager.setDayStartTimestamp(dayStartTime);
+                        } catch (DataKitException e) {
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+
+                        }
                     }
                 });
                 t.start();
@@ -85,7 +100,7 @@ public class DayManager {
         });
     }
 
-    public void subscribeDayEnd() {
+    public void subscribeDayEnd() throws DataKitException {
         Log.d(TAG, "subscribeDayEnd()...");
         dataKitAPI.subscribe(dataSourceClientDayEnd, new OnReceiveListener() {
             @Override
@@ -96,7 +111,12 @@ public class DayManager {
                 Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        schedulerManager.setDayEndTimestamp(dayEndTime);
+                        try {
+                            schedulerManager.setDayEndTimestamp(dayEndTime);
+                        } catch (DataKitException e) {
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+
+                        }
                     }
                 });
                 t.start();
@@ -104,8 +124,8 @@ public class DayManager {
         });
     }
 
-    private void readDayStartFromDataKit() {
-        Log.d(TAG,"readDayStartFromDataKit()...");
+    private void readDayStartFromDataKit() throws DataKitException {
+        Log.d(TAG, "readDayStartFromDataKit()...");
         ArrayList<DataSourceClient> dataSourceClients;
         dayStartTime = -1;
         dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
@@ -121,8 +141,8 @@ public class DayManager {
         }
     }
 
-    private void readDayEndFromDataKit() {
-        Log.d(TAG,"readDayEndFromDataKit()...");
+    private void readDayEndFromDataKit() throws DataKitException {
+        Log.d(TAG, "readDayEndFromDataKit()...");
         dayEndTime = -1;
         ArrayList<DataSourceClient> dataSourceClients;
         dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_END));
@@ -133,7 +153,7 @@ public class DayManager {
             if (dataTypes.size() != 0) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                 dayEndTime = dataTypeLong.getSample();
-                Log.d(TAG,"readDayEndFromDataKit()...dayEndTime="+dayEndTime);
+                Log.d(TAG, "readDayEndFromDataKit()...dayEndTime=" + dayEndTime);
             }
         }
     }

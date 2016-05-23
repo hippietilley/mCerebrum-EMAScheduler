@@ -10,6 +10,7 @@ import com.google.gson.JsonParser;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -35,13 +36,13 @@ public class IncentiveManager {
     EMAType emaType;
     protected ConditionManager conditionManager;
 
-    public IncentiveManager(Context context, EMAType emaType) {
+    public IncentiveManager(Context context, EMAType emaType) throws DataKitException {
         this.context = context;
         this.emaType=emaType;
         conditionManager = ConditionManager.getInstance(context);
         register();
     }
-    public void start(){
+    public void start() throws DataKitException {
         if(emaType.getIncentive_rules()==null) return;
         for(int i=0;i<emaType.getIncentive_rules().length;i++){
             if (conditionManager.isValid(emaType.getIncentive_rules()[i].getConditions(), emaType.getType(), emaType.getId())) {
@@ -51,7 +52,7 @@ public class IncentiveManager {
             }
         }
     }
-    private void show(IncentiveRule incentiveRule){
+    private void show(IncentiveRule incentiveRule) throws DataKitException {
         Intent intent = new Intent(context, ActivityIncentive.class);
         intent.putExtra("messages",incentiveRule.getMessages());
         intent.putExtra("total_incentive",(getLastTotalIncentive()+incentiveRule.getIncentive()));
@@ -59,7 +60,7 @@ public class IncentiveManager {
         context.startActivity(intent);
     }
 
-    public double getLastTotalIncentive() {
+    public double getLastTotalIncentive() throws DataKitException {
         Gson gson = new Gson();
         ArrayList<DataType> dataTypes = DataKitAPI.getInstance(context).query(dataSourceClient, 1);
         if (dataTypes.size() == 0) return 0;
@@ -68,7 +69,7 @@ public class IncentiveManager {
         return incentive.getTotalIncentive();
     }
 
-    public void saveIncentiveToDataKit(EMAType emaType, IncentiveRule incentiveRule) {
+    public void saveIncentiveToDataKit(EMAType emaType, IncentiveRule incentiveRule) throws DataKitException {
         Incentive incentive=new Incentive();
         incentive.emaId=emaType.getId();
         incentive.emaType=emaType.getType();
@@ -80,7 +81,7 @@ public class IncentiveManager {
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
     }
-    private void register() {
+    private void register() throws DataKitException {
         dataSourceClient = DataKitAPI.getInstance(context).register(createDataSourceBuilderLogger());
     }
     DataSourceBuilder createDataSourceBuilderLogger() {

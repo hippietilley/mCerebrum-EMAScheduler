@@ -1,6 +1,8 @@
 package org.md2k.ema_scheduler.logger;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -9,6 +11,7 @@ import com.google.gson.JsonParser;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeJSONObject;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -17,6 +20,7 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -34,7 +38,7 @@ public class LoggerManager {
     DataSourceClient dataSourceClientLogger;
     ArrayList<LogInfo> logInfos;
 
-    private LoggerManager(Context context) {
+    private LoggerManager(Context context) throws DataKitException {
         Log.d(TAG,"LoggerManager()...");
         this.context = context;
         dataKitAPI = DataKitAPI.getInstance(context);
@@ -46,27 +50,31 @@ public class LoggerManager {
     public static LoggerManager getInstance(Context context) {
         Log.d(TAG,"getInstance()...instance="+instance);
         if (instance == null)
-            instance = new LoggerManager(context);
+            try {
+                instance = new LoggerManager(context);
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+            }
         return instance;
     }
-    private void registerLogInfo() {
+    private void registerLogInfo() throws DataKitException {
         dataSourceClientLogger = dataKitAPI.register(dataSourceBuilderLogger);
     }
     public void clearLog(){
         logInfos.clear();
     }
-    public void reset(long dayStartTime){
+    public void reset(long dayStartTime) throws DataKitException {
         readLogInfosFromDataKit(dayStartTime);
     }
 
-    public void insert(LogInfo logInfo){
+    public void insert(LogInfo logInfo) throws DataKitException {
         Gson gson=new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(logInfo)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         logInfos.add(logInfo);
         dataKitAPI.insert(dataSourceClientLogger, dataTypeJSONObject);
     }
-    private void readLogInfosFromDataKit(long startTimestamp) {
+    private void readLogInfosFromDataKit(long startTimestamp) throws DataKitException {
         Log.d(TAG,"readLogInfosFromDataKit...");
         long endTimestamp = DateTime.getDateTime();
         logInfos=new ArrayList<>();

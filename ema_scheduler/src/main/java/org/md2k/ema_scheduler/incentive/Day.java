@@ -5,6 +5,7 @@ import android.content.Context;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeLong;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
@@ -22,7 +23,7 @@ public class Day {
         this.context=context;
     }
 
-    public long readDayStartFromDataKit() {
+    public long readDayStartFromDataKit() throws DataKitException {
         long dayStartTime;
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         Log.d(TAG, "readDayStartFromDataKit()...");
@@ -40,7 +41,7 @@ public class Day {
         return dayStartTime;
     }
 
-    public long readDayEndFromDataKit() {
+    public long readDayEndFromDataKit() throws DataKitException {
         long dayEndTime=-1;
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         ArrayList<DataSourceClient> dataSourceClients;
