@@ -55,7 +55,7 @@ public class IncentiveManager {
     private void show(IncentiveRule incentiveRule) throws DataKitException {
         Intent intent = new Intent(context, ActivityIncentive.class);
         intent.putExtra("messages",incentiveRule.getMessages());
-        intent.putExtra("total_incentive",(getLastTotalIncentive()+incentiveRule.getIncentive()));
+        intent.putExtra("total_incentive",(getLastTotalIncentive()));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
