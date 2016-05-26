@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.google.gson.Gson;
+
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
+import org.md2k.datakitapi.datatype.DataTypeJSONObject;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnReceiveListener;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
@@ -17,6 +20,7 @@ import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.Event;
 
 import java.util.ArrayList;
 
@@ -85,11 +89,17 @@ public class SmokingEMAScheduler extends Scheduler {
         isRunning = false;
         DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
             @Override
-            public void onReceived(DataType dataType) {
+            public void onReceived(final DataType dataType) {
                 Thread t=new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
+                            DataTypeJSONObject dataTypeJSONObject1 = (DataTypeJSONObject) dataType;
+                            Gson gson1 = new Gson();
+                            Event event = gson1.fromJson(dataTypeJSONObject1.getSample().toString(), Event.class);
+                            if(!event.getEvent().equals(Event.SMOKING))
+                                return;
+
                             sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
                             conditionManager = ConditionManager.getInstance(context);
                             if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId())) {

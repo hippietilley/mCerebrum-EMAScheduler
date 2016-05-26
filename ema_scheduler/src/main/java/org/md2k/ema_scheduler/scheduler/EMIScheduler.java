@@ -24,6 +24,7 @@ import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.scheduler.emi.ProbabilityEMI;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.DayTypeInfo;
+import org.md2k.utilities.data_format.Event;
 
 import java.util.ArrayList;
 
@@ -35,6 +36,7 @@ public class EMIScheduler extends Scheduler {
     Handler handler;
     boolean isPreQuit;
     boolean isStress;
+    boolean isPreLapse;
     DataSourceClient dataSourceClient;
 
     public EMIScheduler(Context context, EMAType emaType) throws DataKitException {
@@ -42,6 +44,7 @@ public class EMIScheduler extends Scheduler {
         Log.d(TAG, "EMIScheduler()...");
         handler = new Handler();
         isPreQuit = true;
+        isPreLapse=true;
     }
 
     @Override
@@ -84,7 +87,26 @@ public class EMIScheduler extends Scheduler {
                 dayTypeInfo = gson.fromJson(dataTypeJSONObject.getSample().toString(), DayTypeInfo.class);
                 if (dayTypeInfo.getDay_type() == DayTypeInfo.PRE_QUIT_INT)
                     isPreQuit = true;
-                else isPreQuit = false;
+                else {
+                    isPreQuit = false;
+                    long startTime=dataTypeJSONObject.getDateTime();
+                    DataSourceBuilder dataSourceBuilder1 = new DataSourceBuilder().setType(DataSourceType.EVENT);
+                    ArrayList<DataSourceClient> dataSourceClientArrayList1 = dataKitAPI.find(dataSourceBuilder1);
+                    if (dataSourceClientArrayList1.size() != 0) {
+                        ArrayList<DataType> dataTypess = dataKitAPI.query(dataSourceClientArrayList1.get(0), startTime, DateTime.getDateTime());
+                        isPreLapse=true;
+                        for(int i=0;i<dataTypess.size();i++){
+                            DataTypeJSONObject dataTypeJSONObject1 = (DataTypeJSONObject) dataTypess.get(i);
+                            Gson gson1 = new Gson();
+                            Event event = gson1.fromJson(dataTypeJSONObject1.getSample().toString(), Event.class);
+                            if(event.getEvent().equals(Event.SMOKING)) {
+                                isPreLapse = false;
+                                break;
+                            }
+                        }
+                    }
+
+                }
             }
         }
     }
@@ -155,7 +177,8 @@ public class EMIScheduler extends Scheduler {
 
     void deliverIfProbability() throws DataKitException {
         readTypeOfDay();
-        ProbabilityEMI probabilityEMI = new ProbabilityEMI(context, dayStartTimestamp, isPreQuit, isStress, emaType.getType(), emaType.getId());
+        if(isPreQuit) return;
+        ProbabilityEMI probabilityEMI = new ProbabilityEMI(context, dayStartTimestamp, isPreLapse, isStress, emaType.getType(), emaType.getId());
         if (probabilityEMI.isTrigger())
             startDelivery();
     }

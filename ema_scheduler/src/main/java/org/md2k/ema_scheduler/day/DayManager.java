@@ -27,7 +27,6 @@ public class DayManager {
     private static final String TAG = DayManager.class.getSimpleName();
     Context context;
     long dayStartTime, dayEndTime;
-    DataKitAPI dataKitAPI;
     DataSourceClient dataSourceClientDayStart;
     DataSourceClient dataSourceClientDayEnd;
     SchedulerManager schedulerManager;
@@ -42,7 +41,6 @@ public class DayManager {
 
     public void start() {
         Log.d(TAG, "start()...");
-        dataKitAPI = DataKitAPI.getInstance(context);
         handler.post(runnableDay);
     }
 
@@ -57,7 +55,7 @@ public class DayManager {
         public void run() {
             ArrayList<DataSourceClient> dataSourceClients = null;
             try {
-                dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
+                dataSourceClients = DataKitAPI.getInstance(context).find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
                 Log.d(TAG, "runnableListenDayStart()...dataSourceClients.size()=" + dataSourceClients.size());
                 if (dataSourceClients.size() == 0)
                     handler.postDelayed(runnableDay, 1000);
@@ -77,7 +75,7 @@ public class DayManager {
 
     public void subscribeDayStart() throws DataKitException {
         Log.d(TAG, "subscribeDayStart()...");
-        dataKitAPI.subscribe(dataSourceClientDayStart, new OnReceiveListener() {
+        DataKitAPI.getInstance(context).subscribe(dataSourceClientDayStart, new OnReceiveListener() {
             @Override
             public void onReceived(DataType dataType) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
@@ -102,7 +100,7 @@ public class DayManager {
 
     public void subscribeDayEnd() throws DataKitException {
         Log.d(TAG, "subscribeDayEnd()...");
-        dataKitAPI.subscribe(dataSourceClientDayEnd, new OnReceiveListener() {
+        DataKitAPI.getInstance(context).subscribe(dataSourceClientDayEnd, new OnReceiveListener() {
             @Override
             public void onReceived(DataType dataType) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
@@ -128,11 +126,11 @@ public class DayManager {
         Log.d(TAG, "readDayStartFromDataKit()...");
         ArrayList<DataSourceClient> dataSourceClients;
         dayStartTime = -1;
-        dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
+        dataSourceClients = DataKitAPI.getInstance(context).find(new DataSourceBuilder().setType(DataSourceType.DAY_START));
         Log.d(TAG, "readDayStartFromDataKit()...find..dataSourceClient.size()=" + dataSourceClients.size());
         if (dataSourceClients.size() > 0) {
             dataSourceClientDayStart = dataSourceClients.get(0);
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayStart, 1);
+            ArrayList<DataType> dataTypes = DataKitAPI.getInstance(context).query(dataSourceClientDayStart, 1);
             if (dataTypes.size() != 0) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                 dayStartTime = dataTypeLong.getSample();
@@ -145,11 +143,11 @@ public class DayManager {
         Log.d(TAG, "readDayEndFromDataKit()...");
         dayEndTime = -1;
         ArrayList<DataSourceClient> dataSourceClients;
-        dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.DAY_END));
+        dataSourceClients = DataKitAPI.getInstance(context).find(new DataSourceBuilder().setType(DataSourceType.DAY_END));
         Log.d(TAG, "readDayEndFromDataKit()...find..dataSourceClient.size()=" + dataSourceClients.size());
         if (dataSourceClients.size() > 0) {
             dataSourceClientDayEnd = dataSourceClients.get(0);
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientDayEnd, 1);
+            ArrayList<DataType> dataTypes = DataKitAPI.getInstance(context).query(dataSourceClientDayEnd, 1);
             if (dataTypes.size() != 0) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataTypes.get(0);
                 dayEndTime = dataTypeLong.getSample();
