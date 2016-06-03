@@ -60,9 +60,6 @@ public class LoggerManager {
     private void registerLogInfo() throws DataKitException {
         dataSourceClientLogger = dataKitAPI.register(dataSourceBuilderLogger);
     }
-    public void clearLog(){
-        logInfos.clear();
-    }
     public void reset(long dayStartTime) throws DataKitException {
         readLogInfosFromDataKit(dayStartTime);
     }
@@ -77,6 +74,8 @@ public class LoggerManager {
     private void readLogInfosFromDataKit(long startTimestamp) throws DataKitException {
         Log.d(TAG,"readLogInfosFromDataKit...");
         long endTimestamp = DateTime.getDateTime();
+        if(endTimestamp-startTimestamp>5*60*60*1000)
+            startTimestamp=endTimestamp-5*60*60*1000;
         logInfos=new ArrayList<>();
         Gson gson=new Gson();
         ArrayList<DataType> dataTypes=dataKitAPI.query(dataSourceClientLogger, startTimestamp, endTimestamp);

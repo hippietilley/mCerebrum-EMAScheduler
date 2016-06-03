@@ -32,7 +32,7 @@ import org.md2k.ema_scheduler.incentive.IncentiveManager;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.NotificationAcknowledge;
+import org.md2k.utilities.data_format.NotificationResponse;
 
 /**
  * Created by monowar on 3/14/16.
@@ -101,8 +101,8 @@ public class RunnerMonitor {
         ema.name = application.getName();
         ema.trigger_type = type;
         switch (status) {
-            case NotificationAcknowledge.OK:
-            case NotificationAcknowledge.DELAY_CANCEL:
+            case NotificationResponse.OK:
+            case NotificationResponse.DELAY_CANCEL:
                 Intent intent = context.getPackageManager().getLaunchIntentForPackage(application.getPackage_name());
                 intent.setAction(application.getPackage_name());
                 intent.putExtra("file_name", application.getFile_name());
@@ -114,14 +114,14 @@ public class RunnerMonitor {
                 handler.postDelayed(runnableTimeOut, application.getTimeout());
                 log(LogInfo.STATUS_RUN_START, "EMA Starts");
                 break;
-            case NotificationAcknowledge.CANCEL:
+            case NotificationResponse.CANCEL:
                 ema.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;
                 ema.end_timestamp=DateTime.getDateTime();
                 log(LogInfo.STATUS_RUN_ABANDONED_BY_USER, "EMA abandoned by user at prompt");
                 saveToDataKit();
                 clear();
                 break;
-            case NotificationAcknowledge.TIMEOUT:
+            case NotificationResponse.TIMEOUT:
                 ema.status=LogInfo.STATUS_RUN_MISSED;
                 ema.end_timestamp=DateTime.getDateTime();
                 log(LogInfo.STATUS_RUN_MISSED, "EMA is timed out..at prompt..MISSED");

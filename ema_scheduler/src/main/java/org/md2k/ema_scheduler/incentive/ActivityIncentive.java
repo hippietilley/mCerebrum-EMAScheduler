@@ -34,7 +34,7 @@ public class ActivityIncentive extends AppCompatActivity {
             ((TextView)findViewById(R.id.textView_message_3)).setText(messages[2]+" "+String.format("%.2f",total_incentive));
         else
             ((TextView)findViewById(R.id.textView_message_3)).setText("");
-        handler.postDelayed(runnableClose, 10000);
+        handler.postDelayed(runnableClose, 60000);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }

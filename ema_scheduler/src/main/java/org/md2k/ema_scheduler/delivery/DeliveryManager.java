@@ -11,7 +11,7 @@ import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.ema_scheduler.notifier.NotifierManager;
 import org.md2k.ema_scheduler.runner.RunnerManager;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.NotificationAcknowledge;
+import org.md2k.utilities.data_format.NotificationResponse;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -77,10 +77,10 @@ public class DeliveryManager {
             public void onResponse(String response) throws DataKitException {
                 Log.d(TAG, "callback received...response=" + response);
                 switch (response) {
-                    case NotificationAcknowledge.OK:
-                    case NotificationAcknowledge.CANCEL:
-                    case NotificationAcknowledge.TIMEOUT:
-                    case NotificationAcknowledge.DELAY_CANCEL:
+                    case NotificationResponse.OK:
+                    case NotificationResponse.CANCEL:
+                    case NotificationResponse.TIMEOUT:
+                    case NotificationResponse.DELAY_CANCEL:
                         Log.d(TAG, "matched...runner=" + runnerManager + " response=" + response);
                         notifierManager.stop();
                         runnerManager.start(finalEmaType, response, type);
@@ -93,7 +93,7 @@ public class DeliveryManager {
         if(isNotifyRequired){
             notifierManager.start();
         }else{
-            runnerManager.start(emaType, NotificationAcknowledge.OK, type);
+            runnerManager.start(emaType, NotificationResponse.OK, type);
         }
         return true;
     }
