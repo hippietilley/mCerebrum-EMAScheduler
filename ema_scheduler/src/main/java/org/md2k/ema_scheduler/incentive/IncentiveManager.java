@@ -46,18 +46,10 @@ public class IncentiveManager {
         if(emaType.getIncentive_rules()==null) return;
         for(int i=0;i<emaType.getIncentive_rules().length;i++){
             if (conditionManager.isValid(emaType.getIncentive_rules()[i].getConditions(), emaType.getType(), emaType.getId())) {
-                saveIncentiveToDataKit(emaType, emaType.getIncentive_rules()[i]);
-                show(emaType.getIncentive_rules()[i]);
+                saveIncentiveToDataKitAndShow(emaType, emaType.getIncentive_rules()[i]);
                 break;
             }
         }
-    }
-    private void show(IncentiveRule incentiveRule) throws DataKitException {
-        Intent intent = new Intent(context, ActivityIncentive.class);
-        intent.putExtra("messages",incentiveRule.getMessages());
-        intent.putExtra("total_incentive",(getLastTotalIncentive()));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
     }
 
     public double getLastTotalIncentive() throws DataKitException {
@@ -69,7 +61,7 @@ public class IncentiveManager {
         return incentive.getTotalIncentive();
     }
 
-    public void saveIncentiveToDataKit(EMAType emaType, IncentiveRule incentiveRule) throws DataKitException {
+    public void saveIncentiveToDataKitAndShow(EMAType emaType, IncentiveRule incentiveRule) throws DataKitException {
         Incentive incentive=new Incentive();
         incentive.emaId=emaType.getId();
         incentive.emaType=emaType.getType();
@@ -80,6 +72,15 @@ public class IncentiveManager {
         JsonObject sample = new JsonParser().parse(gson.toJson(incentive)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
+
+
+        Intent intent = new Intent(context, ActivityIncentive.class);
+        intent.putExtra("messages",incentiveRule.getMessages());
+        intent.putExtra("total_incentive",incentive.totalIncentive);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+
+
     }
     private void register() throws DataKitException {
         dataSourceClient = DataKitAPI.getInstance(context).register(createDataSourceBuilderLogger());

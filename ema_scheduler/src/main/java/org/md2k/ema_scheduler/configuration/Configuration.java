@@ -6,7 +6,7 @@ import com.google.gson.reflect.TypeToken;
 
 import org.md2k.ema_scheduler.Constants;
 import org.md2k.utilities.FileManager;
-import org.md2k.utilities.data_format.NotificationRequest;
+import org.md2k.utilities.data_format.notification.NotificationRequests;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -42,7 +42,7 @@ import java.lang.reflect.Type;
  */
 public class Configuration{
     EMAType[] ema_types;
-    NotificationRequest[] notificationRequests;
+    NotificationRequests notification_option;
     ConfigCondition[] conditions;
     private static Configuration instance=null;
     public static Configuration getInstance(){
@@ -80,16 +80,14 @@ public class Configuration{
         BufferedReader br;
         String filepath= Constants.CONFIG_DIRECTORY+Constants.NOTIFICATION_FILENAME;
         if(!FileManager.isExist(filepath))
-            notificationRequests =null;
+            notification_option =null;
         else {
             try {
                 br = new BufferedReader(new InputStreamReader(new FileInputStream(filepath)));
                 Gson gson = new Gson();
-                Type collectionType = new TypeToken<NotificationRequest[]>() {
-                }.getType();
-                notificationRequests = gson.fromJson(br, collectionType);
+                notification_option = gson.fromJson(br, NotificationRequests.class);
             } catch (IOException e) {
-                notificationRequests = null;
+                notification_option = null;
             }
         }
 
@@ -122,8 +120,8 @@ public class Configuration{
         return null;
     }
 
-    public NotificationRequest[] getNotificationRequests() {
-        return notificationRequests;
+    public NotificationRequests getNotification_option() {
+        return notification_option;
     }
 
     public ConfigCondition[] getConditions() {

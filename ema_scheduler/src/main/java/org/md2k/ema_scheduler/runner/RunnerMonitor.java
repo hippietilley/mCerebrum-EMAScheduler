@@ -32,7 +32,7 @@ import org.md2k.ema_scheduler.incentive.IncentiveManager;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.NotificationResponse;
+import org.md2k.utilities.data_format.notification.NotificationResponse;
 
 /**
  * Created by monowar on 3/14/16.
@@ -60,12 +60,12 @@ public class RunnerMonitor {
                 handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
             else {
                 sendData();
-                handler.postDelayed(runnableWaitThenSave,3000);
+                handler.postDelayed(runnableWaitThenSave, 3000);
                 //clear();
             }
         }
     };
-    Runnable runnableWaitThenSave=new Runnable() {
+    Runnable runnableWaitThenSave = new Runnable() {
         @Override
         public void run() {
             try {
@@ -76,11 +76,11 @@ public class RunnerMonitor {
         }
     };
     private MyBroadcastReceiver myReceiver;
-    boolean isStart=false;
+    boolean isStart = false;
 
     public RunnerMonitor(Context context, Callback callback) throws DataKitException {
         this.context = context;
-        this.callback=callback;
+        this.callback = callback;
 
         myReceiver = new MyBroadcastReceiver();
         intentFilter = new IntentFilter("org.md2k.ema_scheduler.response");
@@ -90,11 +90,11 @@ public class RunnerMonitor {
     }
 
     public void start(EMAType emaType, String status, Application application, String type) throws DataKitException {
-        isStart=true;
+        isStart = true;
         context.registerReceiver(myReceiver, intentFilter);
         this.type = type;
         this.application = application;
-        this.emaType=emaType;
+        this.emaType = emaType;
         ema = new EMA();
         ema.start_timestamp = DateTime.getDateTime();
         ema.id = application.getId();
@@ -110,28 +110,29 @@ public class RunnerMonitor {
                 intent.putExtra("name", application.getName());
                 intent.putExtra("timeout", application.getTimeout());
                 context.startActivity(intent);
-                Log.d(TAG,"timeout="+application.getTimeout());
+                Log.d(TAG, "timeout=" + application.getTimeout());
                 handler.postDelayed(runnableTimeOut, application.getTimeout());
                 log(LogInfo.STATUS_RUN_START, "EMA Starts");
                 break;
             case NotificationResponse.CANCEL:
-                ema.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;
-                ema.end_timestamp=DateTime.getDateTime();
+                ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
+                ema.end_timestamp = DateTime.getDateTime();
                 log(LogInfo.STATUS_RUN_ABANDONED_BY_USER, "EMA abandoned by user at prompt");
                 saveToDataKit();
                 clear();
                 break;
             case NotificationResponse.TIMEOUT:
-                ema.status=LogInfo.STATUS_RUN_MISSED;
-                ema.end_timestamp=DateTime.getDateTime();
+                ema.status = LogInfo.STATUS_RUN_MISSED;
+                ema.end_timestamp = DateTime.getDateTime();
                 log(LogInfo.STATUS_RUN_MISSED, "EMA is timed out..at prompt..MISSED");
                 saveToDataKit();
                 clear();
                 break;
         }
     }
+
     protected void log(String status, String message) throws DataKitException {
-        if(type.equals("SYSTEM")) {
+        if (type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_RUN);
             logInfo.setId(emaType.getId());
@@ -153,13 +154,13 @@ public class RunnerMonitor {
 
     void clear() {
         Log.d(TAG, "clear()...");
-        if(isStart) {
+        if (isStart) {
             handler.removeCallbacks(runnableTimeOut);
             if (myReceiver != null)
                 context.unregisterReceiver(myReceiver);
         }
         Log.d(TAG, "...clear()");
-        isStart=false;
+        isStart = false;
 
     }
 
@@ -171,10 +172,11 @@ public class RunnerMonitor {
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
         return dataSourceBuilder;
     }
+
     void showIncentive() throws DataKitException {
-        if(!ema.status.equals((LogInfo.STATUS_RUN_COMPLETED))) return;
-        if(emaType.getIncentive_rules()==null) return;
-        IncentiveManager incentiveManager=new IncentiveManager(context, emaType);
+        if (!ema.status.equals((LogInfo.STATUS_RUN_COMPLETED))) return;
+        if (emaType.getIncentive_rules() == null) return;
+        IncentiveManager incentiveManager = new IncentiveManager(context, emaType);
         incentiveManager.start();
     }
 
@@ -212,12 +214,13 @@ public class RunnerMonitor {
             }
         }
     }
+
     public void saveData(JsonArray answer, String status) throws DataKitException {
         ema.end_timestamp = DateTime.getDateTime();
         ema.question_answers = answer;
-        if(status==null) ema.status=LogInfo.STATUS_RUN_ABANDONED_BY_USER;
+        if (status == null) ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
         else
-        ema.status = status;
+            ema.status = status;
         log(ema.status, ema.status);
         saveToDataKit();
         clear();

@@ -11,7 +11,7 @@ import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.ema_scheduler.notifier.NotifierManager;
 import org.md2k.ema_scheduler.runner.RunnerManager;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.NotificationResponse;
+import org.md2k.utilities.data_format.notification.NotificationResponse;
 
 import java.util.ArrayList;
 import java.util.Random;
