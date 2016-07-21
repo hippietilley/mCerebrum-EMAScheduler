@@ -121,7 +121,8 @@ public class RandomEMAScheduler extends Scheduler {
                     startDelivery();
                 schedule();
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+                Log.d(TAG,"DataKitException...schedule()");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
 
             }
         }
@@ -132,7 +133,8 @@ public class RandomEMAScheduler extends Scheduler {
             try {
                 schedule();
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+                Log.d(TAG,"DataKitException...schedule()..");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
     };

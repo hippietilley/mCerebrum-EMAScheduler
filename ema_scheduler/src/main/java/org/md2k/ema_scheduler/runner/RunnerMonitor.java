@@ -71,7 +71,8 @@ public class RunnerMonitor {
             try {
                 saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+                Log.d(TAG,"DataKitException...saveData");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
     };
@@ -210,7 +211,8 @@ public class RunnerMonitor {
                     Log.d(TAG, "data received... lastResponseTime=" + lastResponseTime + " message=" + message);
                 }
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+                Log.d(TAG,"DataKitException...savedata..");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
     }

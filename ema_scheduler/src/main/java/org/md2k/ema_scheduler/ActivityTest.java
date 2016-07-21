@@ -42,7 +42,7 @@ public class ActivityTest extends AppCompatActivity {
                 }
             }
         } catch (DataKitException e) {
-            LocalBroadcastManager.getInstance(ActivityTest.this).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+            LocalBroadcastManager.getInstance(ActivityTest.this).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
 
         }
     }
@@ -74,7 +74,7 @@ public class ActivityTest extends AppCompatActivity {
                         DeliveryManager deliveryManager = DeliveryManager.getInstance(ActivityTest.this);
                         deliveryManager.start(emaTypes[finalI], true, "TEST");
                     } catch (DataKitException e) {
-                        LocalBroadcastManager.getInstance(ActivityTest.this).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+                        LocalBroadcastManager.getInstance(ActivityTest.this).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
 
                     }
                 }

@@ -71,6 +71,7 @@ public class LoggerManager {
     public void insert(LogInfo logInfo) throws DataKitException {
         Gson gson=new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(logInfo)).getAsJsonObject();
+        Log.d(TAG,"log="+sample.toString());
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClientLogger, dataTypeJSONObject);
         switch (logInfo.getOperation()) {

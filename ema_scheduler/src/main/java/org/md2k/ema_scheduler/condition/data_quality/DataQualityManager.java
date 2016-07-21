@@ -12,7 +12,6 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.ema_scheduler.Constants;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 import org.md2k.ema_scheduler.logger.LogInfo;
@@ -28,14 +27,13 @@ public class DataQualityManager extends Condition {
     public static final String TAG = DataQualityManager.class.getSimpleName();
     public static final String DAY_START = "DAY_START";
     public static final String LAST_EMA = "LAST_EMA";
-    public static final int QUALITY_WINDOW = 5000;
+    public static final int QUALITY_WINDOW = 3000;
 
     public DataQualityManager(Context context) {
         super(context);
     }
 
     public boolean isValid(ConfigCondition configCondition) throws DataKitException {
-        if (Constants.DEBUG) return true;
         long lastXTimeStamp = getLastXTimeStamp(configCondition);
         if (lastXTimeStamp == -1) return false;
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(1));
@@ -50,6 +48,12 @@ public class DataQualityManager extends Condition {
             return false;
         }
     }
+    boolean isWearing(int value){
+        if(value==DATA_QUALITY.GOOD || value==DATA_QUALITY.BAND_LOOSE || value==DATA_QUALITY.NOISE)
+            return true;
+        return false;
+    }
+
 
     public double getDataQuality(DataSourceBuilder dataSourceBuilder, long lastXTimeStamp) throws DataKitException {
         long curTime = DateTime.getDateTime();
@@ -60,7 +64,7 @@ public class DataQualityManager extends Condition {
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), curTime - lastXTimeStamp, curTime);
             for (int i = 0; i < dataTypes.size(); i++) {
                 int curQuality = ((DataTypeInt) dataTypes.get(i)).getSample();
-                if (curQuality == DATA_QUALITY.GOOD)
+                if (isWearing(curQuality))
                     goodQuality++;
             }
         }

@@ -76,7 +76,8 @@ public class StressEMAScheduler extends Scheduler {
                 subscribeEvent();
             }
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+                Log.d(TAG,"DataKitException..subscribeEvent");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
     };
@@ -101,7 +102,8 @@ public class StressEMAScheduler extends Scheduler {
                                 startDelivery();
                             }
                         } catch (DataKitException e) {
-                            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+                            Log.d(TAG,"DataKitException...startDelivery");
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
                         }
                     }
                 });

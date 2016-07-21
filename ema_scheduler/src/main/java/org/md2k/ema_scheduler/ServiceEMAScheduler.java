@@ -48,6 +48,7 @@ import org.md2k.utilities.Report.Log;
 
 public class ServiceEMAScheduler extends Service {
     private static final String TAG = ServiceEMAScheduler.class.getSimpleName();
+    public static final String BROADCAST_MSG=ServiceEMAScheduler.class.getCanonicalName();
     DataKitAPI dataKitAPI;
     Configuration configuration;
     DayManager dayManager;
@@ -57,15 +58,17 @@ public class ServiceEMAScheduler extends Service {
         Log.d(TAG, "onCreate()");
         configuration = Configuration.getInstance();
         LoggerManager.clear();
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(ServiceEMAScheduler.class.getSimpleName()));
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(BROADCAST_MSG));
 
         if (configuration.getEma_types() == null) {
             Toast.makeText(ServiceEMAScheduler.this, "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
+            Log.d(TAG, "stopSelf()... EMA Configuration file not available...");
             stopSelf();
         } else {
             try {
                 connectDataKit();
             } catch (DataKitException e) {
+                Log.d(TAG, "stopSelf()... DataKitException...in connection");
                 stopSelf();
             }
         }
@@ -73,6 +76,7 @@ public class ServiceEMAScheduler extends Service {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "stopSelf()...received broadcastReceiver msg");
             stopSelf();
         }
     };
@@ -94,6 +98,7 @@ public class ServiceEMAScheduler extends Service {
                     dayManager = new DayManager(getApplicationContext());
                     dayManager.start();
                 } catch (DataKitException e) {
+                    Log.d(TAG, "stopSelf()... DataKitException ... dayManager ...error...");
                     stopSelf();
                 }
             }
@@ -102,6 +107,7 @@ public class ServiceEMAScheduler extends Service {
 
     @Override
     public void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         Log.d(TAG, "onDestroy()...");
         if (dayManager != null)
             dayManager.stop();
