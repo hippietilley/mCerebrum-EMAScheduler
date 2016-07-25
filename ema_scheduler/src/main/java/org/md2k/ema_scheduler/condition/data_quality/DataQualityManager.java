@@ -49,7 +49,7 @@ public class DataQualityManager extends Condition {
         }
     }
     boolean isWearing(int value){
-        if(value==DATA_QUALITY.GOOD || value==DATA_QUALITY.BAND_LOOSE || value==DATA_QUALITY.NOISE)
+        if (value == DATA_QUALITY.GOOD || value == DATA_QUALITY.NOISE)
             return true;
         return false;
     }
@@ -75,11 +75,11 @@ public class DataQualityManager extends Condition {
     long getLastXTimeStamp(ConfigCondition configCondition) throws DataKitException {
         long lastXTimeStamp = -1;
         if (configCondition.getValues().get(0).equals(DAY_START)) {
-            lastXTimeStamp = getDay(DataSourceType.DAY_START);
+            lastXTimeStamp = DateTime.getDateTime() - getDay(DataSourceType.DAY_START);
         } else if (configCondition.getValues().get(0).equals(LAST_EMA)) {
-            lastXTimeStamp=getLastEMA();
-            if(lastXTimeStamp==-1)
-                lastXTimeStamp=getDay(DataSourceType.DAY_START);
+            lastXTimeStamp = DateTime.getDateTime() - getLastEMA();
+            if (lastXTimeStamp < 0)
+                lastXTimeStamp = DateTime.getDateTime() - getDay(DataSourceType.DAY_START);
         } else lastXTimeStamp = Long.parseLong(configCondition.getValues().get(0));
         return lastXTimeStamp;
     }

@@ -49,10 +49,21 @@ public class RunnerMonitor {
     String type;
     Application application;
     EMA ema;
-    DataSourceClient dataSourceClient;
     EMAType emaType;
     Callback callback;
-
+    boolean isStart = false;
+    private MyBroadcastReceiver myReceiver;
+    Runnable runnableWaitThenSave = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
+            } catch (DataKitException e) {
+                Log.d(TAG, "DataKitException...saveData");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+            }
+        }
+    };
     Runnable runnableTimeOut = new Runnable() {
         @Override
         public void run() {
@@ -65,19 +76,6 @@ public class RunnerMonitor {
             }
         }
     };
-    Runnable runnableWaitThenSave = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
-            } catch (DataKitException e) {
-                Log.d(TAG,"DataKitException...saveData");
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
-            }
-        }
-    };
-    private MyBroadcastReceiver myReceiver;
-    boolean isStart = false;
 
     public RunnerMonitor(Context context, Callback callback) throws DataKitException {
         this.context = context;
@@ -86,8 +84,6 @@ public class RunnerMonitor {
         myReceiver = new MyBroadcastReceiver();
         intentFilter = new IntentFilter("org.md2k.ema_scheduler.response");
         handler = new Handler();
-        DataSourceBuilder dataSourceBuilder = createDataSourceBuilder();
-        dataSourceClient = DataKitAPI.getInstance(context).register(dataSourceBuilder);
     }
 
     public void start(EMAType emaType, String status, Application application, String type) throws DataKitException {
@@ -165,9 +161,9 @@ public class RunnerMonitor {
 
     }
 
-    DataSourceBuilder createDataSourceBuilder() {
+    DataSourceBuilder createDataSourceBuilder(String id) {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EMA).setPlatform(platform);
+        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EMA).setPlatform(platform).setId(id);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "EMA");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "EMA & EMI Question and answers");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeJSONObject.class.getName());
@@ -187,9 +183,22 @@ public class RunnerMonitor {
         String json = gson.toJson(ema);
         JsonObject sample = new JsonParser().parse(gson.toJson(ema)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        DataSourceClient dataSourceClient = DataKitAPI.getInstance(context).register(createDataSourceBuilder(ema.id));
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
         callback.onResponse(ema.status);
 //        Toast.makeText(this, "Information is Saved", Toast.LENGTH_SHORT).show();
+    }
+
+    public void saveData(JsonArray answer, String status) throws DataKitException {
+        ema.end_timestamp = DateTime.getDateTime();
+        ema.question_answers = answer;
+        if (status == null) ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
+        else
+            ema.status = status;
+        log(ema.status, ema.status);
+        saveToDataKit();
+        clear();
+
     }
 
     public class MyBroadcastReceiver extends BroadcastReceiver {
@@ -215,18 +224,6 @@ public class RunnerMonitor {
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
-    }
-
-    public void saveData(JsonArray answer, String status) throws DataKitException {
-        ema.end_timestamp = DateTime.getDateTime();
-        ema.question_answers = answer;
-        if (status == null) ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
-        else
-            ema.status = status;
-        log(ema.status, ema.status);
-        saveToDataKit();
-        clear();
-
     }
 
 }

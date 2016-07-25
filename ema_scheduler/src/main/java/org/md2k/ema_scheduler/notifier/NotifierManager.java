@@ -1,7 +1,9 @@
 package org.md2k.ema_scheduler.notifier;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -18,6 +20,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.configuration.Notification;
@@ -52,6 +55,60 @@ public class NotifierManager {
     long lastInsertTime = 0;
     EMAType emaType;
     NotificationRequests notificationRequestSelected;
+    Runnable runnableAck = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "runnableACK: lastInsertTime=" + lastInsertTime + " lastACKTime=" + lastAckTime + " i-a=" + (lastInsertTime - lastAckTime));
+            if (lastInsertTime > lastAckTime) {
+                try {
+                    insertDataToDataKit(notificationRequestSelected);
+                } catch (DataKitException e) {
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+                }
+                handlerAck.postDelayed(this, 5000);
+            }
+        }
+    };
+    Runnable runnableNotify = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "runnableNotify...");
+            try {
+                logNotify(LogInfo.STATUS_NOTIFICATION_NOTIFYING, "notifying..." + String.valueOf(notifyNo + 1));
+                notificationRequestSelected = findNotification(notifications[notifyNo].getTypes());
+                lastInsertTime = DateTime.getDateTime();
+                handlerAck.post(runnableAck);
+                Log.d(TAG, "notifications length=" + notifications.length + " now=" + notifyNo);
+                notifyNo++;
+                if (notifyNo < notifications.length)
+                    handler.postDelayed(this, (notifications[notifyNo].getTime() - notifications[notifyNo - 1].getTime()));
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+            }
+        }
+    };
+    Runnable runnableSubscribe = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "runnableSubscribe...run()");
+            Application application = new ApplicationBuilder().setId("org.md2k.notificationmanager").build();
+            DataSourceBuilder dataSourceBuilderA = new DataSourceBuilder().setType(DataSourceType.NOTIFICATION_ACKNOWLEDGE).setApplication(application);
+            DataSourceBuilder dataSourceBuilderR = new DataSourceBuilder().setType(DataSourceType.NOTIFICATION_RESPONSE).setApplication(application);
+            try {
+                dataSourceClientAcknowledges = DataKitAPI.getInstance(context).find(dataSourceBuilderA);
+                dataSourceClientResponses = DataKitAPI.getInstance(context).find(dataSourceBuilderR);
+                Log.d(TAG, "DataSourceClients...size=" + dataSourceClientAcknowledges.size());
+                if (dataSourceClientAcknowledges.size() == 0 || dataSourceClientResponses.size() == 0) {
+                    handlerSubscribe.postDelayed(this, 1000);
+                } else {
+                    subscribeNotificationResponse();
+                    subscribeNotificationAcknowledge();
+                }
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+            }
+        }
+    };
 
     public NotifierManager(Context context) throws DataKitException {
         Log.d(TAG, "NotifierManager()...");
@@ -74,61 +131,6 @@ public class NotifierManager {
         Log.d(TAG, "before runnableSubscribe..");
         handlerSubscribe.post(runnableSubscribe);
     }
-
-    Runnable runnableAck = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG, "runnableACK: lastInsertTime=" + lastInsertTime + " lastACKTime=" + lastAckTime + " i-a=" + (lastInsertTime - lastAckTime));
-            if (lastInsertTime > lastAckTime) {
-                try {
-                    insertDataToDataKit(notificationRequestSelected);
-                } catch (DataKitException e) {
-                    e.printStackTrace();
-                }
-                handlerAck.postDelayed(this, 5000);
-            }
-        }
-    };
-    Runnable runnableNotify = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG, "runnableNotify...");
-            try {
-                logNotify(LogInfo.STATUS_NOTIFICATION_NOTIFYING, "notifying..." + String.valueOf(notifyNo + 1));
-                notificationRequestSelected = findNotification(notifications[notifyNo].getTypes());
-                lastInsertTime = DateTime.getDateTime();
-                handlerAck.post(runnableAck);
-                Log.d(TAG, "notifications length=" + notifications.length + " now=" + notifyNo);
-                notifyNo++;
-                if (notifyNo < notifications.length)
-                    handler.postDelayed(this, (notifications[notifyNo].getTime() - notifications[notifyNo - 1].getTime()));
-            } catch (DataKitException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-    Runnable runnableSubscribe = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG, "runnableSubscribe...run()");
-            Application application = new ApplicationBuilder().setId("org.md2k.notificationmanager").build();
-            DataSourceBuilder dataSourceBuilderA = new DataSourceBuilder().setType(DataSourceType.NOTIFICATION_ACKNOWLEDGE).setApplication(application);
-            DataSourceBuilder dataSourceBuilderR = new DataSourceBuilder().setType(DataSourceType.NOTIFICATION_RESPONSE).setApplication(application);
-            try {
-                dataSourceClientAcknowledges = DataKitAPI.getInstance(context).find(dataSourceBuilderA);
-                dataSourceClientResponses = DataKitAPI.getInstance(context).find(dataSourceBuilderR);
-                Log.d(TAG, "DataSourceClients...size=" + dataSourceClientAcknowledges.size());
-                if (dataSourceClientAcknowledges.size() == 0 || dataSourceClientResponses.size() == 0) {
-                    handlerSubscribe.postDelayed(this, 1000);
-                } else {
-                    subscribeNotificationResponse();
-                    subscribeNotificationAcknowledge();
-                }
-            } catch (DataKitException e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
     void subscribeNotificationResponse() throws DataKitException {
         Log.d(TAG, "subscribeNotificationResponse...");
@@ -169,7 +171,7 @@ public class NotifierManager {
                                 }
 
                             } catch (DataKitException e) {
-                                e.printStackTrace();
+                                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
                             }
                         }
                     });

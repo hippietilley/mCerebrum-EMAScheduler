@@ -47,11 +47,18 @@ import org.md2k.utilities.Report.Log;
  */
 
 public class ServiceEMAScheduler extends Service {
+    public static final String BROADCAST_MSG = ServiceEMAScheduler.class.getSimpleName();
     private static final String TAG = ServiceEMAScheduler.class.getSimpleName();
-    public static final String BROADCAST_MSG=ServiceEMAScheduler.class.getCanonicalName();
     DataKitAPI dataKitAPI;
     Configuration configuration;
     DayManager dayManager;
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "stopSelf()...received broadcastReceiver msg");
+            stopSelf();
+        }
+    };
 
     public void onCreate() {
         super.onCreate();
@@ -73,13 +80,6 @@ public class ServiceEMAScheduler extends Service {
             }
         }
     }
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "stopSelf()...received broadcastReceiver msg");
-            stopSelf();
-        }
-    };
 
     private void connectDataKit() throws DataKitException {
         Log.d(TAG, "connectDataKit()...");

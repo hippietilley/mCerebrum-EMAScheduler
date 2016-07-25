@@ -38,6 +38,25 @@ public class EMIScheduler extends Scheduler {
     boolean isStress;
     boolean isPreLapse;
     DataSourceClient dataSourceClient;
+    Runnable runnableStressClassification = new Runnable() {
+        @Override
+        public void run() {
+            DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
+            ArrayList<DataSourceClient> dataSourceClients = null;
+            try {
+                dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.ORG_MD2K_CSTRESS_STRESS_EPISODE_CLASSIFICATION));
+                Log.d(TAG, "runnableListenDayStart()...dataSourceClients.size()=" + dataSourceClients.size());
+                if (dataSourceClients.size() == 0)
+                    handler.postDelayed(runnableStressClassification, 60000);
+                else {
+                    dataSourceClient = dataSourceClients.get(0);
+                    subscribeStress();
+                }
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+            }
+        }
+    };
 
     public EMIScheduler(Context context, EMAType emaType) throws DataKitException {
         super(context, emaType);
@@ -104,26 +123,6 @@ public class EMIScheduler extends Scheduler {
             }
         }
     }
-
-    Runnable runnableStressClassification = new Runnable() {
-        @Override
-        public void run() {
-            DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
-            ArrayList<DataSourceClient> dataSourceClients = null;
-            try {
-                dataSourceClients = dataKitAPI.find(new DataSourceBuilder().setType(DataSourceType.ORG_MD2K_CSTRESS_STRESS_EPISODE_CLASSIFICATION));
-                Log.d(TAG, "runnableListenDayStart()...dataSourceClients.size()=" + dataSourceClients.size());
-                if (dataSourceClients.size() == 0)
-                    handler.postDelayed(runnableStressClassification, 60000);
-                else {
-                    dataSourceClient = dataSourceClients.get(0);
-                    subscribeStress();
-                }
-            } catch (DataKitException e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
     public void prepareAndDeliver(DataType dataType) throws DataKitException {
         if (!isValidDay()) return;

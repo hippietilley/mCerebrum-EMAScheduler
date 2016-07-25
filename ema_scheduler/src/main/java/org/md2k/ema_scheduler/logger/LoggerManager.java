@@ -57,13 +57,20 @@ public class LoggerManager {
             try {
                 instance = new LoggerManager(context);
             } catch (DataKitException e) {
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.class.getSimpleName()));
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         return instance;
     }
+
+    public static void clear() {
+        Log.d(TAG, "clear()...");
+        instance = null;
+    }
+
     private void registerLogInfo() throws DataKitException {
         dataSourceClientLogger = dataKitAPI.register(dataSourceBuilderLogger);
     }
+
     public void reset(long dayStartTime) throws DataKitException {
         readLogInfoFromFile(dayStartTime);
     }
@@ -149,6 +156,7 @@ public class LoggerManager {
     public ArrayList<LogInfo> getLogInfos() {
         return logInfos;
     }
+
     public ArrayList<LogInfo> getLogInfos(String operation, String status, String type, String id){
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+")");
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
@@ -162,6 +170,7 @@ public class LoggerManager {
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+") size="+logInfosTemp.size());
         return logInfosTemp;
     }
+
     public LogInfo getLogInfoLast(String operation, String status, String type, String id) {
         LogInfo logInfo=null;
         Log.d(TAG,"getLogInfoLast("+operation+" "+type+" "+id+")");
@@ -175,6 +184,7 @@ public class LoggerManager {
         }
         return logInfo;
     }
+
     public ArrayList<LogInfo> getLogInfos(String operation, String status, String type, String id, long startTime, long endTime){
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+" "+startTime+" "+endTime+")");
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
@@ -189,10 +199,6 @@ public class LoggerManager {
         }
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+" "+startTime+" "+endTime+") size="+logInfosTemp.size());
         return logInfosTemp;
-    }
-    public static void clear(){
-        Log.d(TAG,"clear()...");
-        instance=null;
     }
 
 }
