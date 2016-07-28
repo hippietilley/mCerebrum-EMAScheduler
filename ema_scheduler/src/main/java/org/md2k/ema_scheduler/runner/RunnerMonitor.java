@@ -52,18 +52,6 @@ public class RunnerMonitor {
     EMAType emaType;
     Callback callback;
     boolean isStart = false;
-    private MyBroadcastReceiver myReceiver;
-    Runnable runnableWaitThenSave = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
-            } catch (DataKitException e) {
-                Log.d(TAG, "DataKitException...saveData");
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
-            }
-        }
-    };
     Runnable runnableTimeOut = new Runnable() {
         @Override
         public void run() {
@@ -73,6 +61,18 @@ public class RunnerMonitor {
                 sendData();
                 handler.postDelayed(runnableWaitThenSave, 3000);
                 //clear();
+            }
+        }
+    };
+    private MyBroadcastReceiver myReceiver;
+    Runnable runnableWaitThenSave = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
+            } catch (DataKitException e) {
+                Log.d(TAG, "DataKitException...saveData");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
     };
@@ -171,6 +171,7 @@ public class RunnerMonitor {
     }
 
     void showIncentive() throws DataKitException {
+        Log.d(TAG, "showIncentiveRules..ema_status=" + ema.status + " rules=" + emaType.getIncentive_rules());
         if (!ema.status.equals((LogInfo.STATUS_RUN_COMPLETED))) return;
         if (emaType.getIncentive_rules() == null) return;
         IncentiveManager incentiveManager = new IncentiveManager(context, emaType);
@@ -180,7 +181,6 @@ public class RunnerMonitor {
     void saveToDataKit() throws DataKitException {
         showIncentive();
         Gson gson = new Gson();
-        String json = gson.toJson(ema);
         JsonObject sample = new JsonParser().parse(gson.toJson(ema)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         DataSourceClient dataSourceClient = DataKitAPI.getInstance(context).register(createDataSourceBuilder(ema.id));

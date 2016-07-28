@@ -22,6 +22,7 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.configuration.IncentiveRule;
+import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,10 +32,10 @@ import java.util.HashMap;
  */
 public class IncentiveManager {
     private static final String TAG = IncentiveManager.class.getSimpleName();
+    protected ConditionManager conditionManager;
     Context context;
     DataSourceClient dataSourceClient;
     EMAType emaType;
-    protected ConditionManager conditionManager;
 
     public IncentiveManager(Context context, EMAType emaType) throws DataKitException {
         this.context = context;
@@ -43,6 +44,7 @@ public class IncentiveManager {
         register();
     }
     public void start() throws DataKitException {
+        Log.d(TAG, "incentiveManager...start()..");
         if(emaType.getIncentive_rules()==null) return;
         for(int i=0;i<emaType.getIncentive_rules().length;i++){
             if (conditionManager.isValid(emaType.getIncentive_rules()[i].getConditions(), emaType.getType(), emaType.getId())) {
