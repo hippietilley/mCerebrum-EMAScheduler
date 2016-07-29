@@ -1,5 +1,9 @@
 package org.md2k.ema_scheduler.logger;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Created by monowar on 3/14/16.
  */
@@ -35,6 +39,7 @@ public class LogInfo {
     LogSchedule logSchedule;
     EMIInfo emiInfo;
     String status;
+    String current_time;
 
     public String getType() {
         return type;
@@ -66,6 +71,19 @@ public class LogInfo {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+        this.current_time = formatTime(timestamp);
+    }
+
+    String formatTime(long timestamp) {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(timestamp);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss a");
+            Date currenTimeZone = calendar.getTime();
+            return sdf.format(currenTimeZone);
+        } catch (Exception e) {
+        }
+        return "";
     }
 
     public String getId() {
