@@ -5,6 +5,7 @@ import android.content.Context;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.delivery.DeliveryManager;
 import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ public class SchedulerManager {
     Context context;
     Configuration configuration;
     ArrayList<Scheduler> scheduler;
+    DeliveryManager deliveryManager;
+
     boolean isStarted;
 
     public SchedulerManager(Context context) throws DataKitException {
@@ -25,6 +28,7 @@ public class SchedulerManager {
         configuration = Configuration.getInstance();
         scheduler = new ArrayList<>();
         isStarted = false;
+        deliveryManager = new DeliveryManager(context);
         prepareScheduler();
     }
 
@@ -37,19 +41,19 @@ public class SchedulerManager {
             Log.d(TAG, "prepareScheduler()...emaType ID=" + configuration.getEma_types()[i].getId()+"....success");
             switch (configuration.getEma_types()[i].getId()) {
                 case EMAType.ID_RANDOM_EMA:
-                    scheduler.add(new RandomEMAScheduler(context, configuration.getEma_types()[i]));
+                    scheduler.add(new RandomEMAScheduler(context, configuration.getEma_types()[i], deliveryManager));
                     break;
                 case EMAType.ID_EMI:
-                    scheduler.add(new EMIScheduler(context, configuration.getEma_types()[i]));
+                    scheduler.add(new EMIScheduler(context, configuration.getEma_types()[i], deliveryManager));
                     break;
                 case EMAType.ID_END_OF_DAY_EMA:
-                    scheduler.add(new EndOfDayEMAScheduler(context, configuration.getEma_types()[i]));
+                    scheduler.add(new EndOfDayEMAScheduler(context, configuration.getEma_types()[i], deliveryManager));
                     break;
                 case EMAType.ID_SMOKING_EMA:
-                    scheduler.add(new SmokingEMAScheduler(context, configuration.getEma_types()[i]));
+                    scheduler.add(new SmokingEMAScheduler(context, configuration.getEma_types()[i], deliveryManager));
                     break;
                 case EMAType.ID_STRESS_EMA:
-                    scheduler.add(new StressEMAScheduler(context, configuration.getEma_types()[i]));
+                    scheduler.add(new StressEMAScheduler(context, configuration.getEma_types()[i], deliveryManager));
                     break;
                 default:
                     break;

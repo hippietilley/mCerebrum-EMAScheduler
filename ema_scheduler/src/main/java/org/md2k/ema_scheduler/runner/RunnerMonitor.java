@@ -41,7 +41,6 @@ public class RunnerMonitor {
     public static final long NO_RESPONSE_TIME = 35000;
 
     private static final String TAG = RunnerMonitor.class.getSimpleName();
-    IntentFilter intentFilter;
     Handler handler;
     Context context;
     long lastResponseTime;
@@ -52,18 +51,6 @@ public class RunnerMonitor {
     EMAType emaType;
     Callback callback;
     boolean isStart = false;
-    Runnable runnableTimeOut = new Runnable() {
-        @Override
-        public void run() {
-            if (DateTime.getDateTime() - lastResponseTime < NO_RESPONSE_TIME)
-                handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
-            else {
-                sendData();
-                handler.postDelayed(runnableWaitThenSave, 3000);
-                //clear();
-            }
-        }
-    };
     private MyBroadcastReceiver myReceiver;
     Runnable runnableWaitThenSave = new Runnable() {
         @Override
@@ -76,19 +63,29 @@ public class RunnerMonitor {
             }
         }
     };
-
+    Runnable runnableTimeOut = new Runnable() {
+        @Override
+        public void run() {
+            if (DateTime.getDateTime() - lastResponseTime < NO_RESPONSE_TIME)
+                handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
+            else {
+                sendData();
+                handler.postDelayed(runnableWaitThenSave, 3000);
+                //clear();
+            }
+        }
+    };
     public RunnerMonitor(Context context, Callback callback) throws DataKitException {
         this.context = context;
         this.callback = callback;
 
         myReceiver = new MyBroadcastReceiver();
-        intentFilter = new IntentFilter("org.md2k.ema_scheduler.response");
         handler = new Handler();
     }
 
     public void start(EMAType emaType, String status, Application application, String type) throws DataKitException {
         isStart = true;
-        context.registerReceiver(myReceiver, intentFilter);
+        context.registerReceiver(myReceiver, new IntentFilter("org.md2k.ema_scheduler.response"));
         this.type = type;
         this.application = application;
         this.emaType = emaType;
@@ -128,6 +125,18 @@ public class RunnerMonitor {
         }
     }
 
+    void clear() {
+        Log.d(TAG, "clear()...");
+        if (isStart) {
+            handler.removeCallbacks(runnableTimeOut);
+            handler.removeCallbacks(runnableWaitThenSave);
+            if (myReceiver != null)
+                context.unregisterReceiver(myReceiver);
+        }
+        Log.d(TAG, "...clear()");
+        isStart = false;
+    }
+
     protected void log(String status, String message) throws DataKitException {
         if (type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
@@ -149,18 +158,6 @@ public class RunnerMonitor {
         context.sendBroadcast(intent);
     }
 
-    void clear() {
-        Log.d(TAG, "clear()...");
-        if (isStart) {
-            handler.removeCallbacks(runnableTimeOut);
-            if (myReceiver != null)
-                context.unregisterReceiver(myReceiver);
-        }
-        Log.d(TAG, "...clear()");
-        isStart = false;
-
-    }
-
     DataSourceBuilder createDataSourceBuilder(String id) {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EMA).setPlatform(platform).setId(id);
@@ -179,12 +176,12 @@ public class RunnerMonitor {
     }
 
     void saveToDataKit() throws DataKitException {
-        showIncentive();
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(ema)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         DataSourceClient dataSourceClient = DataKitAPI.getInstance(context).register(createDataSourceBuilder(ema.id));
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
+        showIncentive();
         callback.onResponse(ema.status);
 //        Toast.makeText(this, "Information is Saved", Toast.LENGTH_SHORT).show();
     }

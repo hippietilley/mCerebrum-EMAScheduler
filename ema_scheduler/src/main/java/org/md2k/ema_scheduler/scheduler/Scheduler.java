@@ -23,17 +23,17 @@ abstract public class Scheduler {
     private static final String TAG = Scheduler.class.getSimpleName();
     protected Context context;
     protected EMAType emaType;
-    LoggerManager loggerManager;
-    DeliveryManager deliveryManager;
-    BlockManager blockManager;
     protected ConditionManager conditionManager;
     protected long dayStartTimestamp;
     protected long dayEndTimestamp;
+    LoggerManager loggerManager;
+    DeliveryManager deliveryManager;
+    BlockManager blockManager;
 
-    public Scheduler(Context context, EMAType emaType) throws DataKitException {
+    public Scheduler(Context context, EMAType emaType, DeliveryManager deliveryManager) throws DataKitException {
         this.context=context;
         this.emaType=emaType;
-        deliveryManager = DeliveryManager.getInstance(context);
+        this.deliveryManager = deliveryManager;
         blockManager =new BlockManager(context, emaType.getBlocks());
     }
 
@@ -76,7 +76,7 @@ abstract public class Scheduler {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             Date currenTimeZone = calendar.getTime();
             return sdf.format(currenTimeZone);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         return "";
     }

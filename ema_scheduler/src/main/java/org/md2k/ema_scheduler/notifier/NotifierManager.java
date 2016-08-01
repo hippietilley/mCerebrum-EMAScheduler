@@ -44,7 +44,7 @@ public class NotifierManager {
     Handler handlerAck;
     Handler handlerSubscribe;
     int notifyNo;
-    boolean delayEnable = true;
+    boolean delayEnable;
     DataSourceClient dataSourceClientRequest;
     ArrayList<DataSourceClient> dataSourceClientAcknowledges;
     ArrayList<DataSourceClient> dataSourceClientResponses;
@@ -130,9 +130,32 @@ public class NotifierManager {
         this.callbackDelivery = callback;
         Log.d(TAG, "before runnableSubscribe..");
         handlerSubscribe.post(runnableSubscribe);
+        lastAckTime = 0;
+        lastInsertTime = 0;
+        notifyNo = 0;
+        delayEnable = true;
     }
 
-    void subscribeNotificationResponse() throws DataKitException {
+    public void clear() {
+        try {
+            Log.d(TAG, "clear()...");
+            handler.removeCallbacks(runnableNotify);
+            handlerSubscribe.removeCallbacks(runnableSubscribe);
+            handlerAck.removeCallbacks(runnableAck);
+            if (dataSourceClientAcknowledges != null)
+                for (int i = 0; i < dataSourceClientAcknowledges.size(); i++)
+                    DataKitAPI.getInstance(context).unsubscribe(dataSourceClientAcknowledges.get(i));
+            if (dataSourceClientResponses != null)
+                for (int i = 0; i < dataSourceClientResponses.size(); i++)
+                    DataKitAPI.getInstance(context).unsubscribe(dataSourceClientResponses.get(i));
+            dataSourceClientResponses = null;
+            Log.d(TAG, "...clear()");
+        } catch (Exception e) {
+
+        }
+    }
+
+    private void subscribeNotificationResponse() throws DataKitException {
         Log.d(TAG, "subscribeNotificationResponse...");
         for (int i = 0; i < dataSourceClientResponses.size(); i++) {
             DataKitAPI.getInstance(context).subscribe(dataSourceClientResponses.get(i), new OnReceiveListener() {
@@ -187,29 +210,16 @@ public class NotifierManager {
             DataKitAPI.getInstance(context).subscribe(dataSourceClientAcknowledges.get(i), new OnReceiveListener() {
                 @Override
                 public void onReceived(final DataType dataType) {
-                    Log.d(TAG, "lastACKTime=" + lastAckTime);
-                    lastAckTime = DateTime.getDateTime();
+                    Thread t = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "lastACKTime=" + lastAckTime);
+                            lastAckTime = DateTime.getDateTime();
+                        }
+                    });
+                    t.start();
                 }
             });
-        }
-    }
-
-    public void clear() {
-        try {
-            Log.d(TAG, "clear()...");
-            handler.removeCallbacks(runnableNotify);
-            handlerSubscribe.removeCallbacks(runnableSubscribe);
-            handlerAck.removeCallbacks(runnableAck);
-            if (dataSourceClientAcknowledges != null)
-                for (int i = 0; i < dataSourceClientAcknowledges.size(); i++)
-                    DataKitAPI.getInstance(context).unsubscribe(dataSourceClientAcknowledges.get(i));
-            if (dataSourceClientResponses != null)
-                for (int i = 0; i < dataSourceClientResponses.size(); i++)
-                    DataKitAPI.getInstance(context).unsubscribe(dataSourceClientResponses.get(i));
-            dataSourceClientResponses = null;
-            Log.d(TAG, "...clear()");
-        } catch (Exception e) {
-
         }
     }
 
@@ -283,5 +293,4 @@ public class NotifierManager {
         logInfo.setMessage(notificationResult);
         LoggerManager.getInstance(context).insert(logInfo);
     }
-
 }

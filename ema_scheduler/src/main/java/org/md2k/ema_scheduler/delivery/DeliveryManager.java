@@ -21,13 +21,12 @@ import java.util.Random;
  */
 public class DeliveryManager {
     private static final String TAG = DeliveryManager.class.getSimpleName();
-    private static DeliveryManager instance=null;
     Context context;
     NotifierManager notifierManager;
     RunnerManager runnerManager;
     boolean isRunning;
 
-    private DeliveryManager(Context context) throws DataKitException {
+    public DeliveryManager(Context context) throws DataKitException {
         this.context = context;
         runnerManager = new RunnerManager(context, new Callback() {
             @Override
@@ -37,24 +36,6 @@ public class DeliveryManager {
         });
         notifierManager=new NotifierManager(context);
         isRunning=false;
-    }
-
-    public static DeliveryManager getInstance(Context context) throws DataKitException {
-        if(instance==null) instance=new DeliveryManager(context);
-        return instance;
-    }
-    EMAType findEMIType(){
-        EMAType[] emaTypes=Configuration.getInstance().getEma_types();
-        ArrayList<EMAType> emis=new ArrayList<>();
-        for(int i=0;i<emaTypes.length;i++) {
-            if(!emaTypes[i].getType().equals("EMI"))
-                continue;
-            if(emaTypes[i].getId().equals("EMI")) continue;
-            emis.add(emaTypes[i]);
-        }
-        if(emis.size()==0) return null;
-        Random random=new Random();
-        return emis.get(random.nextInt(emis.size()));
     }
 
     public boolean start(EMAType emaType, boolean isNotifyRequired, final String type) throws DataKitException {
@@ -121,6 +102,20 @@ public class DeliveryManager {
         }
     }
 
+    private EMAType findEMIType() {
+        EMAType[] emaTypes = Configuration.getInstance().getEma_types();
+        ArrayList<EMAType> emis = new ArrayList<>();
+        for (EMAType emaType : emaTypes) {
+            if (!emaType.getType().equals("EMI"))
+                continue;
+            if (emaType.getId().equals("EMI")) continue;
+            emis.add(emaType);
+        }
+        if (emis.size() == 0) return null;
+        Random random = new Random();
+        return emis.get(random.nextInt(emis.size()));
+    }
+
     public void stop() {
         Log.d(TAG, "stop()...");
         if (runnerManager != null)
@@ -130,8 +125,5 @@ public class DeliveryManager {
             notifierManager.clear();
         }
         isRunning=false;
-    }
-    public static void clear(){
-        instance=null;
     }
 }

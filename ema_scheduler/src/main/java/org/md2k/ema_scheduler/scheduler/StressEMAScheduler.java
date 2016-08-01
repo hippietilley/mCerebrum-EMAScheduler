@@ -16,6 +16,7 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.delivery.DeliveryManager;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.utilities.Report.Log;
 
@@ -28,10 +29,30 @@ public class StressEMAScheduler extends Scheduler {
     private static final String TAG = StressEMAScheduler.class.getSimpleName();
     Handler handler;
     DataSourceClient dataSourceClient;
-    boolean isRunning;
+    Runnable runnableListenEvent = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
+                Log.d(TAG, "runnableEventEMA()...id=" + emaType.getId() + " find..." + emaType.getScheduler_rules()[0].getData_source().getType());
+                ArrayList<DataSourceClient> dataSourceClients = null;
+                dataSourceClients = dataKitAPI.find(new DataSourceBuilder(emaType.getScheduler_rules()[0].getData_source()));
+                Log.d(TAG, "runnableEventEMA()...id=" + emaType.getId() + " find..." + dataSourceClients.size() + "...done");
+                if (dataSourceClients.size() == 0)
+                    handler.postDelayed(runnableListenEvent, 1000);
+                else {
+                    dataSourceClient = dataSourceClients.get(0);
+                    subscribeEvent();
+                }
+            } catch (DataKitException e) {
+                Log.d(TAG, "DataKitException..subscribeEvent");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+            }
+        }
+    };
 
-    public StressEMAScheduler(Context context, EMAType emaType) throws DataKitException {
-        super(context, emaType);
+    public StressEMAScheduler(Context context, EMAType emaType, DeliveryManager deliveryManager) throws DataKitException {
+        super(context, emaType, deliveryManager);
         Log.d(TAG, "SmokingEMAScheduler()...id=" + emaType.getId());
         handler = new Handler();
     }
@@ -47,44 +68,24 @@ public class StressEMAScheduler extends Scheduler {
     @Override
     public void stop() {
         Log.d(TAG, "stop()...");
+        stopDelivery();
         handler.removeCallbacks(runnableListenEvent);
         unsubscribeEvent();
     }
 
     @Override
     public void setDayStartTimestamp(long dayStartTimestamp) {
+        this.dayStartTimestamp = dayStartTimestamp;
 
     }
 
     @Override
     public void setDayEndTimestamp(long dayEndTimestamp) {
+        this.dayEndTimestamp = dayEndTimestamp;
     }
-
-    Runnable runnableListenEvent = new Runnable() {
-        @Override
-        public void run() {
-            try {
-            DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
-            Log.d(TAG, "runnableEventEMA()...id=" + emaType.getId() + " find..." + emaType.getScheduler_rules()[0].getData_source().getType());
-            ArrayList<DataSourceClient> dataSourceClients = null;
-                dataSourceClients = dataKitAPI.find(new DataSourceBuilder(emaType.getScheduler_rules()[0].getData_source()));
-            Log.d(TAG, "runnableEventEMA()...id=" + emaType.getId() + " find..." + dataSourceClients.size() + "...done");
-            if (dataSourceClients.size() == 0)
-                handler.postDelayed(runnableListenEvent, 1000);
-            else {
-                dataSourceClient = dataSourceClients.get(0);
-                subscribeEvent();
-            }
-            } catch (DataKitException e) {
-                Log.d(TAG,"DataKitException..subscribeEvent");
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
-            }
-        }
-    };
 
     public void subscribeEvent() throws DataKitException {
         Log.d(TAG, "subscribeEvent()...");
-        isRunning = false;
         DataKitAPI.getInstance(context).subscribe(dataSourceClient, new OnReceiveListener() {
             @Override
             public void onReceived(DataType dataType) {
@@ -98,7 +99,6 @@ public class StressEMAScheduler extends Scheduler {
                             conditionManager = ConditionManager.getInstance(context);
                             if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId())) {
                                 Log.d(TAG, "condition valid...");
-                                isRunning = false;
                                 startDelivery();
                             }
                         } catch (DataKitException e) {
@@ -116,7 +116,7 @@ public class StressEMAScheduler extends Scheduler {
         try {
             if (dataSourceClient != null)
                 DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);
-        }catch (Exception e){
+        } catch (Exception ignored) {
 
         }
     }

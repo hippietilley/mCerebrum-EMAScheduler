@@ -31,25 +31,6 @@ public class DayManager {
     DataSourceClient dataSourceClientDayEnd;
     SchedulerManager schedulerManager;
     Handler handler;
-
-    public DayManager(Context context) throws DataKitException {
-        Log.d(TAG, "DayManager()...");
-        this.context = context;
-        schedulerManager = new SchedulerManager(context);
-        handler = new Handler();
-    }
-
-    public void start() {
-        Log.d(TAG, "start()...");
-        handler.post(runnableDay);
-    }
-
-    public void stop() {
-        Log.d(TAG, "stop()...");
-        handler.removeCallbacks(runnableDay);
-        schedulerManager.stop();
-    }
-
     Runnable runnableDay = new Runnable() {
         @Override
         public void run() {
@@ -73,6 +54,29 @@ public class DayManager {
             }
         }
     };
+
+    public DayManager(Context context) throws DataKitException {
+        Log.d(TAG, "DayManager()...");
+        this.context = context;
+        schedulerManager = new SchedulerManager(context);
+        handler = new Handler();
+    }
+
+    public void start() {
+        Log.d(TAG, "start()...");
+        handler.post(runnableDay);
+    }
+
+    public void stop() {
+        Log.d(TAG, "stop()...");
+        handler.removeCallbacks(runnableDay);
+        try {
+            DataKitAPI.getInstance(context).unsubscribe(dataSourceClientDayStart);
+            DataKitAPI.getInstance(context).unsubscribe(dataSourceClientDayEnd);
+        } catch (DataKitException ignored) {
+        }
+        schedulerManager.stop();
+    }
 
     public void subscribeDayStart() throws DataKitException {
         Log.d(TAG, "subscribeDayStart()...");

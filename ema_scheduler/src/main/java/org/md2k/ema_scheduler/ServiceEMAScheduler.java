@@ -15,7 +15,6 @@ import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.day.DayManager;
-import org.md2k.ema_scheduler.delivery.DeliveryManager;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
 
@@ -91,7 +90,6 @@ public class ServiceEMAScheduler extends Service {
                 Log.d(TAG, "datakit connected...");
                 Configuration.clear();
                 LoggerManager.clear();
-                DeliveryManager.clear();
                 configuration = Configuration.getInstance();
                 LoggerManager.getInstance(getApplicationContext());
                 try {

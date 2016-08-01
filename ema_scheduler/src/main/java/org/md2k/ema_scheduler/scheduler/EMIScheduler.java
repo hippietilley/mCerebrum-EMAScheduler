@@ -21,6 +21,7 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.delivery.DeliveryManager;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.scheduler.emi.ProbabilityEMI;
 import org.md2k.utilities.Report.Log;
@@ -58,8 +59,8 @@ public class EMIScheduler extends Scheduler {
         }
     };
 
-    public EMIScheduler(Context context, EMAType emaType) throws DataKitException {
-        super(context, emaType);
+    public EMIScheduler(Context context, EMAType emaType, DeliveryManager deliveryManager) throws DataKitException {
+        super(context, emaType, deliveryManager);
         Log.d(TAG, "EMIScheduler()...");
         handler = new Handler();
         isPreQuit = true;
@@ -78,17 +79,18 @@ public class EMIScheduler extends Scheduler {
     public void stop() {
         handler.removeCallbacks(runnableStressClassification);
         unsubscribeEvent();
+        stopDelivery();
         Log.d(TAG, "stop()...");
     }
 
     @Override
     public void setDayStartTimestamp(long dayStartTimestamp) {
-
+        this.dayStartTimestamp = dayStartTimestamp;
     }
 
     @Override
     public void setDayEndTimestamp(long dayEndTimestamp) {
-
+        this.dayEndTimestamp = dayEndTimestamp;
     }
 
     void readTypeOfDay() throws DataKitException {
@@ -154,13 +156,19 @@ public class EMIScheduler extends Scheduler {
         Log.d(TAG, "subscribeDayStart()...");
         dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
             @Override
-            public void onReceived(DataType dataType) {
-                try {
-                    prepareAndDeliver(dataType);
-                } catch (DataKitException e) {
-                    Log.d(TAG,"DataKitException...prepareAndDeliver...");
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
-                }
+            public void onReceived(final DataType dataType) {
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            prepareAndDeliver(dataType);
+                        } catch (DataKitException e) {
+                            Log.d(TAG, "DataKitException...prepareAndDeliver...");
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+                        }
+                    }
+                });
+                t.start();
             }
         });
     }
@@ -184,7 +192,7 @@ public class EMIScheduler extends Scheduler {
         try {
             if (dataSourceClient != null)
                 DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
     }
