@@ -161,10 +161,13 @@ public class LoggerManager {
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+")");
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
         for(int i=0;i<logInfos.size();i++){
-            if(!logInfos.get(i).getOperation().equals(operation)) continue;
-            if(!logInfos.get(i).getStatus().equals(status)) continue;
-            if(!logInfos.get(i).getType().equals(type)) continue;
-            if(!logInfos.get(i).getId().equals(id)) continue;
+            if (logInfos.get(i).getOperation() == null || !logInfos.get(i).getOperation().equals(operation))
+                continue;
+            if (logInfos.get(i).getStatus() == null || !logInfos.get(i).getStatus().equals(status))
+                continue;
+            if (logInfos.get(i).getType() == null || !logInfos.get(i).getType().equals(type))
+                continue;
+            if (logInfos.get(i).getId() == null || !logInfos.get(i).getId().equals(id)) continue;
             logInfosTemp.add(logInfos.get(i));
         }
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+") size="+logInfosTemp.size());
@@ -175,10 +178,14 @@ public class LoggerManager {
         LogInfo logInfo=null;
         Log.d(TAG,"getLogInfoLast("+operation+" "+type+" "+id+")");
         for (int i = 0; i < logInfos.size(); i++) {
-            if (operation!=null && !logInfos.get(i).getOperation().equals(operation)) continue;
-            if(status!=null && !logInfos.get(i).getStatus().equals(status)) continue;
-            if (type!=null && !logInfos.get(i).getType().equals(type)) continue;
-            if (id!=null && !logInfos.get(i).getId().equals(id)) continue;
+            if (operation != null && (logInfos.get(i).getOperation() == null || !logInfos.get(i).getOperation().equals(operation)))
+                continue;
+            if (status != null && (logInfos.get(i).getStatus() == null || !logInfos.get(i).getStatus().equals(status)))
+                continue;
+            if (type != null && (logInfos.get(i).getType() == null || !logInfos.get(i).getType().equals(type)))
+                continue;
+            if (id != null && (logInfos.get(i).getId() == null || !logInfos.get(i).getId().equals(id)))
+                continue;
             if (logInfo == null || logInfo.getTimestamp() < logInfos.get(i).getTimestamp())
                 logInfo = logInfos.get(i);
         }
@@ -189,10 +196,13 @@ public class LoggerManager {
         Log.d(TAG,"getLogInfos("+operation+" "+type+" "+id+" "+startTime+" "+endTime+")");
         ArrayList<LogInfo> logInfosTemp=new ArrayList<>();
         for(int i=0;i<logInfos.size();i++){
-            if(operation!=null && !logInfos.get(i).getOperation().equals(operation)) continue;
+            if (operation != null && (logInfos.get(i).getOperation() == null || !logInfos.get(i).getOperation().equals(operation)))
+                continue;
             if(status!=null && logInfos.get(i).getStatus()!=null && !logInfos.get(i).getStatus().equals(status)) continue;
-            if(type!=null && !logInfos.get(i).getType().equals(type)) continue;
-            if(id!=null && !logInfos.get(i).getId().equals(id)) continue;
+            if (type != null && (logInfos.get(i).getType() == null || !logInfos.get(i).getType().equals(type)))
+                continue;
+            if (id != null && (logInfos.get(i).getId() == null || !logInfos.get(i).getId().equals(id)))
+                continue;
             if(startTime!=-1 && logInfos.get(i).getTimestamp()<startTime) continue;
             if(endTime!=-1 && logInfos.get(i).getTimestamp()>endTime) continue;
             logInfosTemp.add(logInfos.get(i));

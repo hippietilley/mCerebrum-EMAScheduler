@@ -17,6 +17,7 @@ import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.day.DayManager;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.Report.LogStorage;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -62,6 +63,7 @@ public class ServiceEMAScheduler extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate()");
+        LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
         configuration = Configuration.getInstance();
         LoggerManager.clear();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(BROADCAST_MSG));

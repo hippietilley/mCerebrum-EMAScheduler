@@ -47,7 +47,7 @@ public class DeliveryManager {
         log(LogInfo.STATUS_DELIVER_SUCCESS, emaType,type);
         if(emaType.getId().equals("EMI")){
             emaType=findEMIType();
-            logRandom(emaType,type);
+            logRandom(LogInfo.STATUS_DELIVER_SUCCESS, emaType, type);
             if(emaType==null) return false;
         }
         runnerManager.set(emaType.getApplication());
@@ -90,12 +90,14 @@ public class DeliveryManager {
             LoggerManager.getInstance(context).insert(logInfo);
         }
     }
-    protected void logRandom(EMAType emaType, String type) throws DataKitException {
+
+    protected void logRandom(String status, EMAType emaType, String type) throws DataKitException {
         if(type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_DELIVER);
             logInfo.setId(emaType.getId());
             logInfo.setType(emaType.getType());
+            logInfo.setStatus(status);
             logInfo.setTimestamp(DateTime.getDateTime());
             logInfo.setMessage("EMI randomly selected. trying to deliver...");
             LoggerManager.getInstance(context).insert(logInfo);
