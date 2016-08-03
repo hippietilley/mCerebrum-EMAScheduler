@@ -153,8 +153,8 @@ public class ActivityMain extends AppCompatActivity {
             time = formatTime(logInfo.getTimestamp());
             if (logInfo.getOperation() != null && logInfo.getId() != null) {
                 type = logInfo.getOperation().toLowerCase() + ":" + logInfo.getId().toLowerCase()+":"+logInfo.getStatus();
-                msg = logInfo.getMessage().toLowerCase();
-                addRow(time, type, msg);
+                //               msg = logInfo.getMessage().toLowerCase();
+                //               addRow(time, type, msg);
             }
         }
     }

@@ -41,23 +41,27 @@ import java.lang.reflect.Type;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Configuration{
+    private static Configuration instance = null;
     EMAType[] ema_types;
     NotificationRequests notification_option;
     ConfigCondition[] conditions;
-    private static Configuration instance=null;
+
+    private Configuration() {
+        readEMATypes();
+        readNotifications();
+        readConditions();
+    }
+
     public static Configuration getInstance(){
         if(instance==null)
             instance=new Configuration();
         return instance;
     }
+
     public static void clear(){
         instance=null;
     }
-    private Configuration(){
-        readEMATypes();
-        readNotifications();
-        readConditions();
-    }
+
     private void readEMATypes(){
         BufferedReader br;
         String filepath= Constants.CONFIG_DIRECTORY+Constants.CONFIG_FILENAME;
@@ -70,6 +74,7 @@ public class Configuration{
                 Type collectionType = new TypeToken<EMAType[]>() {
                 }.getType();
                 ema_types = gson.fromJson(br, collectionType);
+                br.close();
             } catch (IOException e) {
                 ema_types = null;
             }
@@ -86,6 +91,7 @@ public class Configuration{
                 br = new BufferedReader(new InputStreamReader(new FileInputStream(filepath)));
                 Gson gson = new Gson();
                 notification_option = gson.fromJson(br, NotificationRequests.class);
+                br.close();
             } catch (IOException e) {
                 notification_option = null;
             }
@@ -104,6 +110,7 @@ public class Configuration{
                 Type collectionType = new TypeToken<ConfigCondition[]>() {
                 }.getType();
                 conditions = gson.fromJson(br, collectionType);
+                br.close();
             } catch (IOException e) {
                 conditions = null;
             }

@@ -128,12 +128,12 @@ public class NotifierManager {
         this.emaType = emaType;
         this.notifications = emaType.getNotifications();
         this.callbackDelivery = callback;
-        Log.d(TAG, "before runnableSubscribe..");
-        handlerSubscribe.post(runnableSubscribe);
         lastAckTime = 0;
         lastInsertTime = 0;
         notifyNo = 0;
         delayEnable = true;
+        Log.d(TAG, "before runnableSubscribe..");
+        handlerSubscribe.post(runnableSubscribe);
     }
 
     public void clear() {
@@ -233,20 +233,26 @@ public class NotifierManager {
     }
 
     private void insertDataToDataKit(NotificationRequests notificationRequests) throws DataKitException {
+        ArrayList<NotificationRequest> temp = new ArrayList<>();
         Log.d(TAG, "insertDataToDataKit()...");
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
         for (NotificationRequest notificationRequest : notificationRequests.getNotification_option()) {
             boolean isDelayOk = false;
             if (notificationRequest.getResponse_option() != null)
                 isDelayOk = notificationRequest.getResponse_option().isDelay();
-            if (isDelayOk && !delayEnable)
+            if (isDelayOk && !delayEnable) {
                 notificationRequest.getResponse_option().setDelay(false);
+                temp.add(notificationRequest);
+            }
         }
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(notificationRequests)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         dataKitAPI.insert(dataSourceClientRequest, dataTypeJSONObject);
         Log.d(TAG, "...insertDataToDataKit()");
+        for (int i = 0; i < temp.size(); i++)
+            temp.get(i).getResponse_option().setDelay(true);
+
     }
 
     public NotificationRequests findNotification(String notificationType[]) {
