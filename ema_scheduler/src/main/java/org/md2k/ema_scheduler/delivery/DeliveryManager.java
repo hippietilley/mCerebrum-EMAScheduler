@@ -64,8 +64,8 @@ public class DeliveryManager {
                     case NotificationResponse.DELAY_CANCEL:
                         Log.d(TAG, "matched...runner=" + runnerManager + " response=" + response);
                         notifierManager.stop();
-                        runnerManager.start(finalEmaType, response, type);
                         notifierManager.clear();
+                        runnerManager.start(finalEmaType, response, type);
                         break;
                 }
             }
