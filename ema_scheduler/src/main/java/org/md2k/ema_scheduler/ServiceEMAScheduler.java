@@ -12,6 +12,7 @@ import android.widget.Toast;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.day.DayManager;
@@ -56,6 +57,7 @@ public class ServiceEMAScheduler extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "stopSelf()...received broadcastReceiver msg");
+            Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",broadcast_receiver_stop_service");
             stopSelf();
         }
     };
@@ -64,6 +66,7 @@ public class ServiceEMAScheduler extends Service {
         super.onCreate();
         Log.d(TAG, "onCreate()");
         LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
+        Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",service_start");
         configuration = Configuration.getInstance();
         LoggerManager.clear();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(BROADCAST_MSG));
@@ -107,6 +110,7 @@ public class ServiceEMAScheduler extends Service {
 
     @Override
     public void onDestroy() {
+        Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",service_stop");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         Log.d(TAG, "onDestroy()...");
         if (dayManager != null)
