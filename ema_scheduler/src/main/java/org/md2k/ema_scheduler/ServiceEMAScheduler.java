@@ -53,17 +53,20 @@ public class ServiceEMAScheduler extends Service {
     DataKitAPI dataKitAPI;
     Configuration configuration;
     DayManager dayManager;
+    private boolean isStopping;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "stopSelf()...received broadcastReceiver msg");
             Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",broadcast_receiver_stop_service");
+            clear();
             stopSelf();
         }
     };
 
     public void onCreate() {
         super.onCreate();
+        isStopping = false;
         Log.d(TAG, "onCreate()");
         LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
         Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",service_start");
@@ -74,18 +77,20 @@ public class ServiceEMAScheduler extends Service {
         if (configuration.getEma_types() == null) {
             Toast.makeText(ServiceEMAScheduler.this, "!!!Error: EMA Configuration file not available...", Toast.LENGTH_LONG).show();
             Log.d(TAG, "stopSelf()... EMA Configuration file not available...");
+            clear();
             stopSelf();
         } else {
             try {
                 connectDataKit();
             } catch (DataKitException e) {
                 Log.d(TAG, "stopSelf()... DataKitException...in connection");
+                clear();
                 stopSelf();
             }
         }
     }
 
-    private void connectDataKit() throws DataKitException {
+    private synchronized void connectDataKit() throws DataKitException {
         Log.d(TAG, "connectDataKit()...");
         dataKitAPI = DataKitAPI.getInstance(ServiceEMAScheduler.this);
         dataKitAPI.connect(new OnConnectionListener() {
@@ -102,14 +107,16 @@ public class ServiceEMAScheduler extends Service {
                     dayManager.start();
                 } catch (DataKitException e) {
                     Log.d(TAG, "stopSelf()... DataKitException ... dayManager ...error...");
+                    clear();
                     stopSelf();
                 }
             }
         });
     }
 
-    @Override
-    public void onDestroy() {
+    synchronized void clear() {
+        if (isStopping) return;
+        isStopping = true;
         Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",service_stop");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         Log.d(TAG, "onDestroy()...");
@@ -121,6 +128,11 @@ public class ServiceEMAScheduler extends Service {
         Log.d(TAG, "...stopScheduler()");
         if (dataKitAPI != null && dataKitAPI.isConnected()) dataKitAPI.disconnect();
         Log.d(TAG, "...DataKit disconnect()");
+    }
+
+    @Override
+    public void onDestroy() {
+        clear();
         super.onDestroy();
     }
 

@@ -1,18 +1,13 @@
 package org.md2k.ema_scheduler.condition.battery_level;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 
-import org.md2k.datakitapi.DataKitAPI;
-import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
 import org.md2k.datakitapi.exception.DataKitException;
-import org.md2k.datakitapi.source.datasource.DataSource;
-import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
-import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
-
-import java.util.ArrayList;
 
 /**
  * Created by monowar on 3/26/16.
@@ -23,28 +18,29 @@ public class BatteryLevelManager extends Condition {
     }
 
     public boolean isValid(ConfigCondition configCondition) throws DataKitException {
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(0));
-        DataSource dataSource = configCondition.getData_source();
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);
-        ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(dataSourceBuilder);
-        if (dataSourceClientArrayList.size() != 0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.queryHFlastN(dataSourceClientArrayList.get(0), 1);
-            if (dataTypes.size() == 0) {
-                log(configCondition, "true: datapoint not found");
-                return true;
-            }
-            double[] samples = ((DataTypeDoubleArray) dataTypes.get(0)).getSample();
-            if (samples[0] > limitPercentage) {
-                log(configCondition, "true: " + samples[0] + " > " + limitPercentage);
-                return true;
-            } else {
-                log(configCondition, "false: " + samples[0] + " < " + limitPercentage);
-                return false;
-            }
-        } else {
-            log(configCondition, "true: datasource not found");
+        double percentage = getBatteryLevel();
+        if (percentage > limitPercentage) {
+            log(configCondition, "true: " + percentage + " > " + limitPercentage);
             return true;
+        } else {
+            log(configCondition, "false: " + percentage + " < " + limitPercentage);
+            return false;
         }
+    }
+
+    double getBatteryLevel() {
+        IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent intent = context.registerReceiver(null, iFilter);
+        assert intent != null;
+        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
+        float percentage;
+        if (level == -1 || scale == -1) {
+            percentage = 0.0f;
+        } else {
+            percentage = ((float) level / (float) scale) * 100.0f;
+        }
+        return percentage;
     }
 }
