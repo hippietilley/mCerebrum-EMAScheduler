@@ -1,14 +1,11 @@
 language: android
-
 before_cache:
 - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-
 cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
   - "$HOME/.m2/"
-
 android:
   components:
   - platform-tools
@@ -17,17 +14,31 @@ android:
   - android-23
   - extra-android-support
   - extra-android-m2repository
-
 before_install:
+- openssl aes-256-cbc -K $encrypted_022deeb1974d_key -iv $encrypted_022deeb1974d_iv -in ema_scheduler/release-key.keystore.enc -out ema_scheduler/release-key.keystore -d
 - git clone https://github.com/MD2Korg/mCerebrum-Utilities.git /home/travis/build/MD2Korg/mCerebrum-Utilities
 - git clone https://github.com/MD2Korg/mCerebrum-DataKitAPI.git /home/travis/build/MD2Korg/mCerebrum-DataKitAPI
-
 script:
-  - ./gradlew build test
-
+- "./gradlew assembleRelease"
 notifications:
   slack:
     secure: drSaLEsi+xlUePocfcDTLO9S/5XSBsnR6h7OzPhU4xsO+mBjH3qb93Qe4Jwzz9IZQ0UFzDcmu7ObHOksd6fDgvnIcmznowuABs7QFSF5dodF3eXuF/NJc5J3SqptrOZhlPhGQJcan8siBpLw5z+UBal9ORQPJ8e0SN2bxvRH30GzOlaBOrS0w9hGmtoIY/c8ZIjxGn7BK+b7qL6pNqD4tTg3BImh4Q8Q0icjlT/Pe4kq9pJuYP+Ph4B6THE5PY6W5kmaPSZT2wk72tbNa+1f0lxkO106+Fi4X/qEf6BNQ/2ufUi8cGyjYhu8ZRfGEQVwmwtk0goZvPRyxzHx94tc0/utmW+ZvEEdXOTfs1cE84xGvsYOmoMaMacJC0DPSRTJ269LnmUlTYZoZPyEaqEJp0vFLnS7ZwYcYBzEQ/coS1zKOEWX5a29ijvCOxeFGWF9NcEvaGfpoP/RiLJXjguKfrQLQiek+xkzmubSRWpP9LFoqtXwVMxle/zi/99Ry02nvmEUSK3BbAM57LBnrT+0lYDC/ocxTpQ3Gvd52qFoZBzb8Fshu2+3UYCSCHROkOdHtBmBvRKE4LiTz8/6xtzeL1n+1RSrbN13tbk01gkNIHagSLWUildtFkvok2pJXawslE88ZhRzOOK8ViWFenbhca6sPfvBebXccTJKnzi4GQc=
-    on_success: change  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-    on_start: false     # default: false
+    on_success: change
+    on_failure: always
+    on_start: false
+deploy:
+  file_glob: true
+  provider: releases
+  api_key:
+    secure: hZSa/+pLUV5Z17EgwZgSXFzeVLrTDXaoS8wxXbOF0qTmkNJCjZvuu6qkr1sppx5XFnQcgWQPlVsh0Y9f8Ed7sTtcjqPmsXfrjtzvZjo9pCye3gPoXbWYWgK9r6WNyKUDxGjQVh2WJblxzoOiaCKJPEASjCFtphgGVTUqPgDwcLlp6Sx1R9c67j7SHVl3mnoCtPTbLz++eeHcJC3egXBBllD3DZotKd0bppoBn7rFt1VXlmR1ZrrblHFHDPVW9uwkQDQSsxctM+VNXjpOjDD/nv7HF1yVU5pPSnQlugf3yxycRux1anbi+rLnWFixw8hyVKu0n1qUOYM5k727Ke2tT5t4MmmBRKAq+oI9GfKLaXc87Dja8Y+7M0hy0K0RwE8Q1mYdFCf6utTIX0fYLGS4S9NKNuQbivLHtDBUuTbcaYnp9xWCgir0g1ivhKVTXKIObiXH8C+FYYR1RRGMGwBvcX+2ieqzYBzyJVYLmsoTMnUz1kiPUzfnLIFsRCAkYJUGTatLApaGsZfkfQcUKYwzPfTmcU0iJGgEIPKY7TpAuYNfOPEiC24EhFLD+rxokKJJ9zqWcVVBnbWa5EMKYZKM0eJ2JDld75CDxOA81nGLxfAzGEPQC2s8SjrmdiK4iPUfwbPUho/2WSp5yA9NKYmioZhqGh7aD6yE4HTSvkRx7jY=
+  file: ema_scheduler/build/outputs/apk/ema_scheduler*.*.*.apk
+  on:
+    repo: MD2Korg/mCerebrum-EMAScheduler
+    tags: true
+  skip_cleanup: true
+env:
+  global:
+  - secure: lA3PhrScRqd9Z8yPjCQMTEeUPWSZulKlneBv1I1HEO+hJBGhhNCqaX4jhivG2ysuQq0+DE2PXRmWOMruaiPaGfxOCm28bX4X6uj4OodvORBWb2Tkh+mJQilaThLCq0B1Y6qAER726nsLZdoXaPK73Ke+aQUw3gPW/kUsWOfWQXtVJ9DSCJWrR5fbkeJs2tj3ix9D8eRZuSwO/bUDgVBsWK/Su/sJoD655JzvEXxJ7euJuLSpOsjFIcVQh1okb6iEM8UmM8kv8iWFFIC5JqIKK9Odftd2GGTp0r/AZxx0qgT3ca1R/OdC9WO8SfE80arbwKadkf/tKwYu0jtKIj5zT8j8g4NpyNKKMXSq58Nz0QwbqjjY2K4bKIOOlefGA9qvv+bqW6SC9hwbwJ8bkXsPwpnLyTdxX66d631ubiWtDureK9I2I4xsUx+QbSw4jcb8e7nwCs7Ro3q69cQ0fAb/tlKVl+KxSp04dOOXTy10ZBE1vvhKtU8EJgJ2/iSKVe5BGPwdTTbL/b8AKMEvRgUebWT6AmKFmp3rsI5iwCzU5JCAiBl7VWpcv32Ub01lnflc+m6LzGDVQmFQj+kvx7xRr4Bz1joL5KYJfHFEZuv0A4QDMFmS9erxuat9g5vaYSvq5AJ+mJO1lHp5BYradsOG8rVEitJbpYnuv3ME2mYpEhI=
+  - secure: VsRjy8ihZ/tPksWrfQMQtNMq58A12/z5G1ajSRcnauH/D2pwggnQAidfWN4tR0EItUygUtwlwLOtCcqD2AuYWmY3KgQhtmTttvW/O9Dnr8fjV0ICtcZFuTjvt24FJjF/alz7uApcP4Zs/pUmbADq1Us9zg0x/PtnP8lvHtq7f+TqS9pTxWRl8sj4EeKj6PKnoCuM62wnrT57auqHm+B/WMWV8faYmNdlKf6TZIS2D8u04m841SQZ250yMooQIbZIXCHiJ2OWkPEIj2Oj5K3/t7WwYgG3tHFNtLgosZ5O9MzlGsTz+2FDHpyejHBI0qQ5Oqkz1tn8Wl1q2qkVxAvGy0SxSZCeeA9q4O0UsNrsv0Mh40J1EE/ByposafNrbbgw8WR8NXOUVe+q/Wyn5EO4rBhsE/IU3QhYE8cd+9H4fdjLr0Xm+FKazYkh6SIXqo+xFwCAC9yMeuSk88vxjGuTNUV/XwqSBcDLB+qd38yfSBSe4jnrNxRrm1A3gDxY9h4NWGGyJsVMDgr9lT8Tu7Ou7nzgP7qlUQguMmxf3V12nGouaHsffqqTLObvKjHKvk1+qZNOBtqH5StCtpwLXgPKzHyRGAlCXzu9T2HdkPL0ZuwMqbrUgwYazQC2FXlfKCcET4XnaEAViur4m0GwwQOhrv3lQ5FW2eADuw8gmkNu4ZI=
+  - secure: Lq6reiI++GRJXuyn1ENg/u+vWDoYLyloBWDIzlj44ZaRGIXXjiTVhC2H2NfXOUC0iPiktglvzc0A+AQuWzmplxAndJIph2nj/xycyHX6/T1Rdu26i5yNlLIyKuaKME3fo1nx1RvART2wSgCFRnzPF7lXKhNyPQCqZKE8MErOfiW0PNf8b1Xn0wuLerKjU72vlcQTZ0da8kIZzFzhmu3KRJ1IrxfctI82OV1schFKbRanlkyCLFMfNH+TqZkiUQr1BaiK4il0sFk4lrH6ABsFYfoZKMhEmc9e5NiZlt3X/BJJJutoD2fGHrHomK2e4msw3bmgXHpZRSQDgmbxeDv9lvg6hXdLg1eyoDzMooJWGSkz7AAdKXil5jmtY7JzZsdoVs0M7wGzktwSyCUNu1dgqrAmMJbA/uizxZazX+VM9CZOEfsJYIae8Mf+BgkK+sHLbPoIgq+XfDY+IO4v1JReHYMsu8MuOnyAMkdjI3+TqZe5jq37DhH0D7Nzd8TPE39AjjofxOkv5NUJ61p1BL/hUdIz3clDU657Rf54lFukIi+HVA5AUIzERTec643PCUtvU83sSAMN7dtl7dXQ8j7OvAIzNNHzRQ0wbWxy5I0p+jDsXPPTB+5L5osh2CwF0dBlDkTMMxQduNsTVJE/Up0g9bBQWYUIl1OKPaVoN0AzsVk=
+  - secure: OEdXSE2pSiEOQLhcatSAJYYwPjOlE73CZuMTkCTSFDvYJdaMc88JjIkJwDoj2iOoGZnWg21/R7zRV6BsGnED7ugxUJxZ5vc8gvyvM5YwD+l9/NwIanF8xglfWiWEFbz5mBQZVHzD6AbjYr3LiqX037IniyivT+1/1gacDqidOn/vwQo2kMBi0euFYJEK9Z3P37VmrZF/DEM9fLr2/lIpCO+Bq9iq/onTgnHDo9DMAgcTZRBACPiyF1c9LAmqrUMgfIa5qwo+KN92v4pNxIr8z/Zra5+e28SqaaVCXK4XmVcvgFRHzWBUsDcydocgzZ1ugNvxQHDBk3/lDHqRRVpjUeBvafQLHoKugRp1scRqMoL6CTVhupczbmy6JTVIFLumiSHtb/UAgUNdQbqvfM9WLl1C3lW3Uj3W4OGGfCJCUYc++ty5iIP5VdcpnI6IMVM5TI8n/NQpjLxf6wZP7+cduUVJFSBzbK1drikWNcgARknj5Tk5CKbIWY3uZHQSCelfu4TCGGZFgpJNExQpCGRca8LmX3rPOX/g9khzU0uNb4Jb1zg3G+X1phe+ZI1+NSxHotviludxh8LQxU1kaeJ1mLo51aa/kaucQ8WptXY3lPS4xdugYLOAznr3ftfou/wyFZbWBhsbt4IlHXGy9qwnXv2JgXRdvCossx9NviH+OvA=
