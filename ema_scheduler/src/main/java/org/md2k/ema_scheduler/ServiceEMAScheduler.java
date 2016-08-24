@@ -1,5 +1,6 @@
 package org.md2k.ema_scheduler;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.NotificationCompat;
 import android.widget.Toast;
 
 import org.md2k.datakitapi.DataKitAPI;
@@ -90,6 +92,13 @@ public class ServiceEMAScheduler extends Service {
         }
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.w(TAG, "onStartCommand()...");
+        startForeground(98763, getCompatNotification());
+        return START_STICKY;
+    }
+
     private synchronized void connectDataKit() throws DataKitException {
         Log.d(TAG, "connectDataKit()...");
         dataKitAPI = DataKitAPI.getInstance(ServiceEMAScheduler.this);
@@ -116,6 +125,7 @@ public class ServiceEMAScheduler extends Service {
 
     synchronized void clear() {
         if (isStopping) return;
+        stopForeground(true);
         isStopping = true;
         Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",service_stop");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
@@ -141,4 +151,11 @@ public class ServiceEMAScheduler extends Service {
     public IBinder onBind(Intent intent) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    private Notification getCompatNotification() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.mipmap.ic_launcher).setContentTitle(getResources().getString(R.string.app_name));
+        return builder.build();
+    }
+
 }
