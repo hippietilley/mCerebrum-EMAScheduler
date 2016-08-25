@@ -35,4 +35,5 @@ public class Constants {
     public static final String CONDITION_FILENAME = "condition.json";
     public static final boolean DEBUG=false;
     public static final String LOG_FILENAME = "log.json";
+    public static final String INTENT_USER = "INTENT_USER";
 }

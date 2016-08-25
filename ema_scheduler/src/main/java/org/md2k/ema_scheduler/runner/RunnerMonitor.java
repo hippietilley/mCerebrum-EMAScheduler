@@ -35,7 +35,30 @@ import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.notification.NotificationResponse;
 
 /**
- * Created by monowar on 3/14/16.
+ * Copyright (c) 2016, The University of Memphis, MD2K Center
+ * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+ * All rights reserved.
+ * <p/>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * <p/>
+ * * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ * <p/>
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p/>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class RunnerMonitor {
     public static final long NO_RESPONSE_TIME = 35000;
@@ -51,18 +74,6 @@ public class RunnerMonitor {
     EMAType emaType;
     Callback callback;
     boolean isStart = false;
-    private MyBroadcastReceiver myReceiver;
-    Runnable runnableWaitThenSave = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
-            } catch (DataKitException e) {
-                Log.d(TAG, "DataKitException...saveData");
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
-            }
-        }
-    };
     Runnable runnableTimeOut = new Runnable() {
         @Override
         public void run() {
@@ -75,6 +86,19 @@ public class RunnerMonitor {
             }
         }
     };
+    private MyBroadcastReceiver myReceiver;
+    Runnable runnableWaitThenSave = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
+            } catch (DataKitException e) {
+                Log.d(TAG, "DataKitException...saveData");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+            }
+        }
+    };
+
     public RunnerMonitor(Context context, Callback callback) throws DataKitException {
         this.context = context;
         this.callback = callback;
@@ -169,6 +193,7 @@ public class RunnerMonitor {
 
     void showIncentive() throws DataKitException {
         Log.d(TAG, "showIncentiveRules..ema_status=" + ema.status + " rules=" + emaType.getIncentive_rules());
+        if (!type.equals("SYSTEM")) return;
         if (!ema.status.equals((LogInfo.STATUS_RUN_COMPLETED))) return;
         if (emaType.getIncentive_rules() == null) return;
         IncentiveManager incentiveManager = new IncentiveManager(context, emaType);
@@ -217,7 +242,7 @@ public class RunnerMonitor {
                     Log.d(TAG, "data received... lastResponseTime=" + lastResponseTime + " message=" + message);
                 }
             } catch (DataKitException e) {
-                Log.d(TAG,"DataKitException...savedata..");
+                Log.d(TAG, "DataKitException...savedata..");
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }

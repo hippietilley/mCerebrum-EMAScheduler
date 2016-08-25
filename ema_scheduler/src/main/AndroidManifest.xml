@@ -29,10 +29,10 @@
             android:exported="true" />
 
         <activity
-            android:name="org.md2k.ema_scheduler.ActivityTest"
+            android:name=".ActivityTest"
             android:enabled="true"
             android:exported="true"
-            android:label="EMASchedulerTest"
+            android:label="Test"
             android:screenOrientation="portrait" />
         <activity
             android:name="org.md2k.ema_scheduler.incentive.ActivityIncentive"

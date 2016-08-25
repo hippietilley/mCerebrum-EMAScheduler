@@ -131,9 +131,7 @@ public class EMIScheduler extends Scheduler {
         double sample = ((DataTypeDouble) dataType).getSample();
         if (!(sample == 0 || sample == 2)) return;
         sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
-        if (sample == 0)
-            isStress = false;
-        else isStress = true;
+        isStress = sample != 0;
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {

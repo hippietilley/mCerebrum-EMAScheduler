@@ -31,55 +31,56 @@ public class DeliveryManager {
         runnerManager = new RunnerManager(context, new Callback() {
             @Override
             public void onResponse(String response) {
-                isRunning=false;
+                isRunning = false;
             }
         });
-        notifierManager=new NotifierManager(context);
-        isRunning=false;
+        notifierManager = new NotifierManager(context);
+        isRunning = false;
     }
 
     public boolean start(EMAType emaType, boolean isNotifyRequired, final String type) throws DataKitException {
-        if(isRunning){
-            log(LogInfo.STATUS_DELIVER_ALREADY_RUNNING, emaType,"Not started..another one is running");
+        if (isRunning) {
+            log(LogInfo.STATUS_DELIVER_ALREADY_RUNNING, emaType, "Not started..another one is running");
             return false;
         }
         Log.d(TAG, "start()...emaType=" + emaType.getType() + " id=" + emaType.getId());
-        log(LogInfo.STATUS_DELIVER_SUCCESS, emaType,type);
-        if(emaType.getId().equals("EMI")){
-            emaType=findEMIType();
+        log(LogInfo.STATUS_DELIVER_SUCCESS, emaType, type);
+        if (emaType.getId().equals("EMI")) {
+            emaType = findEMIType();
             logRandom(LogInfo.STATUS_DELIVER_SUCCESS, emaType, type);
-            if(emaType==null) return false;
+            if (emaType == null) return false;
         }
         runnerManager.set(emaType.getApplication());
-        Log.d(TAG,"runner="+runnerManager);
+        Log.d(TAG, "runner=" + runnerManager);
         final EMAType finalEmaType = emaType;
-        notifierManager.set(emaType, new Callback() {
-            @Override
-            public void onResponse(String response) throws DataKitException {
-                Log.d(TAG, "callback received...response=" + response);
-                switch (response) {
-                    case NotificationResponse.OK:
-                    case NotificationResponse.CANCEL:
-                    case NotificationResponse.TIMEOUT:
-                    case NotificationResponse.DELAY_CANCEL:
-                        Log.d(TAG, "matched...runner=" + runnerManager + " response=" + response);
-                        notifierManager.stop();
-                        notifierManager.clear();
-                        runnerManager.start(finalEmaType, response, type);
-                        break;
+        isRunning = true;
+        if (isNotifyRequired) {
+            notifierManager.set(emaType, new Callback() {
+                @Override
+                public void onResponse(String response) throws DataKitException {
+                    Log.d(TAG, "callback received...response=" + response);
+                    switch (response) {
+                        case NotificationResponse.OK:
+                        case NotificationResponse.CANCEL:
+                        case NotificationResponse.TIMEOUT:
+                        case NotificationResponse.DELAY_CANCEL:
+                            Log.d(TAG, "matched...runner=" + runnerManager + " response=" + response);
+                            notifierManager.stop();
+                            notifierManager.clear();
+                            runnerManager.start(finalEmaType, response, type);
+                            break;
+                    }
                 }
-            }
-        });
-        isRunning=true;
-        if(isNotifyRequired){
+            });
             notifierManager.start();
-        }else{
+        } else {
             runnerManager.start(emaType, NotificationResponse.OK, type);
         }
         return true;
     }
+
     protected void log(String status, EMAType emaType, String type) throws DataKitException {
-        if(type.equals("SYSTEM")) {
+        if (type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_DELIVER);
             logInfo.setId(emaType.getId());
@@ -92,7 +93,7 @@ public class DeliveryManager {
     }
 
     protected void logRandom(String status, EMAType emaType, String type) throws DataKitException {
-        if(type.equals("SYSTEM")) {
+        if (type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_DELIVER);
             logInfo.setId(emaType.getId());
@@ -126,6 +127,6 @@ public class DeliveryManager {
             notifierManager.stop();
             notifierManager.clear();
         }
-        isRunning=false;
+        isRunning = false;
     }
 }
