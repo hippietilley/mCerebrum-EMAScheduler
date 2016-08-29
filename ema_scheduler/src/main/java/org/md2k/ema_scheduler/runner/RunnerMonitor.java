@@ -74,18 +74,6 @@ public class RunnerMonitor {
     EMAType emaType;
     Callback callback;
     boolean isStart = false;
-    Runnable runnableTimeOut = new Runnable() {
-        @Override
-        public void run() {
-            if (DateTime.getDateTime() - lastResponseTime < NO_RESPONSE_TIME)
-                handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
-            else {
-                sendData();
-                handler.postDelayed(runnableWaitThenSave, 3000);
-                //clear();
-            }
-        }
-    };
     private MyBroadcastReceiver myReceiver;
     Runnable runnableWaitThenSave = new Runnable() {
         @Override
@@ -95,6 +83,18 @@ public class RunnerMonitor {
             } catch (DataKitException e) {
                 Log.d(TAG, "DataKitException...saveData");
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+            }
+        }
+    };
+    Runnable runnableTimeOut = new Runnable() {
+        @Override
+        public void run() {
+            if (DateTime.getDateTime() - lastResponseTime < NO_RESPONSE_TIME)
+                handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
+            else {
+                sendData();
+                handler.postDelayed(runnableWaitThenSave, 3000);
+                //clear();
             }
         }
     };
@@ -193,11 +193,12 @@ public class RunnerMonitor {
 
     void showIncentive() throws DataKitException {
         Log.d(TAG, "showIncentiveRules..ema_status=" + ema.status + " rules=" + emaType.getIncentive_rules());
-        if (!type.equals("SYSTEM")) return;
-        if (!ema.status.equals((LogInfo.STATUS_RUN_COMPLETED))) return;
-        if (emaType.getIncentive_rules() == null) return;
-        IncentiveManager incentiveManager = new IncentiveManager(context, emaType);
-        incentiveManager.start();
+        Log.w(TAG, "ShowIncentive (type=" + type + ", ema_status=" + ema.status + " incentive_size=" + emaType.getIncentive_rules().length + ")");
+        if (type.equals("SYSTEM") && ema.status.equals((LogInfo.STATUS_RUN_COMPLETED)) && emaType.getIncentive_rules() != null) {
+            Log.w(TAG, "ShowIncentive calculate...");
+            IncentiveManager incentiveManager = new IncentiveManager(context, emaType);
+            incentiveManager.start();
+        }
     }
 
     void saveToDataKit() throws DataKitException {

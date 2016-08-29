@@ -87,8 +87,4 @@ public class EMAType implements Serializable {
     public IncentiveRule[] getIncentive_rules() {
         return incentive_rules;
     }
-
-    public void setIncentive_rules(IncentiveRule[] incentive_rules) {
-        this.incentive_rules = incentive_rules;
-    }
 }
