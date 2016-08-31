@@ -74,18 +74,6 @@ public class RunnerMonitor {
     EMAType emaType;
     Callback callback;
     boolean isStart = false;
-    private MyBroadcastReceiver myReceiver;
-    Runnable runnableWaitThenSave = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
-            } catch (DataKitException e) {
-                Log.d(TAG, "DataKitException...saveData");
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
-            }
-        }
-    };
     Runnable runnableTimeOut = new Runnable() {
         @Override
         public void run() {
@@ -98,6 +86,18 @@ public class RunnerMonitor {
             }
         }
     };
+    private MyBroadcastReceiver myReceiver;
+    Runnable runnableWaitThenSave = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
+            } catch (DataKitException e) {
+                Log.d(TAG, "DataKitException...saveData");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+            }
+        }
+    };
 
     public RunnerMonitor(Context context, Callback callback) throws DataKitException {
         this.context = context;
@@ -107,7 +107,7 @@ public class RunnerMonitor {
         handler = new Handler();
     }
 
-    public void start(EMAType emaType, String status, Application application, String type) throws DataKitException {
+    public void start(EMAType emaType, String notificationResponse, Application application, String type) throws DataKitException {
         isStart = true;
         context.registerReceiver(myReceiver, new IntentFilter("org.md2k.ema_scheduler.response"));
         this.type = type;
@@ -118,7 +118,7 @@ public class RunnerMonitor {
         ema.id = application.getId();
         ema.name = application.getName();
         ema.trigger_type = type;
-        switch (status) {
+        switch (notificationResponse) {
             case NotificationResponse.OK:
             case NotificationResponse.DELAY_CANCEL:
                 Intent intent = context.getPackageManager().getLaunchIntentForPackage(application.getPackage_name());
@@ -136,14 +136,14 @@ public class RunnerMonitor {
                 ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
                 ema.end_timestamp = DateTime.getDateTime();
                 log(LogInfo.STATUS_RUN_ABANDONED_BY_USER, "EMA abandoned by user at prompt");
-                saveToDataKit();
+                saveToDataKit(notificationResponse, null);
                 clear();
                 break;
             case NotificationResponse.TIMEOUT:
                 ema.status = LogInfo.STATUS_RUN_MISSED;
                 ema.end_timestamp = DateTime.getDateTime();
                 log(LogInfo.STATUS_RUN_MISSED, "EMA is timed out..at prompt..MISSED");
-                saveToDataKit();
+                saveToDataKit(notificationResponse, null);
                 clear();
                 break;
         }
@@ -191,23 +191,34 @@ public class RunnerMonitor {
         return dataSourceBuilder;
     }
 
-    void showIncentive() throws DataKitException {
-        Log.d(TAG, "showIncentiveRules..ema_status=" + ema.status + " rules=" + emaType.getIncentive_rules());
-        Log.w(TAG, "ShowIncentive (type=" + type + ", ema_status=" + ema.status + " incentive_size=" + emaType.getIncentive_rules().length + ")");
-        if (type.equals("SYSTEM") && ema.status.equals((LogInfo.STATUS_RUN_COMPLETED)) && emaType.getIncentive_rules() != null) {
-            Log.w(TAG, "ShowIncentive calculate...");
-            IncentiveManager incentiveManager = new IncentiveManager(context, emaType);
-            incentiveManager.start();
+    void saveAndShowIncentive(String notificationResponse, String completionResponse) throws DataKitException {
+        if (!type.equals("SYSTEM")) return;
+        IncentiveManager incentiveManager = new IncentiveManager(context);
+        incentiveManager.start(emaType, notificationResponse, completionResponse);
+/*
+        if(emaType.getId().equals("EMI")){
+            if(emaType.getIncentive_rules()!=null && notificationResponse.equals(NotificationResponse.OK)){
+                Log.w(TAG, "ShowIncentive calculate...");
+                IncentiveManager incentiveManager = new IncentiveManager(context);
+                incentiveManager.start(emaType, notificationResponse, completionResponse);
+            }
+        }else {
+            if (ema.status.equals((LogInfo.STATUS_RUN_COMPLETED)) && emaType.getIncentive_rules() != null) {
+                Log.w(TAG, "ShowIncentive calculate...");
+                IncentiveManager incentiveManager = new IncentiveManager(context);
+                incentiveManager.start(emaType, notificationResponse, completionResponse);
+            }
         }
+*/
     }
 
-    void saveToDataKit() throws DataKitException {
+    void saveToDataKit(String notificationResponse, String completionResponse) throws DataKitException {
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(ema)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
         DataSourceClient dataSourceClient = DataKitAPI.getInstance(context).register(createDataSourceBuilder(ema.id));
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
-        showIncentive();
+        saveAndShowIncentive(notificationResponse, completionResponse);
         callback.onResponse(ema.status);
 //        Toast.makeText(this, "Information is Saved", Toast.LENGTH_SHORT).show();
     }
@@ -215,11 +226,12 @@ public class RunnerMonitor {
     public void saveData(JsonArray answer, String status) throws DataKitException {
         ema.end_timestamp = DateTime.getDateTime();
         ema.question_answers = answer;
+        Log.d(TAG, "status=" + status);
         if (status == null) ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
         else
             ema.status = status;
         log(ema.status, ema.status);
-        saveToDataKit();
+        saveToDataKit(NotificationResponse.OK, ema.status);
         clear();
 
     }
@@ -232,6 +244,7 @@ public class RunnerMonitor {
                 if (type.equals("RESULT")) {
                     String answer = intent.getStringExtra("ANSWER");
                     String status = intent.getStringExtra("STATUS");
+                    Log.d(TAG, "result...");
                     JsonParser parser = new JsonParser();
                     JsonElement tradeElement = parser.parse(answer);
                     JsonArray question_answer = tradeElement.getAsJsonArray();

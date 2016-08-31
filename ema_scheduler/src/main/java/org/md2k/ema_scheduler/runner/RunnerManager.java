@@ -48,9 +48,9 @@ public class RunnerManager {
         this.application=application;
     }
 
-    public void start(EMAType emaType, String status, String type) throws DataKitException {
-        Log.d(TAG, "start()...status=" + status + " filename=" + application.getId());
-            runnerMonitor.start(emaType, status, application, type);
+    public void start(EMAType emaType, String notificationResponse, String type) throws DataKitException {
+        Log.d(TAG, "start()...status=" + notificationResponse + " filename=" + application.getId());
+        runnerMonitor.start(emaType, notificationResponse, application, type);
     }
     public void stop(){
         runnerMonitor.clear();

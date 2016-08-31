@@ -22,7 +22,9 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.configuration.IncentiveRule;
+import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.notification.NotificationResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,26 +60,49 @@ public class IncentiveManager {
     protected ConditionManager conditionManager;
     Context context;
     DataSourceClient dataSourceClient;
-    EMAType emaType;
 
-    public IncentiveManager(Context context, EMAType emaType) throws DataKitException {
+    public IncentiveManager(Context context) throws DataKitException {
         this.context = context;
-        this.emaType=emaType;
         conditionManager = ConditionManager.getInstance(context);
         register();
     }
-    public void start() throws DataKitException {
-        Log.d(TAG, "incentiveManager...start()..");
-        if(emaType.getIncentive_rules()==null) return;
-        Log.w(TAG, "IncentiveManager ... check condition...");
+
+    public void start(final EMAType emaType, final String notificationResponse, final String completionResponse) throws DataKitException {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Log.d(TAG, "ematype=" + emaType.getId() + " noti=" + notificationResponse + " com=" + completionResponse);
+                    if (emaType.getIncentive_rules() == null) return;
+                    if (notificationResponse.equals(NotificationResponse.CANCEL) || notificationResponse.equals(NotificationResponse.TIMEOUT))
+                        return;
+                    IncentiveRule incentiveRule = getIncentiveRule(emaType);
+
+                    if (emaType.getType().equals("EMI")) {
+                        Incentive incentive = saveIncentiveToDataKit(emaType, incentiveRule);
+                        if (completionResponse != null && completionResponse.equals(LogInfo.STATUS_RUN_COMPLETED))
+                            show(incentiveRule, incentive);
+                    } else {
+                        if (completionResponse != null && completionResponse.equals(LogInfo.STATUS_RUN_COMPLETED)) {
+                            Incentive incentive = saveIncentiveToDataKit(emaType, incentiveRule);
+                            show(incentiveRule, incentive);
+                        }
+                    }
+                } catch (DataKitException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
+    }
+
+    private IncentiveRule getIncentiveRule(EMAType emaType) throws DataKitException {
         for(int i=0;i<emaType.getIncentive_rules().length;i++){
             if (conditionManager.isValid(emaType.getIncentive_rules()[i].getConditions(), emaType.getType(), emaType.getId())) {
-                Log.w(TAG, "IncentiveManager ... check condition...match");
-                saveIncentiveToDataKitAndShow(emaType, emaType.getIncentive_rules()[i]);
-                break;
+                return emaType.getIncentive_rules()[i];
             }
         }
-        Log.w(TAG, "IncentiveManager ... check condition...end");
+        return null;
     }
 
     public double getLastTotalIncentive() throws DataKitException {
@@ -89,7 +114,7 @@ public class IncentiveManager {
         return incentive.getTotalIncentive();
     }
 
-    public void saveIncentiveToDataKitAndShow(EMAType emaType, IncentiveRule incentiveRule) throws DataKitException {
+    public Incentive saveIncentiveToDataKit(EMAType emaType, IncentiveRule incentiveRule) throws DataKitException {
         Log.d(TAG, "IncentiveManager...saveIncentiveToDataKitAndShow()...");
         Incentive incentive=new Incentive();
         incentive.emaId=emaType.getId();
@@ -103,16 +128,17 @@ public class IncentiveManager {
         Log.d(TAG, "IncentiveManager...saveIncentiveToDataKitAndShow()...insert to datakit...");
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
         Log.d(TAG, "IncentiveManager...saveIncentiveToDataKitAndShow()...insert to datakit...done");
+        return incentive;
+    }
 
-
+    public void show(IncentiveRule incentiveRule, Incentive incentive) throws DataKitException {
         Intent intent = new Intent(context, ActivityIncentive.class);
         intent.putExtra("messages",incentiveRule.getMessages());
         intent.putExtra("total_incentive",incentive.totalIncentive);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
-
-
     }
+
     private void register() throws DataKitException {
         dataSourceClient = DataKitAPI.getInstance(context).register(createDataSourceBuilderLogger());
     }
