@@ -57,7 +57,7 @@ public class DataQualityManager extends Condition {
         long startTimeStamp = getStartTimeStamp(configCondition);
         if (startTimeStamp == -1) return false;
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(1));
-        double percentage = LoggerDataQuality.getInstance(context).getQuality(startTimeStamp, DateTime.getDateTime());
+        double percentage = LoggerDataQuality.getInstance(context).getQuality(startTimeStamp - 60 * 1000, DateTime.getDateTime() - 60 * 1000);
         if (percentage >= limitPercentage) {
             log(configCondition, "true: good_quality:" + String.valueOf(percentage));
             return true;
