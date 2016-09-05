@@ -74,18 +74,6 @@ public class RunnerMonitor {
     EMAType emaType;
     Callback callback;
     boolean isStart = false;
-    Runnable runnableTimeOut = new Runnable() {
-        @Override
-        public void run() {
-            if (DateTime.getDateTime() - lastResponseTime < NO_RESPONSE_TIME)
-                handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
-            else {
-                sendData();
-                handler.postDelayed(runnableWaitThenSave, 3000);
-                //clear();
-            }
-        }
-    };
     private MyBroadcastReceiver myReceiver;
     Runnable runnableWaitThenSave = new Runnable() {
         @Override
@@ -95,6 +83,18 @@ public class RunnerMonitor {
             } catch (DataKitException e) {
                 Log.d(TAG, "DataKitException...saveData");
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
+            }
+        }
+    };
+    Runnable runnableTimeOut = new Runnable() {
+        @Override
+        public void run() {
+            if (DateTime.getDateTime() - lastResponseTime < NO_RESPONSE_TIME)
+                handler.postDelayed(this, DateTime.getDateTime() - lastResponseTime);
+            else {
+                sendData();
+                handler.postDelayed(runnableWaitThenSave, 3000);
+                //clear();
             }
         }
     };

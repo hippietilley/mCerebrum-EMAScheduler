@@ -18,6 +18,7 @@ import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.day.DayManager;
+import org.md2k.ema_scheduler.logger.LoggerDataQuality;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.Report.LogStorage;
@@ -111,6 +112,7 @@ public class ServiceEMAScheduler extends Service {
                 LoggerManager.clear();
                 configuration = Configuration.getInstance();
                 LoggerManager.getInstance(getApplicationContext());
+                LoggerDataQuality.getInstance(getApplicationContext()).start();
                 try {
                     dayManager = new DayManager(getApplicationContext());
                     dayManager.start();
@@ -126,6 +128,7 @@ public class ServiceEMAScheduler extends Service {
     synchronized void clear() {
         if (isStopping) return;
         stopForeground(true);
+        LoggerDataQuality.getInstance(getApplicationContext()).stop();
         isStopping = true;
         Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",service_stop");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
