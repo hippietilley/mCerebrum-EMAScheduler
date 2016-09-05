@@ -83,6 +83,7 @@ public class LoggerDataQuality {
                 if (dataSourceClientArrayList.size() == 0) handler.postDelayed(this, 1000);
                 else {
                     dataSourceClient = dataSourceClientArrayList.get(0);
+                    Arrays.fill(dataQuality, -1);
                     prepare();
                     handler.postDelayed(runnableCurrent, MINUTE);
                 }
@@ -126,8 +127,7 @@ public class LoggerDataQuality {
                 Arrays.fill(values, 0);
                 try {
                     long curTimeStamp = DateTime.getDateTime();
-                    long prevTimeStamp = curTimeStamp - 24 * 60 * 60 * 1000;
-                    for (long now = prevTimeStamp; now < curTimeStamp; now += 30 * 60 * 1000) {
+                    for (long now = curTimeStamp - 24 * 60 * 60 * 1000; now < curTimeStamp; now += 30 * 60 * 1000) {
                         dataTypes = DataKitAPI.getInstance(context).query(dataSourceClient, now, now + 30 * 60 * 1000);
                         Log.d(TAG, "now = " + now + " datasize=" + dataTypes.size());
 
@@ -140,7 +140,8 @@ public class LoggerDataQuality {
                         }
                     }
                     for (int i = 0; i < 1440; i++)
-                        if (values[i] >= 14) dataQuality[i] = DATA_QUALITY.GOOD;
+                        if (values[i] >= 14 && dataQuality[i] == -1)
+                            dataQuality[i] = DATA_QUALITY.GOOD;
                         else dataQuality[i] = DATA_QUALITY.BAD;
                 } catch (DataKitException e) {
                     e.printStackTrace();
@@ -153,9 +154,9 @@ public class LoggerDataQuality {
         int count = 0;
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(startTimeStamp);
-        int sIndex = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
+        int sIndex = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE) - 1;
         calendar.setTimeInMillis(endTimeStamp);
-        int eIndex = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
+        int eIndex = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE) - 1;
         for (int i = sIndex; i <= eIndex; i++) {
             if (dataQuality[i] == DATA_QUALITY.GOOD) {
                 count++;
