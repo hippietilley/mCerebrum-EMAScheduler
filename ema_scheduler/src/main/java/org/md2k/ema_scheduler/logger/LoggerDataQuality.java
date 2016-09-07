@@ -140,7 +140,7 @@ public class LoggerDataQuality {
                         }
                     }
                     for (int i = 0; i < 1440; i++)
-                        if (values[i] >= 14 && dataQuality[i] == -1)
+                        if (values[i] >= 10 && dataQuality[i] == -1)
                             dataQuality[i] = DATA_QUALITY.GOOD;
                         else dataQuality[i] = DATA_QUALITY.BAD;
                 } catch (DataKitException e) {
