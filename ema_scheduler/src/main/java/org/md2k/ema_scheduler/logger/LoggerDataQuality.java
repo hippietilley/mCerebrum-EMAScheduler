@@ -132,6 +132,7 @@ public class LoggerDataQuality {
                         Log.d(TAG, "now = " + now + " datasize=" + dataTypes.size());
 
                         for (int i = 0; i < dataTypes.size(); i++) {
+                            if (!(dataTypes.get(i) instanceof DataTypeInt)) continue;
                             DataTypeInt dataTypeInt = (DataTypeInt) dataTypes.get(i);
                             calendar.setTimeInMillis(dataTypeInt.getDateTime());
                             index = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);

@@ -15,17 +15,20 @@ import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.messagehandler.ResultCallback;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
+import org.md2k.utilities.permission.PermissionInfo;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -69,6 +72,21 @@ public class ActivityMain extends AppCompatActivity {
         Fabric.with(this, crashlyticsKit, new Crashlytics());
 
         setContentView(R.layout.activity_main);
+        PermissionInfo permissionInfo = new PermissionInfo();
+        permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
+            @Override
+            public void onResult(Boolean result) {
+                if (!result) {
+                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    load();
+                }
+            }
+        });
+    }
+
+    void load() {
         final Button buttonService = (Button) findViewById(R.id.button_app_status);
 
         buttonService.setOnClickListener(new View.OnClickListener() {
