@@ -73,7 +73,7 @@ public class DayManager {
                     schedulerManager.start(dayStartTime, dayEndTime);
                 }
             } catch (DataKitException e) {
-                Log.d(TAG,"DataKitException...runnableDay");
+                Log.w(TAG,"DataKitException...runnableDay");
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
@@ -117,7 +117,7 @@ public class DayManager {
                             LoggerManager.getInstance(context).reset(dayStartTime);
                             schedulerManager.setDayStartTimestamp(dayStartTime);
                         } catch (DataKitException e) {
-                            Log.d(TAG,"DataKitException...schedulerManager.setDayStartTimestamp");
+                            Log.w(TAG,"DataKitException...schedulerManager.setDayStartTimestamp");
                             LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
 
                         }
@@ -142,7 +142,7 @@ public class DayManager {
                         try {
                             schedulerManager.setDayEndTimestamp(dayEndTime);
                         } catch (DataKitException e) {
-                            Log.d(TAG,"DataKitException...schedulerManager...setDayEndTimestamp");
+                            Log.w(TAG,"DataKitException...schedulerManager...setDayEndTimestamp");
                             LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
 
                         }

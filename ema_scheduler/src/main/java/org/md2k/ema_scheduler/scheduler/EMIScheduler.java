@@ -77,6 +77,7 @@ public class EMIScheduler extends Scheduler {
                     subscribeStress();
                 }
             } catch (DataKitException e) {
+                Log.w(TAG,"DataKitException...runnableStressClassification...");
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
@@ -163,7 +164,7 @@ public class EMIScheduler extends Scheduler {
                     if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId()))
                         deliverIfProbability();
                 } catch (DataKitException e) {
-                    Log.d(TAG, "DataKitException...deliverIfProbability()");
+                    Log.w(TAG, "DataKitException...deliverIfProbability()");
                     LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
 
                 }
@@ -184,7 +185,7 @@ public class EMIScheduler extends Scheduler {
                         try {
                             prepareAndDeliver(dataType);
                         } catch (DataKitException e) {
-                            Log.d(TAG, "DataKitException...prepareAndDeliver...");
+                            Log.w(TAG, "DataKitException...prepareAndDeliver...");
                             LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
                         }
                     }

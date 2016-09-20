@@ -1,7 +1,9 @@
 package org.md2k.ema_scheduler.logger;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
@@ -10,6 +12,7 @@ import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 import org.md2k.ema_scheduler.configuration.Configuration;
@@ -80,15 +83,18 @@ public class LoggerDataQuality {
                 if (dataSourceBuilder == null)
                     return;
                 ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(context).find(dataSourceBuilder);
-                if (dataSourceClientArrayList.size() == 0) handler.postDelayed(this, 1000);
+                if (dataSourceClientArrayList.size() == 0)
+                    handler.postDelayed(this, 1000);
                 else {
                     dataSourceClient = dataSourceClientArrayList.get(0);
                     Arrays.fill(dataQuality, -1);
                     prepare();
                     handler.postDelayed(runnableCurrent, MINUTE);
                 }
-            } catch (DataKitException ignored) {
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
+
         }
     };
 
@@ -127,8 +133,8 @@ public class LoggerDataQuality {
                 Arrays.fill(values, 0);
                 try {
                     long curTimeStamp = DateTime.getDateTime();
-                    for (long now = curTimeStamp - 24 * 60 * 60 * 1000; now < curTimeStamp; now += 30 * 60 * 1000) {
-                        dataTypes = DataKitAPI.getInstance(context).query(dataSourceClient, now, now + 30 * 60 * 1000);
+                    for (long now = curTimeStamp - 24 * 60 * 60 * 1000; now < curTimeStamp; now += 20 * 60 * 1000) {
+                        dataTypes = DataKitAPI.getInstance(context).query(dataSourceClient, now, now + 20 * 60 * 1000);
                         Log.d(TAG, "now = " + now + " datasize=" + dataTypes.size());
 
                         for (int i = 0; i < dataTypes.size(); i++) {
@@ -145,7 +151,7 @@ public class LoggerDataQuality {
                             dataQuality[i] = DATA_QUALITY.GOOD;
                         else dataQuality[i] = DATA_QUALITY.BAD;
                 } catch (DataKitException e) {
-                    e.printStackTrace();
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
                 }
             }
         }).start();
@@ -168,19 +174,19 @@ public class LoggerDataQuality {
 
     private int getCurrentQuality(long startTimeStamp, long endTimeStamp) {
         int count = 0;
-        ArrayList<DataType> dataTypes = null;
+        ArrayList<DataType> dataTypes;
         try {
             dataTypes = DataKitAPI.getInstance(context).query(dataSourceClient, startTimeStamp, endTimeStamp);
             for (int i = 0; i < dataTypes.size(); i++) {
+                if (!(dataTypes.get(i) instanceof DataTypeInt)) continue;
                 int curQuality = ((DataTypeInt) dataTypes.get(i)).getSample();
                 if (isWearing(curQuality))
                     count++;
             }
-        } catch (DataKitException ignored) {
-
+        } catch (DataKitException e) {
+            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
         }
-        Log.d(TAG, "datatypes.size()=" + dataTypes.size() + " count=" + count);
-        if (count >= 14) return DATA_QUALITY.GOOD;
+        if (count >= 10) return DATA_QUALITY.GOOD;
         return DATA_QUALITY.BAD;
     }
 

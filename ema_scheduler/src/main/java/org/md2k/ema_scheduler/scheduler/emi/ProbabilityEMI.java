@@ -109,7 +109,7 @@ public class ProbabilityEMI {
         Random generator = new Random();
         double number = generator.nextDouble();
         emiInfo.random = number;
-        if (number <= emiInfo.probability) emiInfo.isTriggered = true;
+        if (number >= emiInfo.probability) emiInfo.isTriggered = true;
         else emiInfo.isTriggered = false;
         emiHistoryManager.insert(emiInfo);
         return emiInfo.isTriggered;
