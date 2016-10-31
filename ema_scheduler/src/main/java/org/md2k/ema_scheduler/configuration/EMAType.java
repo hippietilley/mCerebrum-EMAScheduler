@@ -36,16 +36,16 @@ public class EMAType implements Serializable {
     public static final String ID_STRESS_EMA ="STRESS_EMA";
     public static final String ID_END_OF_DAY_EMA="END_OF_DAY_EMA";
     public static final String ID_EMI="EMI";
-    String id;
-    String type;
-    String trigger_type;
-    String name;
-    boolean enable;
-    Application application;
-    Block[] blocks;
-    SchedulerRule[] scheduler_rules;
-    Notification[] notifications;
-    IncentiveRule[] incentive_rules;
+    private String id;
+    private String type;
+    private String trigger_type;
+    private String name;
+    private boolean enable;
+    private Application application;
+    private Block[] blocks;
+    private SchedulerRule[] scheduler_rules;
+    private Notification[] notifications;
+    private IncentiveRule[] incentive_rules;
 
 
     public String getId() {

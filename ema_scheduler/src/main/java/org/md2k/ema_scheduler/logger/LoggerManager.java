@@ -59,11 +59,11 @@ import java.util.Iterator;
 public class LoggerManager {
     private static final String TAG = LoggerManager.class.getSimpleName();
     private static LoggerManager instance;
-    Context context;
-    DataKitAPI dataKitAPI;
-    DataSourceBuilder dataSourceBuilderLogger;
-    DataSourceClient dataSourceClientLogger;
-    ArrayList<LogInfo> logInfos;
+    private Context context;
+    private DataKitAPI dataKitAPI;
+    private DataSourceBuilder dataSourceBuilderLogger;
+    private DataSourceClient dataSourceClientLogger;
+    private ArrayList<LogInfo> logInfos;
 
     private LoggerManager(Context context) throws DataKitException {
         Log.d(TAG,"LoggerManager()...");
@@ -159,7 +159,7 @@ public class LoggerManager {
 
     }
 
-    DataSourceBuilder createDataSourceBuilderLogger() {
+    private DataSourceBuilder createDataSourceBuilderLogger() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.LOG).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Log");

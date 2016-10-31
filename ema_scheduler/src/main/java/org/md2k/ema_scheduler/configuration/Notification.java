@@ -29,8 +29,8 @@ import java.io.Serializable;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Notification implements Serializable {
-    long time;
-    String [] types;
+    private long time;
+    private String [] types;
 
     public long getTime() {
         return time;

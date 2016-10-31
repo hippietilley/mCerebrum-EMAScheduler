@@ -29,11 +29,11 @@ import java.io.Serializable;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Application implements Serializable {
-    String id;
-    String name;
-    String file_name;
-    String package_name;
-    long timeout;
+    private String id;
+    private String name;
+    private String file_name;
+    private String package_name;
+    private long timeout;
 
     public String getPackage_name() {
         return package_name;

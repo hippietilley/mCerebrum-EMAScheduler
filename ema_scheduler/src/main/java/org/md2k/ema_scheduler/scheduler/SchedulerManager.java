@@ -38,12 +38,12 @@ import java.util.ArrayList;
  */
 public class SchedulerManager {
     private static final String TAG = SchedulerManager.class.getSimpleName();
-    Context context;
-    Configuration configuration;
-    ArrayList<Scheduler> scheduler;
-    DeliveryManager deliveryManager;
+    private Context context;
+    private Configuration configuration;
+    private ArrayList<Scheduler> scheduler;
+    private DeliveryManager deliveryManager;
 
-    boolean isStarted;
+    private boolean isStarted;
 
     public SchedulerManager(Context context) throws DataKitException {
         Log.d(TAG, "SchedulerManager()...");

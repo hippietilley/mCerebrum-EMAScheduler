@@ -60,33 +60,22 @@ import org.md2k.utilities.data_format.notification.NotificationResponse;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class RunnerMonitor {
-    public static final long NO_RESPONSE_TIME = 35000;
+class RunnerMonitor {
+    private static final long NO_RESPONSE_TIME = 35000;
 
     private static final String TAG = RunnerMonitor.class.getSimpleName();
-    Handler handler;
-    Context context;
-    long lastResponseTime;
-    String message;
-    String type;
-    Application application;
-    EMA ema;
-    EMAType emaType;
-    Callback callback;
-    boolean isStart = false;
+    private Handler handler;
+    private Context context;
+    private long lastResponseTime;
+    private String message;
+    private String type;
+    private Application application;
+    private EMA ema;
+    private EMAType emaType;
+    private Callback callback;
+    private boolean isStart = false;
     private MyBroadcastReceiver myReceiver;
-    Runnable runnableWaitThenSave = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
-            } catch (DataKitException e) {
-                Log.d(TAG, "DataKitException...saveData");
-                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
-            }
-        }
-    };
-    Runnable runnableTimeOut = new Runnable() {
+    private Runnable runnableTimeOut = new Runnable() {
         @Override
         public void run() {
             if (DateTime.getDateTime() - lastResponseTime < NO_RESPONSE_TIME)
@@ -95,6 +84,17 @@ public class RunnerMonitor {
                 sendData();
                 handler.postDelayed(runnableWaitThenSave, 3000);
                 //clear();
+            }
+        }
+    };
+    private Runnable runnableWaitThenSave = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                saveData(null, LogInfo.STATUS_RUN_ABANDONED_BY_TIMEOUT);
+            } catch (DataKitException e) {
+                Log.d(TAG, "DataKitException...saveData");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
     };
@@ -161,7 +161,7 @@ public class RunnerMonitor {
         isStart = false;
     }
 
-    protected void log(String status, String message) throws DataKitException {
+    private void log(String status, String message) throws DataKitException {
         if (type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_RUN);
@@ -174,7 +174,7 @@ public class RunnerMonitor {
         }
     }
 
-    void sendData() {
+    private void sendData() {
         Intent intent = new Intent();
         intent.setAction("org.md2k.ema.operation");
         intent.putExtra("TYPE", "TIMEOUT");
@@ -182,7 +182,7 @@ public class RunnerMonitor {
         context.sendBroadcast(intent);
     }
 
-    DataSourceBuilder createDataSourceBuilder(String id) {
+    private DataSourceBuilder createDataSourceBuilder(String id) {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EMA).setPlatform(platform).setId(id);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "EMA");
@@ -191,7 +191,7 @@ public class RunnerMonitor {
         return dataSourceBuilder;
     }
 
-    void saveAndShowIncentive(String notificationResponse, String completionResponse) throws DataKitException {
+    private void saveAndShowIncentive(String notificationResponse, String completionResponse) throws DataKitException {
         if (!type.equals("SYSTEM")) return;
         IncentiveManager incentiveManager = new IncentiveManager(context);
         incentiveManager.start(emaType, notificationResponse, completionResponse);
@@ -212,7 +212,7 @@ public class RunnerMonitor {
 */
     }
 
-    void saveToDataKit(String notificationResponse, String completionResponse) throws DataKitException {
+    private void saveToDataKit(String notificationResponse, String completionResponse) throws DataKitException {
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(ema)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
@@ -223,7 +223,7 @@ public class RunnerMonitor {
 //        Toast.makeText(this, "Information is Saved", Toast.LENGTH_SHORT).show();
     }
 
-    public void saveData(JsonArray answer, String status) throws DataKitException {
+    private void saveData(JsonArray answer, String status) throws DataKitException {
         ema.end_timestamp = DateTime.getDateTime();
         ema.question_answers = answer;
         Log.d(TAG, "status=" + status);

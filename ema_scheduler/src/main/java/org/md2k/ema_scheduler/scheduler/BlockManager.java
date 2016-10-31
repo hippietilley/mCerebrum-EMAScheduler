@@ -30,9 +30,9 @@ import org.md2k.ema_scheduler.configuration.Block;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class BlockManager {
-    Context context;
-    Block[] blocks;
+class BlockManager {
+    private Context context;
+    private Block[] blocks;
     public BlockManager(Context context, Block[] blocks){
         this.blocks = blocks;
         this.context=context;

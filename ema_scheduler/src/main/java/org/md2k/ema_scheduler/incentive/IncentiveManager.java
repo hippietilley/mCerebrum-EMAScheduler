@@ -57,9 +57,9 @@ import java.util.HashMap;
  */
 public class IncentiveManager {
     private static final String TAG = IncentiveManager.class.getSimpleName();
-    protected ConditionManager conditionManager;
-    Context context;
-    DataSourceClient dataSourceClient;
+    private ConditionManager conditionManager;
+    private Context context;
+    private DataSourceClient dataSourceClient;
 
     public IncentiveManager(Context context) throws DataKitException {
         this.context = context;
@@ -107,7 +107,7 @@ public class IncentiveManager {
         return incentive.getTotalIncentive();
     }
 
-    public Incentive saveIncentiveToDataKit(EMAType emaType, IncentiveRule incentiveRule) throws DataKitException {
+    private Incentive saveIncentiveToDataKit(EMAType emaType, IncentiveRule incentiveRule) throws DataKitException {
         Log.d(TAG, "IncentiveManager...saveIncentiveToDataKitAndShow()...");
         Incentive incentive = new Incentive();
         incentive.emaId = emaType.getId();
@@ -123,8 +123,24 @@ public class IncentiveManager {
         Log.d(TAG, "IncentiveManager...saveIncentiveToDataKitAndShow()...insert to datakit...done");
         return incentive;
     }
+    public Incentive saveIncentiveAdminToDataKit(double incentiveValue) throws DataKitException {
+        Log.d(TAG, "IncentiveManager...saveIncentiveToDataKitAndShow()...");
+        Incentive incentive = new Incentive();
+        incentive.emaId = "ADMIN";
+        incentive.emaType = "ADMIN";
+        incentive.timeStamp = DateTime.getDateTime();
+        incentive.incentive = incentiveValue;
+        incentive.totalIncentive = getLastTotalIncentive() + incentive.getIncentive();
+        Gson gson = new Gson();
+        JsonObject sample = new JsonParser().parse(gson.toJson(incentive)).getAsJsonObject();
+        DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
+        Log.d(TAG, "IncentiveManager...saveIncentiveToDataKitAndShow()...insert to datakit...");
+        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
+        Log.d(TAG, "IncentiveManager...saveIncentiveToDataKitAndShow()...insert to datakit...done");
+        return incentive;
+    }
 
-    public void show(IncentiveRule incentiveRule, Incentive incentive) throws DataKitException {
+    private void show(IncentiveRule incentiveRule, Incentive incentive) throws DataKitException {
         Intent intent = new Intent(context, ActivityIncentive.class);
         intent.putExtra("messages", incentiveRule.getMessages());
         intent.putExtra("total_incentive", incentive.totalIncentive);
@@ -136,7 +152,7 @@ public class IncentiveManager {
         dataSourceClient = DataKitAPI.getInstance(context).register(createDataSourceBuilderLogger());
     }
 
-    DataSourceBuilder createDataSourceBuilderLogger() {
+    private DataSourceBuilder createDataSourceBuilderLogger() {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.INCENTIVE).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "Incentive");

@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Incentive">
+        <Preference
+            android:enabled="false"
+            android:key="key_current_incentive"
+            android:title="Total Incentive"
+            >
+        </Preference>
+        <EditTextPreference
+            android:key="key_update_incentive"
+            android:title="Add Incentive"
+            >
+        </EditTextPreference>
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,4 +1,4 @@
-version = '1.2.5'
+version = '1.2.6'
 apply from: 'versioning.gradle'
 
 buildscript {
@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.22.0'
     }
 }
 apply plugin: 'com.android.application'

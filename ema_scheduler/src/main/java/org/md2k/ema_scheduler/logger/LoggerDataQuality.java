@@ -53,10 +53,10 @@ public class LoggerDataQuality {
     private static final String TAG = LoggerDataQuality.class.getSimpleName();
     private static final long MINUTE = 60 * 1000;
     private static LoggerDataQuality instance;
-    Context context;
-    int[] dataQuality = new int[60 * 24];
-    Handler handler;
-    DataSourceClient dataSourceClient;
+    private Context context;
+    private int[] dataQuality = new int[60 * 24];
+    private Handler handler;
+    private DataSourceClient dataSourceClient;
     private Runnable runnableCurrent = new Runnable() {
         @Override
         public void run() {
@@ -68,7 +68,7 @@ public class LoggerDataQuality {
             handler.postDelayed(this, MINUTE);
         }
     };
-    Runnable runnableInitialize = new Runnable() {
+    private Runnable runnableInitialize = new Runnable() {
         @Override
         public void run() {
             try {
@@ -122,7 +122,7 @@ public class LoggerDataQuality {
         handler.removeCallbacks(runnableCurrent);
     }
 
-    void prepare() {
+    private void prepare() {
         new Thread(new Runnable() {
             @Override
             public void run() {

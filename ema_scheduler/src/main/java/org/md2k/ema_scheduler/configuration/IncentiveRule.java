@@ -29,9 +29,9 @@ import java.io.Serializable;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class IncentiveRule implements Serializable {
-    double incentive;
-    String[] messages;
-    String[] conditions;
+    private double incentive;
+    private String[] messages;
+    private String[] conditions;
 
     public double getIncentive() {
         return incentive;

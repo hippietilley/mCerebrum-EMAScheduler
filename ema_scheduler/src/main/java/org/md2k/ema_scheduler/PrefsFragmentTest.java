@@ -46,7 +46,7 @@ import org.md2k.ema_scheduler.configuration.EMAType;
  */
 
 public class PrefsFragmentTest extends PreferenceFragment {
-    Configuration configuration;
+    private Configuration configuration;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

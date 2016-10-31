@@ -39,8 +39,8 @@ import org.md2k.utilities.Report.Log;
  */
 public class EndOfDayEMAScheduler extends Scheduler {
     private static final String TAG = EndOfDayEMAScheduler.class.getSimpleName();
-    Handler handler;
-    Runnable runnableStartDelivery = new Runnable() {
+    private Handler handler;
+    private Runnable runnableStartDelivery = new Runnable() {
         @Override
         public void run() {
             try {

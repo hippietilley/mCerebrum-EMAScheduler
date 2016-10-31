@@ -48,13 +48,14 @@ import java.util.ArrayList;
  */
 public class DayManager {
     private static final String TAG = DayManager.class.getSimpleName();
-    Context context;
-    long dayStartTime, dayEndTime;
-    DataSourceClient dataSourceClientDayStart;
-    DataSourceClient dataSourceClientDayEnd;
-    SchedulerManager schedulerManager;
-    Handler handler;
-    Runnable runnableDay = new Runnable() {
+    private Context context;
+    private long dayStartTime;
+    private long dayEndTime;
+    private DataSourceClient dataSourceClientDayStart;
+    private DataSourceClient dataSourceClientDayEnd;
+    private SchedulerManager schedulerManager;
+    private Handler handler;
+    private Runnable runnableDay = new Runnable() {
         @Override
         public void run() {
             ArrayList<DataSourceClient> dataSourceClients = null;
@@ -102,7 +103,7 @@ public class DayManager {
         schedulerManager.stop();
     }
 
-    public void subscribeDayStart() throws DataKitException {
+    private void subscribeDayStart() throws DataKitException {
         Log.d(TAG, "subscribeDayStart()...");
         DataKitAPI.getInstance(context).subscribe(dataSourceClientDayStart, new OnReceiveListener() {
             @Override
@@ -128,7 +129,7 @@ public class DayManager {
         });
     }
 
-    public void subscribeDayEnd() throws DataKitException {
+    private void subscribeDayEnd() throws DataKitException {
         Log.d(TAG, "subscribeDayEnd()...");
         DataKitAPI.getInstance(context).subscribe(dataSourceClientDayEnd, new OnReceiveListener() {
             @Override

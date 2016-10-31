@@ -55,9 +55,9 @@ import org.md2k.utilities.permission.PermissionInfo;
 public class ServiceEMAScheduler extends Service {
     public static final String BROADCAST_MSG = ServiceEMAScheduler.class.getSimpleName();
     private static final String TAG = ServiceEMAScheduler.class.getSimpleName();
-    DataKitAPI dataKitAPI;
-    Configuration configuration;
-    DayManager dayManager;
+    private DataKitAPI dataKitAPI;
+    private Configuration configuration;
+    private DayManager dayManager;
     private boolean isStopping;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -87,7 +87,7 @@ public class ServiceEMAScheduler extends Service {
         });
     }
 
-    void load() {
+    private void load() {
 
         LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
         Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",service_start");
@@ -143,7 +143,7 @@ public class ServiceEMAScheduler extends Service {
         });
     }
 
-    synchronized void clear() {
+    private synchronized void clear() {
         if (isStopping) return;
         stopForeground(true);
         LoggerDataQuality.getInstance(getApplicationContext()).stop();
