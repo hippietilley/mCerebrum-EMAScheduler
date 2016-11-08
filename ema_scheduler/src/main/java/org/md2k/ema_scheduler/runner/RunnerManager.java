@@ -36,9 +36,9 @@ import org.md2k.utilities.Report.Log;
  */
 public class RunnerManager {
     private static final String TAG = RunnerManager.class.getSimpleName();
-    Context context;
-    RunnerMonitor runnerMonitor;
-    Application application;
+    private Context context;
+    private RunnerMonitor runnerMonitor;
+    private Application application;
 
     public RunnerManager(Context context, Callback callback) throws DataKitException {
         this.context = context;

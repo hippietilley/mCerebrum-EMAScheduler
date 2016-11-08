@@ -1,14 +1,14 @@
 package org.md2k.ema_scheduler;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-import org.md2k.ema_scheduler.configuration.Configuration;
-import org.md2k.ema_scheduler.configuration.EMAType;
-/*
+import org.md2k.datakitapi.messagehandler.ResultCallback;
+import org.md2k.utilities.permission.PermissionInfo;
+
+/**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
@@ -35,54 +35,37 @@ import org.md2k.ema_scheduler.configuration.EMAType;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ActivityTest extends AppCompatActivity {
-    private static final String TAG = ActivityTest.class.getSimpleName();
-    private Configuration configuration;
+public class ActivityIncentiveSettings extends AppCompatActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getIntent().hasExtra("package_name")) {
-            configuration = Configuration.getInstance();
-            String packageName = getIntent().getStringExtra("package_name");
-            EMAType emaType = findEMAType(packageName);
-            if (emaType != null) {
-                Intent intent = new Intent(Constants.INTENT_USER);
-                intent.putExtra(EMAType.class.getSimpleName(), emaType);
-                intent.putExtra("is_notify", false);
-                intent.putExtra("type", "USER");
-                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                finish();
+        PermissionInfo permissionInfo = new PermissionInfo();
+        permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
+            @Override
+            public void onResult(Boolean result) {
+                if (!result) {
+                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    setContentView(R.layout.activity_incentive_settings);
+                    getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
+                            new PrefsFragmentIncentiveSettings()).commit();
+                }
             }
-        } else {
-            setContentView(R.layout.activity_test);
-            getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
-                    new PrefsFragmentTest()).commit();
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setDisplayShowTitleEnabled(true);
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            }
+        });
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
             case android.R.id.home:
                 finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
-    private EMAType findEMAType(String packageName) {
-        if (packageName == null) return null;
-        if (packageName.length() == 0) return null;
-        EMAType emaTypes[] = configuration.getEma_types();
-        for (EMAType emaType : emaTypes) {
-            if (emaType.getApplication() == null) continue;
-            if (emaType.getApplication().getPackage_name().equals(packageName)) return emaType;
-        }
-        return null;
-    }
-
 }

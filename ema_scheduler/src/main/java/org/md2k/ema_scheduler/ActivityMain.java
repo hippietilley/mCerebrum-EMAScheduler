@@ -15,17 +15,20 @@ import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.messagehandler.ResultCallback;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.logger.LogInfo;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Apps;
 import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
+import org.md2k.utilities.permission.PermissionInfo;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -35,8 +38,8 @@ import io.fabric.sdk.android.Fabric;
 
 public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
-    Handler mHandler = new Handler();
-    Runnable runnable = new Runnable() {
+    private Handler mHandler = new Handler();
+    private Runnable runnable = new Runnable() {
         @Override
         public void run() {
             {
@@ -69,6 +72,21 @@ public class ActivityMain extends AppCompatActivity {
         Fabric.with(this, crashlyticsKit, new Crashlytics());
 
         setContentView(R.layout.activity_main);
+        PermissionInfo permissionInfo = new PermissionInfo();
+        permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
+            @Override
+            public void onResult(Boolean result) {
+                if (!result) {
+                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    load();
+                }
+            }
+        });
+    }
+
+    private void load() {
         final Button buttonService = (Button) findViewById(R.id.button_app_status);
 
         buttonService.setOnClickListener(new View.OnClickListener() {
@@ -123,6 +141,8 @@ public class ActivityMain extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.action_settings:
+                intent = new Intent(this, ActivityIncentiveSettings.class);
+                startActivity(intent);
                 break;
 
         }
@@ -141,7 +161,7 @@ public class ActivityMain extends AppCompatActivity {
         super.onPause();
     }
 
-    void updateTable() {
+    private void updateTable() {
         if (!DataKitAPI.getInstance(getApplicationContext()).isConnected()) return;
         long curTime = DateTime.getDateTime();
         LogInfo logInfo;
@@ -159,7 +179,7 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    String formatTime(long timestamp) {
+    private String formatTime(long timestamp) {
         try {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(timestamp);
@@ -171,7 +191,7 @@ public class ActivityMain extends AppCompatActivity {
         return "";
     }
 
-    void createTable() {
+    private void createTable() {
         TableLayout ll = (TableLayout) findViewById(R.id.tableLayout);
         ll.removeAllViews();
         ll.addView(createDefaultRow());
@@ -199,7 +219,7 @@ public class ActivityMain extends AppCompatActivity {
 
     }
 
-    TableRow createDefaultRow() {
+    private TableRow createDefaultRow() {
         TableRow row = new TableRow(this);
         TextView tvDate = new TextView(this);
         tvDate.setText("Date/Time");

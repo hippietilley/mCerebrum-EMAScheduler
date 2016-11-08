@@ -42,9 +42,9 @@ import java.lang.reflect.Type;
  */
 public class Configuration{
     private static Configuration instance = null;
-    EMAType[] ema_types;
-    NotificationRequests notification_option;
-    ConfigCondition[] conditions;
+    private EMAType[] ema_types;
+    private NotificationRequests notification_option;
+    private ConfigCondition[] conditions;
 
     private Configuration() {
         readEMATypes();

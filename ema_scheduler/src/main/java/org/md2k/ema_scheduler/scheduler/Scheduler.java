@@ -42,18 +42,18 @@ import java.util.Date;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-abstract public class Scheduler {
+abstract class Scheduler {
     private static final String TAG = Scheduler.class.getSimpleName();
-    protected Context context;
-    protected EMAType emaType;
-    protected ConditionManager conditionManager;
-    protected long dayStartTimestamp;
-    protected long dayEndTimestamp;
+    Context context;
+    EMAType emaType;
+    ConditionManager conditionManager;
+    long dayStartTimestamp;
+    long dayEndTimestamp;
     LoggerManager loggerManager;
     DeliveryManager deliveryManager;
     BlockManager blockManager;
 
-    public Scheduler(Context context, EMAType emaType, DeliveryManager deliveryManager) throws DataKitException {
+    Scheduler(Context context, EMAType emaType, DeliveryManager deliveryManager) throws DataKitException {
         this.context=context;
         this.emaType=emaType;
         this.deliveryManager = deliveryManager;
@@ -72,16 +72,16 @@ abstract public class Scheduler {
     abstract public void setDayStartTimestamp(long dayStartTimestamp) throws DataKitException;
     abstract public void setDayEndTimestamp(long dayEndTimestamp) throws DataKitException;
 
-    public boolean startDelivery() throws DataKitException {
+    boolean startDelivery() throws DataKitException {
         Log.d(TAG, "startDelivery...emaType="+emaType.getType()+" emaId="+emaType.getId());
         return deliveryManager.start(emaType, true, "SYSTEM");
     }
 
-    public void stopDelivery(){
+    void stopDelivery(){
         Log.d(TAG, "stopDelivery...");
         deliveryManager.stop();
     }
-    protected void sendToLogInfo(String status, long scheduledTime) throws DataKitException {
+    void sendToLogInfo(String status, long scheduledTime) throws DataKitException {
         LogSchedule logSchedule = new LogSchedule();
         logSchedule.setScheduleTimestamp(scheduledTime);
         LogInfo logInfo = new LogInfo();

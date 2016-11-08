@@ -36,13 +36,13 @@ public class SchedulerRule implements Serializable {
     public static final String TIME_BLOCK_START ="BLOCK_START";
     public static final String TIME_BLOCK_END ="BLOCK_END";
     public static final String TIME_LAST_SCHEDULE="LAST_SCHEDULE";
-    String type;
-    String start_time;
-    String end_time;
-    int divide;
-    DataSource data_source;
-    String[] parameters;
-    String[] conditions;
+    private String type;
+    private String start_time;
+    private String end_time;
+    private int divide;
+    private DataSource data_source;
+    private String[] parameters;
+    private String[] conditions;
 
     public String getType() {
         return type;

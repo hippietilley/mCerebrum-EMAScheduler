@@ -36,11 +36,11 @@ import java.util.Random;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ProbabilityEMI {
-    public static double LAMBDA = 0.4;
-    Context context;
-    EMIHistoryManager emiHistoryManager;
-    EMIInfo emiInfo;
-    long dayStartTime;
+    private static double LAMBDA = 0.4;
+    private Context context;
+    private EMIHistoryManager emiHistoryManager;
+    private EMIInfo emiInfo;
+    private long dayStartTime;
 
     public ProbabilityEMI(Context context, long dayStartTime, boolean isPreLapse, boolean isStress, String type, String id) {
         emiInfo = new EMIInfo();
@@ -51,7 +51,7 @@ public class ProbabilityEMI {
         emiHistoryManager = new EMIHistoryManager(context, type, id);
     }
 
-    public void getProbability() {
+    private void getProbability() {
         emiInfo.remainingTimeInMinute = getRemainingTimeInMinute(dayStartTime);
         emiInfo.G = FunctionG.getG(context, emiInfo.isPreLapse, emiInfo.isStress, emiInfo.remainingTimeInMinute);
         emiInfo.N = getN();
@@ -60,7 +60,7 @@ public class ProbabilityEMI {
         emiInfo.probability = truncateIfRequired(emiInfo.probability, emiInfo.isStress);
     }
 
-    double getSumLambda() {
+    private double getSumLambda() {
         double sumLambda = 0;
         long curTime = DateTime.getDateTime();
         ArrayList<EMIInfo> emiHistoryArrayList = emiHistoryManager.getEmiHistories(emiInfo.isStress, dayStartTime, curTime);
@@ -75,8 +75,8 @@ public class ProbabilityEMI {
         return sumLambda;
     }
 
-    double getLambdaT(long diff) {
-        double timeInHour = ((double) (diff)) / (1000.0f * 60.0f * 60.0f);
+    private double getLambdaT(long diff) {
+        double timeInHour = ((double) (diff)) / (1000.0f * 60.0f * 60.0f);  // in hour
         return Math.pow(LAMBDA, timeInHour);
     }
 
@@ -85,7 +85,7 @@ public class ProbabilityEMI {
             if (probability < 0.05) probability = 0.05;
             if (probability > 0.95) probability = 0.95;
         } else {
-            if (probability < 0.0) probability = 0.0;
+            if (probability < 0.0) probability = 0.0;  // see here
             if (probability > 1.0) probability = 1.0;
         }
         return probability;
@@ -109,8 +109,7 @@ public class ProbabilityEMI {
         Random generator = new Random();
         double number = generator.nextDouble();
         emiInfo.random = number;
-        if (number <= emiInfo.probability) emiInfo.isTriggered = true;
-        else emiInfo.isTriggered = false;
+        emiInfo.isTriggered = number <= emiInfo.probability;
         emiHistoryManager.insert(emiInfo);
         return emiInfo.isTriggered;
     }

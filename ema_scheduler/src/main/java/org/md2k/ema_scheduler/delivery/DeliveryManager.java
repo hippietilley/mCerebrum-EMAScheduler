@@ -44,10 +44,10 @@ import java.util.Random;
  */
 public class DeliveryManager {
     private static final String TAG = DeliveryManager.class.getSimpleName();
-    Context context;
-    NotifierManager notifierManager;
-    RunnerManager runnerManager;
-    boolean isRunning;
+    private Context context;
+    private NotifierManager notifierManager;
+    private RunnerManager runnerManager;
+    private boolean isRunning;
 
     public DeliveryManager(Context context) throws DataKitException {
         this.context = context;
@@ -102,7 +102,7 @@ public class DeliveryManager {
         return true;
     }
 
-    protected void log(String status, EMAType emaType, String type) throws DataKitException {
+    private void log(String status, EMAType emaType, String type) throws DataKitException {
         if (type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_DELIVER);
@@ -115,7 +115,7 @@ public class DeliveryManager {
         }
     }
 
-    protected void logRandom(String status, EMAType emaType, String type) throws DataKitException {
+    private void logRandom(String status, EMAType emaType, String type) throws DataKitException {
         if (type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
             logInfo.setOperation(LogInfo.OP_DELIVER);

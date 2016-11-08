@@ -8,12 +8,12 @@ import java.util.ArrayList;
  * Created by monowar on 3/10/16.
  */
 public class ConfigCondition {
-    String id;
-    String type;
-    String name;
-    ArrayList<String> values;
-    DataSource data_source;
-    Source source;
+    private String id;
+    private String type;
+    private String name;
+    private ArrayList<String> values;
+    private DataSource data_source;
+    private Source source;
 
     public String getId() {
         return id;

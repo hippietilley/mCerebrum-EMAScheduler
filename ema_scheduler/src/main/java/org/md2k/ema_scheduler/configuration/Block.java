@@ -30,10 +30,10 @@ import java.io.Serializable;
  */
 public class Block implements Serializable {
     public static final String BASE_DAY_START ="DAY_START";
-    int total;
-    String base;
-    long start_offset;
-    long end_offset;
+    private int total;
+    private String base;
+    private long start_offset;
+    private long end_offset;
 
     public int getTotal() {
         return total;

@@ -1,7 +1,9 @@
 package org.md2k.ema_scheduler.logger;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataType;
@@ -10,6 +12,7 @@ import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.ServiceEMAScheduler;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 import org.md2k.ema_scheduler.configuration.Configuration;
@@ -50,10 +53,10 @@ public class LoggerDataQuality {
     private static final String TAG = LoggerDataQuality.class.getSimpleName();
     private static final long MINUTE = 60 * 1000;
     private static LoggerDataQuality instance;
-    Context context;
-    int[] dataQuality = new int[60 * 24];
-    Handler handler;
-    DataSourceClient dataSourceClient;
+    private Context context;
+    private int[] dataQuality = new int[60 * 24];
+    private Handler handler;
+    private DataSourceClient dataSourceClient;
     private Runnable runnableCurrent = new Runnable() {
         @Override
         public void run() {
@@ -65,7 +68,7 @@ public class LoggerDataQuality {
             handler.postDelayed(this, MINUTE);
         }
     };
-    Runnable runnableInitialize = new Runnable() {
+    private Runnable runnableInitialize = new Runnable() {
         @Override
         public void run() {
             try {
@@ -80,15 +83,18 @@ public class LoggerDataQuality {
                 if (dataSourceBuilder == null)
                     return;
                 ArrayList<DataSourceClient> dataSourceClientArrayList = DataKitAPI.getInstance(context).find(dataSourceBuilder);
-                if (dataSourceClientArrayList.size() == 0) handler.postDelayed(this, 1000);
+                if (dataSourceClientArrayList.size() == 0)
+                    handler.postDelayed(this, 1000);
                 else {
                     dataSourceClient = dataSourceClientArrayList.get(0);
                     Arrays.fill(dataQuality, -1);
                     prepare();
                     handler.postDelayed(runnableCurrent, MINUTE);
                 }
-            } catch (DataKitException ignored) {
+            } catch (DataKitException e) {
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
+
         }
     };
 
@@ -116,7 +122,7 @@ public class LoggerDataQuality {
         handler.removeCallbacks(runnableCurrent);
     }
 
-    void prepare() {
+    private void prepare() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -127,11 +133,12 @@ public class LoggerDataQuality {
                 Arrays.fill(values, 0);
                 try {
                     long curTimeStamp = DateTime.getDateTime();
-                    for (long now = curTimeStamp - 24 * 60 * 60 * 1000; now < curTimeStamp; now += 30 * 60 * 1000) {
-                        dataTypes = DataKitAPI.getInstance(context).query(dataSourceClient, now, now + 30 * 60 * 1000);
+                    for (long now = curTimeStamp - 24 * 60 * 60 * 1000; now < curTimeStamp; now += 20 * 60 * 1000) {
+                        dataTypes = DataKitAPI.getInstance(context).query(dataSourceClient, now, now + 20 * 60 * 1000);
                         Log.d(TAG, "now = " + now + " datasize=" + dataTypes.size());
 
                         for (int i = 0; i < dataTypes.size(); i++) {
+                            if (!(dataTypes.get(i) instanceof DataTypeInt)) continue;
                             DataTypeInt dataTypeInt = (DataTypeInt) dataTypes.get(i);
                             calendar.setTimeInMillis(dataTypeInt.getDateTime());
                             index = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
@@ -140,11 +147,11 @@ public class LoggerDataQuality {
                         }
                     }
                     for (int i = 0; i < 1440; i++)
-                        if (values[i] >= 14 && dataQuality[i] == -1)
+                        if (values[i] >= 10 && dataQuality[i] == -1)
                             dataQuality[i] = DATA_QUALITY.GOOD;
                         else dataQuality[i] = DATA_QUALITY.BAD;
                 } catch (DataKitException e) {
-                    e.printStackTrace();
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
                 }
             }
         }).start();
@@ -167,19 +174,19 @@ public class LoggerDataQuality {
 
     private int getCurrentQuality(long startTimeStamp, long endTimeStamp) {
         int count = 0;
-        ArrayList<DataType> dataTypes = null;
+        ArrayList<DataType> dataTypes;
         try {
             dataTypes = DataKitAPI.getInstance(context).query(dataSourceClient, startTimeStamp, endTimeStamp);
             for (int i = 0; i < dataTypes.size(); i++) {
+                if (!(dataTypes.get(i) instanceof DataTypeInt)) continue;
                 int curQuality = ((DataTypeInt) dataTypes.get(i)).getSample();
                 if (isWearing(curQuality))
                     count++;
             }
-        } catch (DataKitException ignored) {
-
+        } catch (DataKitException e) {
+            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
         }
-        Log.d(TAG, "datatypes.size()=" + dataTypes.size() + " count=" + count);
-        if (count >= 14) return DATA_QUALITY.GOOD;
+        if (count >= 10) return DATA_QUALITY.GOOD;
         return DATA_QUALITY.BAD;
     }
 

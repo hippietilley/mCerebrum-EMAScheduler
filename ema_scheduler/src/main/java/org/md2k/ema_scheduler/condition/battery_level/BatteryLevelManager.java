@@ -52,7 +52,7 @@ public class BatteryLevelManager extends Condition {
         }
     }
 
-    double getBatteryLevel() {
+    private double getBatteryLevel() {
         IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent intent = context.registerReceiver(null, iFilter);
         assert intent != null;

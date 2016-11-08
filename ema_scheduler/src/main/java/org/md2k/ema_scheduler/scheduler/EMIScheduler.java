@@ -57,12 +57,12 @@ import java.util.ArrayList;
  */
 public class EMIScheduler extends Scheduler {
     private static final String TAG = EMIScheduler.class.getSimpleName();
-    Handler handler;
-    boolean isPreQuit;
-    boolean isStress;
-    boolean isPreLapse;
-    DataSourceClient dataSourceClient;
-    Runnable runnableStressClassification = new Runnable() {
+    private Handler handler;
+    private boolean isPreQuit;
+    private boolean isStress;
+    private boolean isPreLapse;
+    private DataSourceClient dataSourceClient;
+    private Runnable runnableStressClassification = new Runnable() {
         @Override
         public void run() {
             DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
@@ -77,6 +77,7 @@ public class EMIScheduler extends Scheduler {
                     subscribeStress();
                 }
             } catch (DataKitException e) {
+                Log.w(TAG,"DataKitException...runnableStressClassification...");
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
             }
         }
@@ -116,7 +117,7 @@ public class EMIScheduler extends Scheduler {
         this.dayEndTimestamp = dayEndTimestamp;
     }
 
-    void readTypeOfDay() throws DataKitException {
+    private void readTypeOfDay() throws DataKitException {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.TYPE_OF_DAY);
         DayTypeInfo dayTypeInfo;
@@ -149,7 +150,7 @@ public class EMIScheduler extends Scheduler {
         }
     }
 
-    public void prepareAndDeliver(DataType dataType) throws DataKitException {
+    private void prepareAndDeliver(DataType dataType) throws DataKitException {
         if (!isValidDay()) return;
         double sample = ((DataTypeDouble) dataType).getSample();
         if (!(sample == 0 || sample == 2)) return;
@@ -163,7 +164,7 @@ public class EMIScheduler extends Scheduler {
                     if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId()))
                         deliverIfProbability();
                 } catch (DataKitException e) {
-                    Log.d(TAG, "DataKitException...deliverIfProbability()");
+                    Log.w(TAG, "DataKitException...deliverIfProbability()");
                     LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
 
                 }
@@ -172,7 +173,7 @@ public class EMIScheduler extends Scheduler {
         t.start();
     }
 
-    public void subscribeStress() throws DataKitException {
+    private void subscribeStress() throws DataKitException {
         DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
         Log.d(TAG, "subscribeDayStart()...");
         dataKitAPI.subscribe(dataSourceClient, new OnReceiveListener() {
@@ -184,7 +185,7 @@ public class EMIScheduler extends Scheduler {
                         try {
                             prepareAndDeliver(dataType);
                         } catch (DataKitException e) {
-                            Log.d(TAG, "DataKitException...prepareAndDeliver...");
+                            Log.w(TAG, "DataKitException...prepareAndDeliver...");
                             LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ServiceEMAScheduler.BROADCAST_MSG));
                         }
                     }
@@ -194,7 +195,7 @@ public class EMIScheduler extends Scheduler {
         });
     }
 
-    void deliverIfProbability() throws DataKitException {
+    private void deliverIfProbability() throws DataKitException {
         readTypeOfDay();
         if (isPreQuit) return;
         ProbabilityEMI probabilityEMI = new ProbabilityEMI(context, dayStartTimestamp, isPreLapse, isStress, emaType.getType(), emaType.getId());
@@ -202,14 +203,13 @@ public class EMIScheduler extends Scheduler {
             startDelivery();
     }
 
-    public boolean isValidDay() {
+    private boolean isValidDay() {
         if (dayStartTimestamp == -1) return false;
         if (dayStartTimestamp < dayEndTimestamp) return false;
-        if (dayStartTimestamp + 12 * 60 * 60 * 1000 < DateTime.getDateTime()) return false;
-        return true;
+        return dayStartTimestamp + 12 * 60 * 60 * 1000 >= DateTime.getDateTime();
     }
 
-    public void unsubscribeEvent() {
+    private void unsubscribeEvent() {
         try {
             if (dataSourceClient != null)
                 DataKitAPI.getInstance(context).unsubscribe(dataSourceClient);

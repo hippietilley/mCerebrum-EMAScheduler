@@ -46,8 +46,8 @@ import java.util.ArrayList;
  */
 public class DataQualityManager extends Condition {
     public static final String TAG = DataQualityManager.class.getSimpleName();
-    public static final String DAY_START = "DAY_START";
-    public static final String LAST_EMA = "LAST_EMA";
+    private static final String DAY_START = "DAY_START";
+    private static final String LAST_EMA = "LAST_EMA";
 
     public DataQualityManager(Context context) {
         super(context);

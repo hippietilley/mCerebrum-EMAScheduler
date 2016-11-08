@@ -14,6 +14,7 @@ import android.widget.Toast;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.datakitapi.messagehandler.ResultCallback;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
 import org.md2k.ema_scheduler.configuration.Configuration;
@@ -22,6 +23,7 @@ import org.md2k.ema_scheduler.logger.LoggerDataQuality;
 import org.md2k.ema_scheduler.logger.LoggerManager;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.Report.LogStorage;
+import org.md2k.utilities.permission.PermissionInfo;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -53,9 +55,9 @@ import org.md2k.utilities.Report.LogStorage;
 public class ServiceEMAScheduler extends Service {
     public static final String BROADCAST_MSG = ServiceEMAScheduler.class.getSimpleName();
     private static final String TAG = ServiceEMAScheduler.class.getSimpleName();
-    DataKitAPI dataKitAPI;
-    Configuration configuration;
-    DayManager dayManager;
+    private DataKitAPI dataKitAPI;
+    private Configuration configuration;
+    private DayManager dayManager;
     private boolean isStopping;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -71,6 +73,22 @@ public class ServiceEMAScheduler extends Service {
         super.onCreate();
         isStopping = false;
         Log.d(TAG, "onCreate()");
+        PermissionInfo permissionInfo = new PermissionInfo();
+        permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
+            @Override
+            public void onResult(Boolean result) {
+                if (!result) {
+                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+                    stopSelf();
+                } else {
+                    load();
+                }
+            }
+        });
+    }
+
+    private void load() {
+
         LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
         Log.w(TAG, "time=" + DateTime.convertTimeStampToDateTime(DateTime.getDateTime()) + ",timestamp=" + DateTime.getDateTime() + ",service_start");
         configuration = Configuration.getInstance();
@@ -125,7 +143,7 @@ public class ServiceEMAScheduler extends Service {
         });
     }
 
-    synchronized void clear() {
+    private synchronized void clear() {
         if (isStopping) return;
         stopForeground(true);
         LoggerDataQuality.getInstance(getApplicationContext()).stop();

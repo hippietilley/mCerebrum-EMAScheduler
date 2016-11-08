@@ -43,7 +43,6 @@ public class EmaAnswerManager extends Condition {
         LogInfo logInfoComplete=LoggerManager.getInstance(context).getLogInfoLast(LogInfo.OP_RUN,LogInfo.STATUS_RUN_COMPLETED, null, null);
         long timeDiff=logInfoComplete.getTimestamp()-logInfoDeliver.getTimestamp();
         long require=Long.parseLong(configCondition.getValues().get(0));
-        if(timeDiff<=require) return true;
-        else return false;
+        return timeDiff <= require;
     }
 }
