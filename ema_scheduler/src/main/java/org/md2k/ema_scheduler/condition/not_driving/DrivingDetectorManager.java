@@ -13,6 +13,8 @@ import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
+import org.md2k.utilities.data_format.DataFormat;
+import org.md2k.utilities.data_format.ResultType;
 
 import java.util.ArrayList;
 
@@ -52,37 +54,37 @@ public class DrivingDetectorManager extends Condition {
         long lastXMinute = Long.parseLong(configCondition.getValues().get(0));
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(1));
         int notDriving = 0;
+        int driving=0;
         boolean result = false;
-        DrivingDetector drivingDetector = new DrivingDetector();
+//        DrivingDetector drivingDetector = new DrivingDetector();
         long curTime = DateTime.getDateTime();
         ApplicationBuilder applicationBuilder = new ApplicationBuilder().setId("org.md2k.phonesensor");
-        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.LOCATION).setApplication(applicationBuilder.build());
+        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.ACTIVITY_TYPE).setApplication(applicationBuilder.build());
         ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(dataSourceBuilder);
         if (dataSourceClientArrayList.size() != 0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), 30);
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), curTime-lastXMinute, curTime);
             long lastTimestamp=-1;
             double lastSpeed=0.0;
             for (int i = 0; i < dataTypes.size(); i++) {
-                double speed = ((DataTypeDoubleArray) dataTypes.get(i)).getSample()[3];
-                long timestamp=dataTypes.get(i).getDateTime();
-                if(lastTimestamp==-1){
-                    lastTimestamp=timestamp;
-                    lastSpeed=speed;
-                }else {
-                    if (!(drivingDetector.getDrivingStatus(lastTimestamp, timestamp, speed) == DrivingDetector.DrivingStatus.DRIVING))
-                        notDriving++;
+                double samples[]=((DataTypeDoubleArray) dataTypes.get(i)).getSample();
+                if(samples[DataFormat.ActivityType.Type]== ResultType.ActivityType.IN_VEHICLE) {
+                    driving++;
+                    if(curTime-dataTypes.get(i).getDateTime()<=60000)
+                        driving+=100;
                 }
+                else notDriving++;
             }
             if (dataTypes.size() == 0) {
                 log(configCondition, "true: no data point found");
                 return true;
             } else {
-                double percentage = 100.0 * ((double) notDriving) / ((double) (dataTypes.size()));
-                if (percentage >= limitPercentage) {
-                    log(configCondition, "true: not driving = " + percentage + "%% > " + limitPercentage + " %%");
+                if(driving>dataTypes.size()) driving=dataTypes.size();
+                double percentage = 100.0 * ((double) driving) / ((double) (dataTypes.size()));
+                if (percentage <(100- limitPercentage)) {
+                    log(configCondition, "true: not driving = " + (100-percentage) + "%% > " + limitPercentage + " %%");
                     return true;
                 } else {
-                    log(configCondition, "false: not driving = " + percentage + "%% < " + limitPercentage + " %%");
+                    log(configCondition, "false: not driving = " + (100-percentage) + "%% < " + limitPercentage + " %%");
                     return false;
                 }
             }
