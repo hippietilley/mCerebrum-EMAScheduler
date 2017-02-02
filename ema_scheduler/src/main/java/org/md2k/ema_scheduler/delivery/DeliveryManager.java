@@ -92,6 +92,12 @@ public class DeliveryManager {
                             notifierManager.clear();
                             runnerManager.start(finalEmaType, response, type);
                             break;
+                        default:
+                            notifierManager.stop();
+                            notifierManager.clear();
+                            runnerManager.start(finalEmaType, response, type);
+                            break;
+
                     }
                 }
             });

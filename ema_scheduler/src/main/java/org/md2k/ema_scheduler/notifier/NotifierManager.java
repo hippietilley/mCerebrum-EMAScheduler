@@ -187,6 +187,11 @@ public class NotifierManager {
                                         callbackDelivery.onResponse(notificationResponse.getStatus());
                                         clear();
                                         break;
+                                    default:
+                                        logNotificationResponse(notificationResponse.getStatus(), "User select " + notificationResponse.getStatus());
+                                        callbackDelivery.onResponse(notificationResponse.getStatus());
+                                        clear();
+
                                 }
 
                             } catch (DataKitException e) {

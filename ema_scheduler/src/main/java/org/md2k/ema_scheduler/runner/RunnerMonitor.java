@@ -146,7 +146,24 @@ class RunnerMonitor {
                 saveToDataKit(notificationResponse, null);
                 clear();
                 break;
+            default:{
+                ema.status = LogInfo.STATUS_RUN_COMPLETED;
+                ema.end_timestamp = DateTime.getDateTime();
+                log(LogInfo.STATUS_RUN_COMPLETED, "EMA completed");
+                saveToDataKit(notificationResponse, null);
+                saveData(createJson(notificationResponse),LogInfo.STATUS_RUN_COMPLETED);
+                clear();
+            }
         }
+    }
+    private JsonArray createJson(String response){
+        JsonArray valueArray=new JsonArray();
+        JsonObject jsonPropValue=new JsonObject();
+        jsonPropValue.addProperty("question","I have smoked a ____ in the last 10 minutes.");
+        jsonPropValue.addProperty("type","confirm_refute");
+        jsonPropValue.addProperty("answer",response);
+        valueArray.add(jsonPropValue);
+        return valueArray;
     }
 
     void clear() {
