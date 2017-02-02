@@ -8,6 +8,7 @@ import org.md2k.ema_scheduler.condition.battery_level.BatteryLevelManager;
 import org.md2k.ema_scheduler.condition.data_quality.DataQualityManager;
 import org.md2k.ema_scheduler.condition.ema_answer.EmaAnswerManager;
 import org.md2k.ema_scheduler.condition.last_ema_emi.LastEmaEmiManager;
+import org.md2k.ema_scheduler.condition.no_self_report.NoSelfReportManager;
 import org.md2k.ema_scheduler.condition.not_active.NotActiveManager;
 import org.md2k.ema_scheduler.condition.not_driving.DrivingDetectorManager;
 import org.md2k.ema_scheduler.condition.privacy.PrivacyManager;
@@ -55,6 +56,7 @@ public class ConditionManager {
     private static final String TYPE_NOT_DRIVING="NOT_DRIVING";
     private static final String TYPE_PRIVACY="PRIVACY";
     private static final String TYPE_EMA_ANSWER="EMA_ANSWER";
+    private static final String TYPE_NO_SELF_REPORT="NO_SELF_REPORT";
 
     private static final String TAG = ConditionManager.class.getSimpleName();
     private static ConditionManager instance=null;
@@ -91,12 +93,15 @@ public class ConditionManager {
                 return new LastEmaEmiManager(context);
             case TYPE_NOT_ACTIVE:
                 return new NotActiveManager(context);
+            case TYPE_NO_SELF_REPORT:
+                return new NoSelfReportManager(context);
             case TYPE_VALID_BLOCK:
                 return new ValidBlockManager(context);
             case TYPE_PRIVACY:
                 return new PrivacyManager(context);
             case TYPE_EMA_ANSWER:
                 return new EmaAnswerManager(context);
+
         }
         return null;
     }
