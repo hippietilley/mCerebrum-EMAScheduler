@@ -99,7 +99,7 @@ class RunnerMonitor {
         }
     };
 
-    public RunnerMonitor(Context context, Callback callback) throws DataKitException {
+    RunnerMonitor(Context context, Callback callback) throws DataKitException {
         this.context = context;
         this.callback = callback;
 
@@ -118,50 +118,58 @@ class RunnerMonitor {
         ema.id = application.getId();
         ema.name = application.getName();
         ema.trigger_type = type;
-        switch (notificationResponse) {
-            case NotificationResponse.OK:
-            case NotificationResponse.DELAY_CANCEL:
-                Intent intent = context.getPackageManager().getLaunchIntentForPackage(application.getPackage_name());
-                intent.setAction(application.getPackage_name());
-                intent.putExtra("file_name", application.getFile_name());
-                intent.putExtra("id", application.getId());
-                intent.putExtra("name", application.getName());
-                intent.putExtra("timeout", application.getTimeout());
-                context.startActivity(intent);
-                Log.d(TAG, "timeout=" + application.getTimeout());
-                handler.postDelayed(runnableTimeOut, application.getTimeout());
-                log(LogInfo.STATUS_RUN_START, "EMA Starts");
-                break;
-            case NotificationResponse.CANCEL:
-                ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
-                ema.end_timestamp = DateTime.getDateTime();
-                log(LogInfo.STATUS_RUN_ABANDONED_BY_USER, "EMA abandoned by user at prompt");
-                saveToDataKit(notificationResponse, null);
-                clear();
-                break;
-            case NotificationResponse.TIMEOUT:
-                ema.status = LogInfo.STATUS_RUN_MISSED;
-                ema.end_timestamp = DateTime.getDateTime();
-                log(LogInfo.STATUS_RUN_MISSED, "EMA is timed out..at prompt..MISSED");
-                saveToDataKit(notificationResponse, null);
-                clear();
-                break;
-            default:{
-                ema.status = LogInfo.STATUS_RUN_COMPLETED;
-                ema.end_timestamp = DateTime.getDateTime();
-                log(LogInfo.STATUS_RUN_COMPLETED, "EMA completed");
-                saveToDataKit(notificationResponse, null);
-                saveData(createJson(notificationResponse),LogInfo.STATUS_RUN_COMPLETED);
-                clear();
+        if (!notificationResponse.equals(NotificationResponse.DELAY)) {
+            switch (notificationResponse) {
+                case NotificationResponse.OK:
+                case NotificationResponse.DELAY_CANCEL:
+                    Intent intent = context.getPackageManager().getLaunchIntentForPackage(application.getPackage_name());
+                    intent.setAction(application.getPackage_name());
+                    intent.putExtra("file_name", application.getFile_name());
+                    intent.putExtra("id", application.getId());
+                    intent.putExtra("name", application.getName());
+                    intent.putExtra("timeout", application.getTimeout());
+                    context.startActivity(intent);
+                    Log.d(TAG, "timeout=" + application.getTimeout());
+                    handler.postDelayed(runnableTimeOut, application.getTimeout());
+                    log(LogInfo.STATUS_RUN_START, "EMA Starts");
+                    break;
+                case NotificationResponse.CANCEL:
+                    ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
+                    ema.end_timestamp = DateTime.getDateTime();
+                    log(LogInfo.STATUS_RUN_ABANDONED_BY_USER, "EMA abandoned by user at prompt");
+                    saveToDataKit(notificationResponse, null);
+                    clear();
+                    break;
+                case NotificationResponse.TIMEOUT:
+                    ema.status = LogInfo.STATUS_RUN_MISSED;
+                    ema.end_timestamp = DateTime.getDateTime();
+                    log(LogInfo.STATUS_RUN_MISSED, "EMA is timed out..at prompt..MISSED");
+                    saveToDataKit(notificationResponse, null);
+                    clear();
+                    break;
+                default: {
+                    ema.status = LogInfo.STATUS_RUN_COMPLETED;
+                    ema.end_timestamp = DateTime.getDateTime();
+                    ema.question_answers=createJson(notificationResponse);
+                    log(LogInfo.STATUS_RUN_COMPLETED, "EMA completed");
+                    ema.question_answers=createJson(notificationResponse);
+                    saveToDataKit(notificationResponse, ema.status);
+                    clear();
+                }
             }
         }
     }
-    private JsonArray createJson(String response){
-        JsonArray valueArray=new JsonArray();
-        JsonObject jsonPropValue=new JsonObject();
-        jsonPropValue.addProperty("question","I have smoked a ____ in the last 10 minutes.");
-        jsonPropValue.addProperty("type","confirm_refute");
-        jsonPropValue.addProperty("answer",response);
+
+    private JsonArray createJson(String response) {
+
+        JsonArray valueArray = new JsonArray();
+        JsonObject jsonPropValue = new JsonObject();
+        jsonPropValue.addProperty("question_text", "In the last 10 minutes, did you smoke?");
+        jsonPropValue.addProperty("question_type", "singlechoice");
+        jsonPropValue.addProperty("question_option1", "YES - I smoked a cigarette or cigar.");
+        jsonPropValue.addProperty("question_option2", "YES - I smoked an e-cigarette or vaporizer.");
+        jsonPropValue.addProperty("question_option3", "NO - I did NOT smoke.");
+        jsonPropValue.addProperty("question_answer", response);
         valueArray.add(jsonPropValue);
         return valueArray;
     }

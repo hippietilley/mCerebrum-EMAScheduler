@@ -78,6 +78,7 @@ public class IncentiveManager {
                     if (emaType.getIncentive_rules() == null) return;
                     if (completionResponse != null && completionResponse.equals(LogInfo.STATUS_RUN_COMPLETED)) {
                         IncentiveRule incentiveRule = getIncentiveRule(emaType);
+                        if(incentiveRule==null) return;
                         Incentive incentive = saveIncentiveToDataKit(emaType, incentiveRule);
                         show(incentiveRule, incentive);
                     }
