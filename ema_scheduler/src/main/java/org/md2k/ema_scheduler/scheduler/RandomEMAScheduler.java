@@ -115,10 +115,10 @@ public class RandomEMAScheduler extends Scheduler {
             long nextWindowStartTime = blockManager.getNextBlockStartTime(dayStartTimestamp, curTime);
             Log.d(TAG,"schedule()...next block"+nextWindowStartTime);
             if (nextWindowStartTime != -1) {
-                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_ALREADY_DELIVERED, "schedule()...alreadyDelivered, next call="+formatTime(nextWindowStartTime));
+//                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_ALREADY_DELIVERED, "schedule()...alreadyDelivered, next call="+formatTime(nextWindowStartTime));
                 handler.postDelayed(runnableSchedule, nextWindowStartTime - curTime);
             }else{
-                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_ALREADY_DELIVERED, "schedule()...alreadyDelivered, no valid block after this");
+//                logWhenSchedulerRun(LogInfo.STATUS_SCHEDULER_ALREADY_DELIVERED, "schedule()...alreadyDelivered, no valid block after this");
             }
         } else {
             scheduleNow(blockStartTime, blockEndTime);
