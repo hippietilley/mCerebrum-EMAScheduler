@@ -134,15 +134,14 @@ public class EMIScheduler extends Scheduler {
                     isPreQuit = true;
                 else {
                     isPreQuit = false;
+                    isPreLapse = true;
                     long startTime = dataTypeJSONObject.getDateTime();
-                    DataSourceBuilder dataSourceBuilder1 = new DataSourceBuilder().setType(DataSourceType.EVENT).setId(DataSourceId.SMOKING);
+                    DataSourceBuilder dataSourceBuilder1 = new DataSourceBuilder().setType(DataSourceType.SMOKING).setId(DataSourceId.SELF_REPORT);
                     ArrayList<DataSourceClient> dataSourceClientArrayList1 = dataKitAPI.find(dataSourceBuilder1);
                     if (dataSourceClientArrayList1.size() != 0) {
                         ArrayList<DataType> dataTypess = dataKitAPI.query(dataSourceClientArrayList1.get(0), startTime, DateTime.getDateTime());
-                        isPreLapse = true;
-                        for (int i = 0; i < dataTypess.size(); i++) {
+                        if(dataTypess.size()>=0)
                             isPreLapse = false;
-                        }
                     }
 
                 }
@@ -154,8 +153,11 @@ public class EMIScheduler extends Scheduler {
         if (!isValidDay()) return;
         double sample = ((DataTypeDouble) dataType).getSample();
         if (!(sample == 0 || sample == 2)) return;
+        readTypeOfDay();
+        if (isPreQuit) return;
+
         sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
-        isStress = sample != 0;
+        isStress = (sample != 0);
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -196,15 +198,13 @@ public class EMIScheduler extends Scheduler {
     }
 
     private void deliverIfProbability() throws DataKitException {
-        readTypeOfDay();
-        if (isPreQuit) return;
         ProbabilityEMI probabilityEMI = new ProbabilityEMI(context, dayStartTimestamp, isPreLapse, isStress, emaType.getType(), emaType.getId());
         if (probabilityEMI.isTrigger())
             startDelivery();
     }
 
     private boolean isValidDay() {
-        if (dayStartTimestamp == -1) return false;
+        if (dayStartTimestamp <= 0) return false;
         if (dayStartTimestamp < dayEndTimestamp) return false;
         return dayStartTimestamp + 12 * 60 * 60 * 1000 >= DateTime.getDateTime();
     }

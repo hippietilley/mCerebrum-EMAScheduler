@@ -9,6 +9,7 @@ import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.Condition;
 import org.md2k.ema_scheduler.configuration.ConfigCondition;
 
@@ -46,24 +47,26 @@ public class NotActiveManager extends Condition{
     }
     public boolean isValid(ConfigCondition configCondition) throws DataKitException {
         //if(true) return true;
-        int sampleNo = (Integer.parseInt(configCondition.getValues().get(0))) / 60000;
+        long curTime= DateTime.getDateTime();
+        long prevTime= curTime - Integer.parseInt(configCondition.getValues().get(0));
+//        int sampleNo = (Integer.parseInt(configCondition.getValues().get(0))) / 60000;
         int value = Integer.parseInt(configCondition.getValues().get(1));
         DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         DataSource dataSource = configCondition.getData_source();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);
         ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(dataSourceBuilder);
         if (dataSourceClientArrayList.size() != 0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), sampleNo);
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), prevTime, curTime);
             if (dataTypes.size() == 0) {
-                log(configCondition, "true: datapoint not found");
+                log(configCondition, "true: data point not found");
                 return true;
             }
             double samples = 0;
             for (int i = 0; i < dataTypes.size(); i++) {
                 double sample = ((DataTypeDouble) dataTypes.get(i)).getSample();
-                samples += sample;
+                if((int)sample==value) samples++;
             }
-            if ((int) (samples) == value) {
+            if(samples/dataTypes.size()>=0.66){
                 log(configCondition, "true: person not active");
                 return true;
             } else {

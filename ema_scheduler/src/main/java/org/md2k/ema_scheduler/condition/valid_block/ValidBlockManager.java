@@ -58,10 +58,10 @@ public class ValidBlockManager extends Condition {
         long dayStart=getDay(DataSourceType.DAY_START);
         long dayEnd=getDay(DataSourceType.DAY_END);
         if(dayStart==-1){
-            log(configCondition, "false: day is not started");
+            log(configCondition, "false: day is not started"+" DayStart="+dayStart+" DayEnd="+dayEnd);
             return false;
         }else if(dayStart<dayEnd){
-            log(configCondition, "false: new day is not started");
+            log(configCondition, "false: new day is not started"+" DayStart="+dayStart+" DayEnd="+dayEnd);
             return false;
         }else {
             Block[] blocks=Configuration.getInstance().getEma_types(configCondition.getSource().getId(), configCondition.getSource().getType()).getBlocks();
@@ -78,16 +78,15 @@ public class ValidBlockManager extends Condition {
                             count++;
                     }
                     if(limitEMA>count) {
-                        log(configCondition, "true: block(" + String.valueOf(i + 1)+") triggered: "+String.valueOf(count)+" expected: "+String.valueOf(limitEMA));
+                        log(configCondition, "true: block(" + String.valueOf(i + 1)+") triggered: "+String.valueOf(count)+" expected: "+String.valueOf(limitEMA)+" DayStart="+dayStart+" DayEnd="+dayEnd);
                         return true;
                     }else{
-                        log(configCondition, "false: block(" + String.valueOf(i + 1)+") triggered: "+String.valueOf(count)+" expected: "+String.valueOf(limitEMA));
+                        log(configCondition, "false: block(" + String.valueOf(i + 1)+") triggered: "+String.valueOf(count)+" expected: "+String.valueOf(limitEMA)+" DayStart="+dayStart+" DayEnd="+dayEnd);
                         return false;
-
                     }
                 }
             }
-            log(configCondition,"false: no valid block found");
+            log(configCondition,"false: no valid block found"+" DayStart="+dayStart+" DayEnd="+dayEnd);
             return false;
         }
     }

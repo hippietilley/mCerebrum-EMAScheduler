@@ -58,6 +58,7 @@ public class ProbabilityEMI {
         emiInfo.sumLambda = getSumLambda();
         emiInfo.probability = (emiInfo.N - emiInfo.sumLambda) / (1 + emiInfo.G);
         emiInfo.probability = truncateIfRequired(emiInfo.probability, emiInfo.isStress);
+        emiInfo.timestamp=DateTime.getDateTime();
     }
 
     private double getSumLambda() {

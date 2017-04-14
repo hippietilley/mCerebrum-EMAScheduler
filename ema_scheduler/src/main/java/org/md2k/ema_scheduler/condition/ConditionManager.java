@@ -107,27 +107,32 @@ public class ConditionManager {
     }
     public boolean isValid(String[] conditions, String type, String id) throws DataKitException {
         if(conditions==null) return true;
+        boolean isTrue=true;
         for (String condition : conditions) {
             Log.d(TAG, "condition=" + condition);
             ConfigCondition configCondition = configuration.getConditions(condition);
             if (!conditionHashMap.get(condition).isValid(configCondition)) {
                 Log.d(TAG,"condition="+condition+" false");
-                return false;
+                isTrue=false;
             }else{
                 Log.d(TAG,"condition="+condition+" true");
             }
         }
-        log(type,id);
-        return true;
+        if(isTrue) {
+            log(type, id,"true: all conditions okay");
+            return true;
+        }else{
+            log(type, id,"false: some conditions are failed");
+            return false;
+        }
     }
-    private void log(String type, String id) throws DataKitException {
+    private void log(String type, String id, String message) throws DataKitException {
         LogInfo logInfo=new LogInfo();
         logInfo.setOperation(LogInfo.OP_CONDITION);
         logInfo.setId(id);
         logInfo.setType(type);
         logInfo.setTimestamp(DateTime.getDateTime());
-        logInfo.setMessage("true: all conditions okay");
+        logInfo.setMessage(message);
         LoggerManager.getInstance(context).insert(logInfo);
     }
-
 }

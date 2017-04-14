@@ -145,7 +145,7 @@ public class LoggerManager {
             }
             if (flag)
                 writeLogInfoToFile();
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
             logInfos = new ArrayList<>();
         }
     }
