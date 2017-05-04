@@ -140,10 +140,9 @@ public class EMIScheduler extends Scheduler {
                     ArrayList<DataSourceClient> dataSourceClientArrayList1 = dataKitAPI.find(dataSourceBuilder1);
                     if (dataSourceClientArrayList1.size() != 0) {
                         ArrayList<DataType> dataTypess = dataKitAPI.query(dataSourceClientArrayList1.get(0), startTime, DateTime.getDateTime());
-                        if(dataTypess.size()>=0)
+                        if(dataTypess.size()>0)
                             isPreLapse = false;
                     }
-
                 }
             }
         }

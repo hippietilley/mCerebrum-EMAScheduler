@@ -117,7 +117,7 @@ class SmokingEMAScheduler extends Scheduler {
                         try {
                             sendToLogInfo(LogInfo.STATUS_SCHEDULER_SCHEDULED, DateTime.getDateTime());
                             conditionManager = ConditionManager.getInstance(context);
-                            startDelivery();
+                            //startDelivery();
                             if (conditionManager.isValid(emaType.getScheduler_rules()[0].getConditions(), emaType.getType(), emaType.getId())) {
                                 Log.d(TAG, "condition valid...");
                                 startDelivery();

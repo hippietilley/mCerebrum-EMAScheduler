@@ -26,7 +26,7 @@ package org.md2k.ema_scheduler.incentive;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-class Incentive {
+public class Incentive {
     long timeStamp;
     String emaType;
     String emaId;
@@ -34,6 +34,16 @@ class Incentive {
     double totalIncentive;
     private int blockNumber;
     private double dataQuality;
+    int incentiveRule;
+
+
+    public int getIncentiveRule() {
+        return incentiveRule;
+    }
+
+    public void setIncentiveRule(int incentiveRule) {
+        this.incentiveRule = incentiveRule;
+    }
 
     public long getTimeStamp() {
         return timeStamp;
@@ -75,7 +85,7 @@ class Incentive {
         this.dataQuality = dataQuality;
     }
 
-    double getIncentive() {
+    public double getIncentive() {
         return incentive;
     }
 

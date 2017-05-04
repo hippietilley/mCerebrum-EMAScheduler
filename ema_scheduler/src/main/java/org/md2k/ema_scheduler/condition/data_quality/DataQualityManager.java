@@ -66,6 +66,11 @@ public class DataQualityManager extends Condition {
             return false;
         }
     }
+    public double getPercentage(ConfigCondition configCondition) throws DataKitException {
+        long startTimeStamp = getStartTimeStamp(configCondition);
+        if (startTimeStamp == -1) return 0;
+        return LoggerDataQuality.getInstance(context).getQuality(startTimeStamp, DateTime.getDateTime());
+    }
 
 
     private long getStartTimeStamp(ConfigCondition configCondition) throws DataKitException {

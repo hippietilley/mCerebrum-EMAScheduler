@@ -4,7 +4,9 @@ import android.content.Context;
 
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.condition.EMA_limit.EMALimitManager;
 import org.md2k.ema_scheduler.condition.battery_level.BatteryLevelManager;
+import org.md2k.ema_scheduler.condition.bonus_incentive.BonusIncentive;
 import org.md2k.ema_scheduler.condition.data_quality.DataQualityManager;
 import org.md2k.ema_scheduler.condition.ema_answer.EmaAnswerManager;
 import org.md2k.ema_scheduler.condition.last_ema_emi.LastEmaEmiManager;
@@ -57,6 +59,8 @@ public class ConditionManager {
     private static final String TYPE_PRIVACY="PRIVACY";
     private static final String TYPE_EMA_ANSWER="EMA_ANSWER";
     private static final String TYPE_NO_SELF_REPORT="NO_SELF_REPORT";
+    private static final String TYPE_EMA_LIMIT = "EMA_LIMIT";
+    private static final String TYPE_BONUS_INCENTIVE = "BONUS_INCENTIVE";
 
     private static final String TAG = ConditionManager.class.getSimpleName();
     private static ConditionManager instance=null;
@@ -101,6 +105,10 @@ public class ConditionManager {
                 return new PrivacyManager(context);
             case TYPE_EMA_ANSWER:
                 return new EmaAnswerManager(context);
+            case TYPE_EMA_LIMIT:
+                return new EMALimitManager(context);
+            case TYPE_BONUS_INCENTIVE:
+                return new BonusIncentive(context);
 
         }
         return null;

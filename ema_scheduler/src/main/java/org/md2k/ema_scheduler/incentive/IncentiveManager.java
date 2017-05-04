@@ -20,9 +20,13 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.ema_scheduler.condition.ConditionManager;
+import org.md2k.ema_scheduler.condition.data_quality.DataQualityManager;
+import org.md2k.ema_scheduler.configuration.ConfigCondition;
+import org.md2k.ema_scheduler.configuration.Configuration;
 import org.md2k.ema_scheduler.configuration.EMAType;
 import org.md2k.ema_scheduler.configuration.IncentiveRule;
 import org.md2k.ema_scheduler.logger.LogInfo;
+import org.md2k.ema_scheduler.logger.LoggerDataQuality;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.notification.NotificationResponse;
 
@@ -77,10 +81,11 @@ public class IncentiveManager {
                         return;
                     if (emaType.getIncentive_rules() == null) return;
                     if (completionResponse != null && completionResponse.equals(LogInfo.STATUS_RUN_COMPLETED)) {
-                        IncentiveRule incentiveRule = getIncentiveRule(emaType);
-                        if(incentiveRule==null) return;
-                        Incentive incentive = saveIncentiveToDataKit(emaType, incentiveRule);
-                        show(incentiveRule, incentive);
+
+                        int index = getIncentiveRule(emaType);
+                        if(index==-1) return;
+                        Incentive incentive = saveIncentiveToDataKit(emaType, index);
+                        show(emaType.getIncentive_rules()[index], incentive);
                     }
                 } catch (DataKitException e) {
                     e.printStackTrace();
@@ -90,13 +95,13 @@ public class IncentiveManager {
         t.start();
     }
 
-    private IncentiveRule getIncentiveRule(EMAType emaType) throws DataKitException {
+    private int getIncentiveRule(EMAType emaType) throws DataKitException {
         for (int i = 0; i < emaType.getIncentive_rules().length; i++) {
             if (conditionManager.isValid(emaType.getIncentive_rules()[i].getConditions(), emaType.getType(), emaType.getId())) {
-                return emaType.getIncentive_rules()[i];
+                return i;
             }
         }
-        return null;
+        return -1;
     }
 
     public double getLastTotalIncentive() throws DataKitException {
@@ -108,13 +113,26 @@ public class IncentiveManager {
         return incentive.getTotalIncentive();
     }
 
-    private Incentive saveIncentiveToDataKit(EMAType emaType, IncentiveRule incentiveRule) throws DataKitException {
+    private Incentive saveIncentiveToDataKit(EMAType emaType, int index) throws DataKitException {
         Log.d(TAG, "IncentiveManager...saveIncentiveToDataKitAndShow()...");
+        IncentiveRule incentiveRule=emaType.getIncentive_rules()[index];
+        ConfigCondition configCondition;
         Incentive incentive = new Incentive();
         incentive.emaId = emaType.getId();
         incentive.emaType = emaType.getType();
         incentive.timeStamp = DateTime.getDateTime();
         incentive.incentive = incentiveRule.getIncentive();
+        incentive.incentiveRule=index;
+        for(int i=0;i<incentiveRule.getConditions().length;i++) {
+            configCondition = Configuration.getInstance().getConditions(incentiveRule.getConditions()[i]);
+            if(configCondition.getType().equals(ConditionManager.TYPE_DATA_QUALITY)){
+                DataQualityManager dataQualityManager=new DataQualityManager(context);
+                double percentage = dataQualityManager.getPercentage(configCondition);
+                incentive.setDataQuality(percentage);
+               break;
+            }
+        }
+
         incentive.totalIncentive = getLastTotalIncentive() + incentive.getIncentive();
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(incentive)).getAsJsonObject();
@@ -132,6 +150,7 @@ public class IncentiveManager {
         incentive.timeStamp = DateTime.getDateTime();
         incentive.incentive = incentiveValue;
         incentive.totalIncentive = getLastTotalIncentive() + incentive.getIncentive();
+        incentive.incentiveRule=-1;
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(incentive)).getAsJsonObject();
         DataTypeJSONObject dataTypeJSONObject = new DataTypeJSONObject(DateTime.getDateTime(), sample);
