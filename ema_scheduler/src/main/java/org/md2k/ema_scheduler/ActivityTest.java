@@ -1,16 +1,6 @@
-package org.md2k.ema_scheduler;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
-
-import org.md2k.ema_scheduler.configuration.Configuration;
-import org.md2k.ema_scheduler.configuration.EMAType;
 /*
- * Copyright (c) 2015, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,9 +25,29 @@ import org.md2k.ema_scheduler.configuration.EMAType;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.md2k.ema_scheduler;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
+
+import org.md2k.ema_scheduler.configuration.Configuration;
+import org.md2k.ema_scheduler.configuration.EMAType;
+
+/**
+ * Defines the activity for administering an EMA test.
+ */
 public class ActivityTest extends AppCompatActivity {
     private static final String TAG = ActivityTest.class.getSimpleName();
     private Configuration configuration;
+
+    /**
+     * If this activity is started by the user, an intent is created to start an EMA. Otherwise,
+     * the EMA for the initiating package is loaded.
+     * @param savedInstanceState Previous state of this activity, if it existed.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,10 +73,15 @@ public class ActivityTest extends AppCompatActivity {
             }
         }
     }
+
+    /**
+     * Provides actions for menu items.
+     * @param item Menu item that was selected.
+     * @return Whether the action was successful.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
             case android.R.id.home:
                 finish();
                 return true;
@@ -74,15 +89,23 @@ public class ActivityTest extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Returns the EMA type of the given package.
+     * @param packageName Name of the package to get the EMA type for.
+     * @return The EMA type of the given package.
+     */
     private EMAType findEMAType(String packageName) {
-        if (packageName == null) return null;
-        if (packageName.length() == 0) return null;
+        if (packageName == null)
+            return null;
+        if (packageName.length() == 0)
+            return null;
         EMAType emaTypes[] = configuration.getEma_types();
         for (EMAType emaType : emaTypes) {
-            if (emaType.getApplication() == null) continue;
-            if (emaType.getApplication().getPackage_name().equals(packageName)) return emaType;
+            if (emaType.getApplication() == null)
+                continue;
+            if (emaType.getApplication().getPackage_name().equals(packageName))
+                return emaType;
         }
         return null;
     }
-
 }
