@@ -1,10 +1,6 @@
-package org.md2k.ema_scheduler.configuration;
-
-import java.io.Serializable;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,19 +24,39 @@ import java.io.Serializable;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.configuration;
+
+import java.io.Serializable;
+
+/**
+ * Provides methods for getting incentives, messages, and conditions.
+ */
 public class IncentiveRule implements Serializable {
     private double incentive;
     private String[] messages;
     private String[] conditions;
 
+    /**
+     * Returns the incentive.
+     * @return The incentive.
+     */
     public double getIncentive() {
         return incentive;
     }
 
+    /**
+     * Returns an array of conditions.
+     * @return An array of conditions.
+     */
     public String[] getConditions() {
         return conditions;
     }
 
+    /**
+     * Returns an array of messages.
+     * @return An array of messages.
+     */
     public String[] getMessages() {
         return messages;
     }
