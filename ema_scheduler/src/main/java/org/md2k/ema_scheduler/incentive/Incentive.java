@@ -1,8 +1,6 @@
-package org.md2k.ema_scheduler.incentive;
-
 /*
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +24,12 @@ package org.md2k.ema_scheduler.incentive;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.incentive;
+
+/**
+ * Defines an incentive object.
+ */
 public class Incentive {
     long timeStamp;
     String emaType;
@@ -36,67 +40,130 @@ public class Incentive {
     private double dataQuality;
     int incentiveRule;
 
-
+    /**
+     * Returns the <code>incentiveRule</code>.
+     * @return The <code>incentiveRule</code>.
+     */
     public int getIncentiveRule() {
         return incentiveRule;
     }
 
+    /**
+     * Sets the <code>incentiveRule</code>.
+     * @param incentiveRule The <code>incentiveRule</code>.
+     */
     public void setIncentiveRule(int incentiveRule) {
         this.incentiveRule = incentiveRule;
     }
 
+    /**
+     * Returns the timestamp.
+     * @return The timestamp.
+     */
     public long getTimeStamp() {
         return timeStamp;
     }
 
+    /**
+     * Sets the timestamp.
+     * @param timeStamp The timestamp.
+     */
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }
 
+    /**
+     * Returns the type of the EMA.
+     * @return The type of the EMA.
+     */
     public String getEmaType() {
         return emaType;
     }
 
+    /**
+     * Sets the type of the EMA.
+     * @param emaType The type of the EMA.
+     */
     public void setEmaType(String emaType) {
         this.emaType = emaType;
     }
 
+    /**
+     * Returns the EMA id.
+     * @return The EMA id.
+     */
     public String getEmaId() {
         return emaId;
     }
 
+    /**
+     * Sets the EMA id.
+     * @param emaId The EMA id.
+     */
     public void setEmaId(String emaId) {
         this.emaId = emaId;
     }
 
+    /**
+     * Returns the block number.
+     * @return The block number.
+     */
     public int getBlockNumber() {
         return blockNumber;
     }
 
+    /**
+     * Sets the block number.
+     * @param blockNumber The block number.
+     */
     public void setBlockNumber(int blockNumber) {
         this.blockNumber = blockNumber;
     }
 
+    /**
+     * Returns the data quality value.
+     * @return The data quality value.
+     */
     public double getDataQuality() {
         return dataQuality;
     }
 
+    /**
+     * Sets the data quality value.
+     * @param dataQuality The data quality value.
+     */
     public void setDataQuality(double dataQuality) {
         this.dataQuality = dataQuality;
     }
 
+    /**
+     * Returns the incentive.
+     * @return The incentive.
+     */
     public double getIncentive() {
         return incentive;
     }
 
+    /**
+     * Sets the incentive.
+     * @param incentive The incentive.
+     */
     public void setIncentive(double incentive) {
         this.incentive = incentive;
     }
 
+    /**
+     * Returns the total incentive.
+     * @return The total incentive.
+     */
     double getTotalIncentive() {
         return totalIncentive;
     }
 
+    /**
+     * Sets the total incentive.
+     * @param totalIncentive The total incentive.
+     */
     public void setTotalIncentive(double totalIncentive) {
         this.totalIncentive = totalIncentive;
     }
