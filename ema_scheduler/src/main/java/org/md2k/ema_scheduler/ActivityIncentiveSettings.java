@@ -1,16 +1,6 @@
-package org.md2k.ema_scheduler;
-
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
-import android.widget.Toast;
-
-import org.md2k.datakitapi.messagehandler.ResultCallback;
-import org.md2k.utilities.permission.PermissionInfo;
-
-/**
- * Copyright (c) 2015, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,17 +25,39 @@ import org.md2k.utilities.permission.PermissionInfo;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.md2k.ema_scheduler;
+
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import org.md2k.datakitapi.messagehandler.ResultCallback;
+import org.md2k.utilities.permission.PermissionInfo;
+
+/**
+ * Activity for managing the incentive settings.
+ */
 public class ActivityIncentiveSettings extends AppCompatActivity {
 
+    /**
+     * Checks permissions and then displays the incentive settings.
+     * @param savedInstanceState Previous state of this activity, if it existed.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         PermissionInfo permissionInfo = new PermissionInfo();
         permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
+            /**
+             * Checks the callback result for permissions.
+             * @param result Whether permissions are granted or not.
+             */
             @Override
             public void onResult(Boolean result) {
                 if (!result) {
-                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...",
+                            Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
                     setContentView(R.layout.activity_incentive_settings);
@@ -59,6 +71,12 @@ public class ActivityIncentiveSettings extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
+
+    /**
+     * Provides actions for menu items.
+     * @param item Menu item that was selected.
+     * @return Whether the action was successful.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
