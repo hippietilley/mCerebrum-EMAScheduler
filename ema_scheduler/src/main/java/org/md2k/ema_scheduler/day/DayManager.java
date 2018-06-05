@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package org.md2k.ema_scheduler.day;
 
 import android.content.Context;
@@ -21,30 +48,7 @@ import org.md2k.utilities.Report.Log;
 import java.util.ArrayList;
 
 /**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
- * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class DayManager {
     private static final String TAG = DayManager.class.getSimpleName();
@@ -80,6 +84,10 @@ public class DayManager {
         }
     };
 
+    /**
+     * @param context
+     * @throws DataKitException
+     */
     public DayManager(Context context) throws DataKitException {
         Log.d(TAG, "DayManager()...");
         this.context = context;
@@ -87,11 +95,17 @@ public class DayManager {
         handler = new Handler();
     }
 
+    /**
+     *
+     */
     public void start() {
         Log.d(TAG, "start()...");
         handler.post(runnableDay);
     }
 
+    /**
+     *
+     */
     public void stop() {
         Log.d(TAG, "stop()...");
         handler.removeCallbacks(runnableDay);
@@ -103,15 +117,24 @@ public class DayManager {
         schedulerManager.stop();
     }
 
+    /**
+     * @throws DataKitException
+     */
     private void subscribeDayStart() throws DataKitException {
         Log.d(TAG, "subscribeDayStart()...");
         DataKitAPI.getInstance(context).subscribe(dataSourceClientDayStart, new OnReceiveListener() {
+            /**
+             * @param dataType
+             */
             @Override
             public void onReceived(DataType dataType) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
                 dayStartTime = dataTypeLong.getSample();
                 Log.d(TAG, "subscribeDayStart()...received..dayStartTime=" + dayStartTime);
                 Thread t = new Thread(new Runnable() {
+                    /**
+                     *
+                     */
                     @Override
                     public void run() {
                         try {
@@ -129,15 +152,24 @@ public class DayManager {
         });
     }
 
+    /**
+     * @throws DataKitException
+     */
     private void subscribeDayEnd() throws DataKitException {
         Log.d(TAG, "subscribeDayEnd()...");
         DataKitAPI.getInstance(context).subscribe(dataSourceClientDayEnd, new OnReceiveListener() {
+            /**
+             * @param dataType
+             */
             @Override
             public void onReceived(DataType dataType) {
                 DataTypeLong dataTypeLong = (DataTypeLong) dataType;
                 dayEndTime = dataTypeLong.getSample();
                 Log.d(TAG, "subscribeDayEnd()...received..dayEndTime=" + dayEndTime);
                 Thread t = new Thread(new Runnable() {
+                    /**
+                     *
+                     */
                     @Override
                     public void run() {
                         try {
@@ -154,6 +186,9 @@ public class DayManager {
         });
     }
 
+    /**
+     * @throws DataKitException
+     */
     private void readDayStartFromDataKit() throws DataKitException {
         Log.d(TAG, "readDayStartFromDataKit()...");
         ArrayList<DataSourceClient> dataSourceClients;
@@ -171,6 +206,10 @@ public class DayManager {
         }
     }
 
+    /**
+     *
+     * @throws DataKitException
+     */
     private void readDayEndFromDataKit() throws DataKitException {
         Log.d(TAG, "readDayEndFromDataKit()...");
         dayEndTime = -1;
@@ -188,10 +227,18 @@ public class DayManager {
         }
     }
 
+    /**
+     * Returns the start time.
+     * @return The start time.
+     */
     public long getDayStartTime() {
         return dayStartTime;
     }
 
+    /**
+     * Returns the end time.
+     * @return The end time.
+     */
     public long getDayEndTime() {
         return dayEndTime;
     }
