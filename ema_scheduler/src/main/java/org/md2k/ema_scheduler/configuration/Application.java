@@ -1,10 +1,6 @@
-package org.md2k.ema_scheduler.configuration;
-
-import java.io.Serializable;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +24,14 @@ import java.io.Serializable;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.configuration;
+
+import java.io.Serializable;
+
+/**
+ * Defines an <code>Application</code> object.
+ */
 public class Application implements Serializable {
     private String id;
     private String name;
@@ -35,22 +39,42 @@ public class Application implements Serializable {
     private String package_name;
     private long timeout;
 
+    /**
+     * Returns the package name.
+     * @return The package name.
+     */
     public String getPackage_name() {
         return package_name;
     }
 
+    /**
+     * Returns the file name.
+     * @return The file name.
+     */
     public String getFile_name() {
         return file_name;
     }
 
+    /**
+     * Returns the id.
+     * @return The id.
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Returns the name.
+     * @return The name.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the timeout.
+     * @return The timeout.
+     */
     public long getTimeout() {
         return timeout;
     }
