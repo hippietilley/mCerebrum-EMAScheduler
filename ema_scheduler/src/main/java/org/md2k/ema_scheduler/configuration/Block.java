@@ -1,10 +1,6 @@
-package org.md2k.ema_scheduler.configuration;
-
-import java.io.Serializable;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,25 +24,49 @@ import java.io.Serializable;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.configuration;
+
+import java.io.Serializable;
+
+/**
+ * Defines a <code>Block</code> object.
+ */
 public class Block implements Serializable {
-    public static final String BASE_DAY_START ="DAY_START";
+    public static final String BASE_DAY_START = "DAY_START";
     private int total;
     private String base;
     private long start_offset;
     private long end_offset;
 
+    /**
+     * Returns the total.
+     * @return The total.
+     */
     public int getTotal() {
         return total;
     }
 
+    /**
+     * Returns the base.
+     * @return The base.
+     */
     public String getBase() {
         return base;
     }
 
+    /**
+     * Returns the starting offset.
+     * @return The starting offset.
+     */
     public long getStart_offset() {
         return start_offset;
     }
 
+    /**
+     * Returns the ending offset.
+     * @return The ending offset.
+     */
     public long getEnd_offset() {
         return end_offset;
     }
