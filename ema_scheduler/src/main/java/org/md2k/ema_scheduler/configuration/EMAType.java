@@ -1,10 +1,6 @@
-package org.md2k.ema_scheduler.configuration;
-
-import java.io.Serializable;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +24,14 @@ import java.io.Serializable;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.configuration;
+
+import java.io.Serializable;
+
+/**
+ * Provides methods for accessing attributes of <code>EMAType</code>.
+ */
 public class EMAType implements Serializable {
     public static final String TYPE_EMA = "EMA";
     public static final String TYPE_EMI = "EMI";
@@ -47,43 +51,82 @@ public class EMAType implements Serializable {
     private Notification[] notifications;
     private IncentiveRule[] incentive_rules;
 
-
+    /**
+     * Returns the id.
+     * @return The id.
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Returns the name.
+     * @return The name.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the type.
+     * @return The type.
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Returns the application.
+     * @return The application.
+     */
     public Application getApplication() {
         return application;
     }
 
+    /**
+     * Returns the trigger type.
+     * @return The trigger type.
+     */
     public String getTrigger_type() {
         return trigger_type;
     }
 
+    /**
+     * Returns an array of notifications.
+     * @return An array of notifications.
+     */
     public Notification[] getNotifications() {
         return notifications;
     }
 
+    /**
+     * Returns an array of blocks.
+     * @return An array of blocks.
+     */
     public Block[] getBlocks() {
         return blocks;
     }
 
+    /**
+     * Returns an array of scheduler rules.
+     * @return An array of scheduler rules.
+     */
     public SchedulerRule[] getScheduler_rules() {
         return scheduler_rules;
     }
 
+    /**
+     * Returns whether this is enabled.
+     * @return Whether this is enabled.
+     */
     public boolean isEnable() {
         return enable;
     }
 
+    /**
+     * Returns an array of incentive rules.
+     * @return An array of incentive rules.
+     */
     public IncentiveRule[] getIncentive_rules() {
         return incentive_rules;
     }
