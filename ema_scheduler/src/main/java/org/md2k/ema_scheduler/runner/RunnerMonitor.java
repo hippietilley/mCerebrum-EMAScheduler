@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package org.md2k.ema_scheduler.runner;
 
 import android.content.BroadcastReceiver;
@@ -35,34 +62,10 @@ import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.notification.NotificationResponse;
 
 /**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
- * All rights reserved.
- * <p/>
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * <p/>
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p/>
- * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p/>
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Monitors the runners for timeout and saving data.
  */
 class RunnerMonitor {
     private static final long NO_RESPONSE_TIME = 35000;
-
     private static final String TAG = RunnerMonitor.class.getSimpleName();
     private Handler handler;
     private Context context;
@@ -76,6 +79,9 @@ class RunnerMonitor {
     private boolean isStart = false;
     private MyBroadcastReceiver myReceiver;
     private Runnable runnableTimeOut = new Runnable() {
+        /**
+         * Handles the timeout for the EMA.
+         */
         @Override
         public void run() {
             if (DateTime.getDateTime() - lastResponseTime < NO_RESPONSE_TIME)
@@ -83,11 +89,13 @@ class RunnerMonitor {
             else {
                 sendData();
                 handler.postDelayed(runnableWaitThenSave, 3000);
-                //clear();
             }
         }
     };
     private Runnable runnableWaitThenSave = new Runnable() {
+        /**
+         * Saves EMA data when the EMA is abandoned by timeout.
+         */
         @Override
         public void run() {
             try {
@@ -99,14 +107,27 @@ class RunnerMonitor {
         }
     };
 
+    /**
+     * Constructor
+     * @param context Android context
+     * @param callback Response callback
+     * @throws DataKitException
+     */
     RunnerMonitor(Context context, Callback callback) throws DataKitException {
         this.context = context;
         this.callback = callback;
-
         myReceiver = new MyBroadcastReceiver();
         handler = new Handler();
     }
 
+    /**
+     * Starts a new <code>EMA</code> and registers a receiver for user responses.
+     * @param emaType Type of EMA.
+     * @param notificationResponse User response.
+     * @param application Application
+     * @param type EMA trigger type.
+     * @throws DataKitException
+     */
     public void start(EMAType emaType, String notificationResponse, Application application, String type) throws DataKitException {
         isStart = true;
         context.registerReceiver(myReceiver, new IntentFilter("org.md2k.ema_scheduler.response"));
@@ -150,9 +171,9 @@ class RunnerMonitor {
                 default: {
                     ema.status = LogInfo.STATUS_RUN_COMPLETED;
                     ema.end_timestamp = DateTime.getDateTime();
-                    ema.question_answers=createJson(notificationResponse);
+                    ema.question_answers = createJson(notificationResponse);
                     log(LogInfo.STATUS_RUN_COMPLETED, "EMA completed");
-                    ema.question_answers=createJson(notificationResponse);
+                    ema.question_answers = createJson(notificationResponse);
                     saveToDataKit(notificationResponse, ema.status);
                     clear();
                 }
@@ -160,8 +181,12 @@ class RunnerMonitor {
         }
     }
 
+    /**
+     * Creates a <code>JsonArray</code> for the question, the question type, and response options.
+     * @param response User response.
+     * @return A <code>JsonArray</code> for the question, the question type, and response options.
+     */
     private JsonArray createJson(String response) {
-
         JsonArray valueArray = new JsonArray();
         JsonObject jsonPropValue = new JsonObject();
         jsonPropValue.addProperty("question_text", "In the last 10 minutes, did you smoke?");
@@ -174,6 +199,9 @@ class RunnerMonitor {
         return valueArray;
     }
 
+    /**
+     * Removes callbacks from the handler.
+     */
     void clear() {
         Log.d(TAG, "clear()...");
         if (isStart) {
@@ -186,6 +214,12 @@ class RunnerMonitor {
         isStart = false;
     }
 
+    /**
+     * Creates a new <code>LogInfo</code> object and inserts it into the log.
+     * @param status Status of the EMA.
+     * @param message Log message.
+     * @throws DataKitException
+     */
     private void log(String status, String message) throws DataKitException {
         if (type.equals("SYSTEM")) {
             LogInfo logInfo = new LogInfo();
@@ -199,6 +233,9 @@ class RunnerMonitor {
         }
     }
 
+    /**
+     * Sends an <code>Intent</code>.
+     */
     private void sendData() {
         Intent intent = new Intent();
         intent.setAction("org.md2k.ema.operation");
@@ -207,6 +244,11 @@ class RunnerMonitor {
         context.sendBroadcast(intent);
     }
 
+    /**
+     * Creates a <code>DataSourceBuilder</code> for the given EMA id.
+     * @param id Id of the EMA.
+     * @return A <code>DataSourceBuilder</code> for the given EMA id.
+     */
     private DataSourceBuilder createDataSourceBuilder(String id) {
         Platform platform = new PlatformBuilder().setType(PlatformType.PHONE).setMetadata(METADATA.NAME, "Phone").build();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder().setType(DataSourceType.EMA).setPlatform(platform).setId(id);
@@ -216,27 +258,25 @@ class RunnerMonitor {
         return dataSourceBuilder;
     }
 
+    /**
+     * Starts <code>IncentiveManager</code> to show the user the incentive.
+     * @param notificationResponse User response to notification.
+     * @param completionResponse Response about EMA completetion.
+     * @throws DataKitException
+     */
     private void saveAndShowIncentive(String notificationResponse, String completionResponse) throws DataKitException {
-        if (!type.equals("SYSTEM")) return;
+        if (!type.equals("SYSTEM"))
+            return;
         IncentiveManager incentiveManager = new IncentiveManager(context);
         incentiveManager.start(emaType, notificationResponse, completionResponse);
-/*
-        if(emaType.getId().equals("EMI")){
-            if(emaType.getIncentive_rules()!=null && notificationResponse.equals(NotificationResponse.OK)){
-                Log.w(TAG, "ShowIncentive calculate...");
-                IncentiveManager incentiveManager = new IncentiveManager(context);
-                incentiveManager.start(emaType, notificationResponse, completionResponse);
-            }
-        }else {
-            if (ema.status.equals((LogInfo.STATUS_RUN_COMPLETED)) && emaType.getIncentive_rules() != null) {
-                Log.w(TAG, "ShowIncentive calculate...");
-                IncentiveManager incentiveManager = new IncentiveManager(context);
-                incentiveManager.start(emaType, notificationResponse, completionResponse);
-            }
-        }
-*/
     }
 
+    /**
+     * Saves the EMA data to <code>DataKit</code>.
+     * @param notificationResponse User response to notification.
+     * @param completionResponse Response about EMA completetion.
+     * @throws DataKitException
+     */
     private void saveToDataKit(String notificationResponse, String completionResponse) throws DataKitException {
         Gson gson = new Gson();
         JsonObject sample = new JsonParser().parse(gson.toJson(ema)).getAsJsonObject();
@@ -245,23 +285,38 @@ class RunnerMonitor {
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeJSONObject);
         saveAndShowIncentive(notificationResponse, completionResponse);
         callback.onResponse(ema.status);
-//        Toast.makeText(this, "Information is Saved", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Logs the EMA status and extracts the <code>question_answers</code> from the given <code>JsonArray</code>
+     * of answers, then calls <code>saveToDataKit()</code>.
+     * @param answer Array of question answers.
+     * @param status Status of the EMA.
+     * @throws DataKitException
+     */
     private void saveData(JsonArray answer, String status) throws DataKitException {
         ema.end_timestamp = DateTime.getDateTime();
         ema.question_answers = answer;
         Log.d(TAG, "status=" + status);
-        if (status == null) ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
+        if (status == null)
+            ema.status = LogInfo.STATUS_RUN_ABANDONED_BY_USER;
         else
             ema.status = status;
         log(ema.status, ema.status);
         saveToDataKit(NotificationResponse.OK, ema.status);
         clear();
-
     }
 
+    /**
+     * Nested class for receiving broadcasts.
+     */
     public class MyBroadcastReceiver extends BroadcastReceiver {
+        /**
+         * Saves data from the intent if it is a <code>"RESULT"</code> and logs the status if
+         * the intent is a <code>"STATUS_MESSAGE"</code>.
+         * @param context Android context.
+         * @param intent Intent received.
+         */
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
@@ -286,5 +341,4 @@ class RunnerMonitor {
             }
         }
     }
-
 }
