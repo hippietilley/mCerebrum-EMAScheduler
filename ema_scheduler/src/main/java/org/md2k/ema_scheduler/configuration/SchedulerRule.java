@@ -1,12 +1,6 @@
-package org.md2k.ema_scheduler.configuration;
-
-import org.md2k.datakitapi.source.datasource.DataSource;
-
-import java.io.Serializable;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +24,16 @@ import java.io.Serializable;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.configuration;
+
+import org.md2k.datakitapi.source.datasource.DataSource;
+
+import java.io.Serializable;
+
+/**
+ * Defines a <code>SchedulerRule</code>.
+ */
 public class SchedulerRule implements Serializable {
     public static final String TYPE_RANDOM="RANDOM";
     public static final String TYPE_IMMEDIATE ="IMMEDIATE";
@@ -44,30 +48,58 @@ public class SchedulerRule implements Serializable {
     private String[] parameters;
     private String[] conditions;
 
+    /**
+     * Returns the type.
+     * @return The type.
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Returns the start time.
+     * @return The start time.
+     */
     public String getStart_time() {
         return start_time;
     }
 
+    /**
+     * Returns the end time.
+     * @return The end time.
+     */
     public String getEnd_time() {
         return end_time;
     }
 
+    /**
+     * Returns the divide.
+     * @return The divide.
+     */
     public int getDivide() {
         return divide;
     }
 
+    /**
+     * Returns the data source.
+     * @return The data source.
+     */
     public DataSource getData_source() {
         return data_source;
     }
 
+    /**
+     * Returns an array of parameters.
+     * @return An array of parameters.
+     */
     public String[] getParameters() {
         return parameters;
     }
 
+    /**
+     * Returns an array of conditions.
+     * @return An array of conditions.
+     */
     public String[] getConditions() {
         return conditions;
     }
