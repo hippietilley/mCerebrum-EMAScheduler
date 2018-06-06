@@ -1,8 +1,6 @@
-package org.md2k.ema_scheduler.logger;
-
 /*
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +24,27 @@ package org.md2k.ema_scheduler.logger;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.logger;
+
+/**
+ * Provides the schedule timestamp for the log.
+ */
 public class LogSchedule {
     private long scheduleTimestamp;
 
+    /**
+     * Returns the <code>scheduleTimestamp</code>.
+     * @return The <code>scheduleTimestamp</code>.
+     */
     public long getScheduleTimestamp() {
         return scheduleTimestamp;
     }
 
+    /**
+     * Sets the <code>scheduleTimestamp</code>.
+     * @param scheduleTimestamp New <code>scheduleTimestamp</code>.
+     */
     public void setScheduleTimestamp(long scheduleTimestamp) {
         this.scheduleTimestamp = scheduleTimestamp;
     }
