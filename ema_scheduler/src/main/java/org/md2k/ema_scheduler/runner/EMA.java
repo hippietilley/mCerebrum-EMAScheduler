@@ -1,10 +1,6 @@
-package org.md2k.ema_scheduler.runner;
-
-import com.google.gson.JsonArray;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +24,19 @@ import com.google.gson.JsonArray;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.runner;
+
+import com.google.gson.JsonArray;
+
+/**
+ * Defines the attributes of an <code>EMA</code> object.
+ * <p>
+ *     Attributes include <code>id</code>, <code>name</code>, <code>trigger_type</code>,
+ *     <code>start_timestamp</code>, <code>end_timestamp</code>, <code>status</code>, and
+ *     <code>question_answers</code>.
+ * </p>
+ */
 class EMA {
     String id;
     String name;
@@ -36,5 +45,4 @@ class EMA {
     long end_timestamp;
     String status;
     JsonArray question_answers;
-
 }
