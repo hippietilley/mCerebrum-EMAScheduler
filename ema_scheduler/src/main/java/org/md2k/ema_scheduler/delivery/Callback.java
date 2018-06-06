@@ -1,10 +1,6 @@
-package org.md2k.ema_scheduler.delivery;
-
-import org.md2k.datakitapi.exception.DataKitException;
-
 /*
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +23,14 @@ import org.md2k.datakitapi.exception.DataKitException;
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.md2k.ema_scheduler.delivery;
+
+import org.md2k.datakitapi.exception.DataKitException;
+
+/**
+ * Callback interface for responses.
  */
 public interface Callback {
     void onResponse(String response) throws DataKitException;
