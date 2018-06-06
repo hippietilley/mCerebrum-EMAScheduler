@@ -1,16 +1,6 @@
-package org.md2k.ema_scheduler.runner;
-
-import android.content.Context;
-
-import org.md2k.datakitapi.exception.DataKitException;
-import org.md2k.ema_scheduler.configuration.Application;
-import org.md2k.ema_scheduler.configuration.EMAType;
-import org.md2k.ema_scheduler.delivery.Callback;
-import org.md2k.utilities.Report.Log;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,24 +24,60 @@ import org.md2k.utilities.Report.Log;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.runner;
+
+import android.content.Context;
+
+import org.md2k.datakitapi.exception.DataKitException;
+import org.md2k.ema_scheduler.configuration.Application;
+import org.md2k.ema_scheduler.configuration.EMAType;
+import org.md2k.ema_scheduler.delivery.Callback;
+import org.md2k.utilities.Report.Log;
+
+/**
+ * Mannages the starting and stoping of a runner via <code>RunnerMonitor</code>.
+ */
 public class RunnerManager {
     private static final String TAG = RunnerManager.class.getSimpleName();
     private Context context;
     private RunnerMonitor runnerMonitor;
     private Application application;
 
+    /**
+     * Constructor
+     * @param context Android context
+     * @param callback Callback interface
+     * @throws DataKitException
+     */
     public RunnerManager(Context context, Callback callback) throws DataKitException {
         this.context = context;
-        runnerMonitor=new RunnerMonitor(context, callback);
-    }
-    public void set(Application application){
-        this.application=application;
+        runnerMonitor = new RunnerMonitor(context, callback);
     }
 
+    /**
+     * Sets the application.
+     * @param application Application to set.
+     */
+    public void set(Application application){
+        this.application = application;
+    }
+
+    /**
+     * Starts the runner.
+     * @param emaType Type of EMA.
+     * @param notificationResponse User response to the notification.
+     * @param type EMA trigger type.
+     * @throws DataKitException
+     */
     public void start(EMAType emaType, String notificationResponse, String type) throws DataKitException {
         Log.d(TAG, "start()...status=" + notificationResponse + " filename=" + application.getId());
         runnerMonitor.start(emaType, notificationResponse, application, type);
     }
+
+    /**
+     * Stops the runner.
+     */
     public void stop(){
         runnerMonitor.clear();
     }
