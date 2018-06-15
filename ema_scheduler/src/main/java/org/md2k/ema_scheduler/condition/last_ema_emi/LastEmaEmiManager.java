@@ -1,17 +1,6 @@
-package org.md2k.ema_scheduler.condition.last_ema_emi;
-
-import android.content.Context;
-
-import org.md2k.datakitapi.exception.DataKitException;
-import org.md2k.datakitapi.time.DateTime;
-import org.md2k.ema_scheduler.condition.Condition;
-import org.md2k.ema_scheduler.configuration.ConfigCondition;
-import org.md2k.ema_scheduler.logger.LogInfo;
-import org.md2k.ema_scheduler.logger.LoggerManager;
-
 /*
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,32 +24,57 @@ import org.md2k.ema_scheduler.logger.LoggerManager;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.condition.last_ema_emi;
+
+import android.content.Context;
+
+import org.md2k.datakitapi.exception.DataKitException;
+import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.condition.Condition;
+import org.md2k.ema_scheduler.configuration.ConfigCondition;
+import org.md2k.ema_scheduler.logger.LogInfo;
+import org.md2k.ema_scheduler.logger.LoggerManager;
+
+/**
+ * Manages the last EMA EMI condition.
+ */
 public class LastEmaEmiManager extends Condition {
 
+    /**
+     * Constructor
+     * @param context Android context
+     */
     public LastEmaEmiManager(Context context) {
         super(context);
     }
 
+    /**
+     * Returns whether the condition is valid.
+     * @param configCondition Configuration of the condition.
+     * @return Whether the condition is valid.
+     * @throws DataKitException
+     */
     public boolean isValid(ConfigCondition configCondition) throws DataKitException {
-//        if(Constants.DEBUG) return true;
-
-        LoggerManager loggerManager= LoggerManager.getInstance(context);
-        LogInfo logInfo=loggerManager.getLogInfoLast(LogInfo.OP_DELIVER, LogInfo.STATUS_DELIVER_SUCCESS, configCondition.getSource().getType(), configCondition.getSource().getId());
-        if(logInfo==null) {
+        LoggerManager loggerManager = LoggerManager.getInstance(context);
+        LogInfo logInfo = loggerManager.getLogInfoLast(LogInfo.OP_DELIVER, LogInfo.STATUS_DELIVER_SUCCESS,
+                configCondition.getSource().getType(), configCondition.getSource().getId());
+        if(logInfo == null) {
             log(configCondition, "true: not triggered yet");
             return true;
         }else {
-            long diff= Long.parseLong(configCondition.getValues().get(0));
-            long curTime= DateTime.getDateTime();
-            long min=((curTime-logInfo.getTimestamp())/(1000*60));
-            if(curTime-logInfo.getTimestamp()>diff){
-                log(configCondition, "true: last triggered "+String.valueOf(min)+" (require: "+ String.valueOf(diff/(1000*60))+") minute ago");
+            long diff = Long.parseLong(configCondition.getValues().get(0));
+            long curTime = DateTime.getDateTime();
+            long min = ((curTime - logInfo.getTimestamp()) / (1000*60));
+            if(curTime - logInfo.getTimestamp() > diff){
+                log(configCondition, "true: last triggered " + String.valueOf(min) +
+                        " (require: " + String.valueOf(diff / (1000*60)) + ") minute ago");
                 return true;
             }else{
-                log(configCondition, "false: last triggered "+String.valueOf(min)+" (require: "+ String.valueOf(diff/(1000*60))+") minute ago");
+                log(configCondition, "false: last triggered " + String.valueOf(min) +
+                        " (require: " + String.valueOf(diff / (1000*60)) + ") minute ago");
                 return false;
             }
         }
     }
-
 }
