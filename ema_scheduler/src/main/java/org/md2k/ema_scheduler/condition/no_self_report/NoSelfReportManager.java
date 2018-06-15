@@ -1,23 +1,6 @@
-package org.md2k.ema_scheduler.condition.no_self_report;
-
-import android.content.Context;
-
-import org.md2k.datakitapi.DataKitAPI;
-import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeDouble;
-import org.md2k.datakitapi.exception.DataKitException;
-import org.md2k.datakitapi.source.datasource.DataSource;
-import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
-import org.md2k.datakitapi.source.datasource.DataSourceClient;
-import org.md2k.datakitapi.time.DateTime;
-import org.md2k.ema_scheduler.condition.Condition;
-import org.md2k.ema_scheduler.configuration.ConfigCondition;
-
-import java.util.ArrayList;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,31 +24,62 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.condition.no_self_report;
+
+import android.content.Context;
+
+import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.datatype.DataType;
+import org.md2k.datakitapi.datatype.DataTypeDouble;
+import org.md2k.datakitapi.exception.DataKitException;
+import org.md2k.datakitapi.source.datasource.DataSource;
+import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
+import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.datakitapi.time.DateTime;
+import org.md2k.ema_scheduler.condition.Condition;
+import org.md2k.ema_scheduler.configuration.ConfigCondition;
+
+import java.util.ArrayList;
+
+/**
+ * Manages the No Self Report condition.
+ */
 public class NoSelfReportManager extends Condition{
+    /**
+     * Constructor
+     * @param context Android context
+     */
     public NoSelfReportManager(Context context){
         super(context);
     }
+
+    /**
+     * Returns whether the condition is valid.
+     * @param configCondition Configuration of the condition.
+     * @return Whether the condition is valid.
+     * @throws DataKitException
+     */
     public boolean isValid(ConfigCondition configCondition) throws DataKitException {
-        //if(true) return true;
-//        int sampleNo = (Integer.parseInt(configCondition.getValues().get(0))) / 60000;
-        long curTime= DateTime.getDateTime();
-        long lastXTime=curTime-Long.parseLong(configCondition.getValues().get(0));
+        long curTime = DateTime.getDateTime();
+        long lastXTime = curTime - Long.parseLong(configCondition.getValues().get(0));
         int value = Integer.parseInt(configCondition.getValues().get(1));
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
         DataSource dataSource = configCondition.getData_source();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);
         ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(dataSourceBuilder);
         if (dataSourceClientArrayList.size() != 0) {
-            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0),lastXTime,curTime);
+            ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), lastXTime, curTime);
             if (dataTypes.size() <= value) {
-                log(configCondition, "true: in last "+((curTime-lastXTime)/60000)+" minutes found="+dataTypes.size()+" <="+value);
+                log(configCondition, "true: in last " + ((curTime - lastXTime) / 60000) +
+                        " minutes found=" + dataTypes.size() + " <=" + value);
                 return true;
             }else
             {
-                log(configCondition, "false: in last "+((curTime-lastXTime)/60000)+" minutes found="+dataTypes.size()+" >"+value);
+                log(configCondition, "false: in last " + ((curTime - lastXTime) / 60000) +
+                        " minutes found=" + dataTypes.size() + " >" + value);
                 return false;
             }
-
         } else {
             log(configCondition, "true: datasource not found");
             return true;
