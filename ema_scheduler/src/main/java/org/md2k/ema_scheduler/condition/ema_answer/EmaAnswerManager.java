@@ -1,15 +1,6 @@
-package org.md2k.ema_scheduler.condition.ema_answer;
-
-import android.content.Context;
-
-import org.md2k.ema_scheduler.condition.Condition;
-import org.md2k.ema_scheduler.configuration.ConfigCondition;
-import org.md2k.ema_scheduler.logger.LogInfo;
-import org.md2k.ema_scheduler.logger.LoggerManager;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,16 +24,40 @@ import org.md2k.ema_scheduler.logger.LoggerManager;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.condition.ema_answer;
+
+import android.content.Context;
+
+import org.md2k.ema_scheduler.condition.Condition;
+import org.md2k.ema_scheduler.configuration.ConfigCondition;
+import org.md2k.ema_scheduler.logger.LogInfo;
+import org.md2k.ema_scheduler.logger.LoggerManager;
+
+/**
+ * Manages EMA answer conditions.
+ */
 public class EmaAnswerManager extends Condition {
+    /**
+     * Constructor
+     * @param context Android context
+     */
     public EmaAnswerManager(Context context) {
         super(context);
     }
 
+    /**
+     * Returns whether the condition is valid or not.
+     * @param configCondition Configuration of the condition.
+     * @return Whether the condition is valid or not.
+     */
     public boolean isValid(ConfigCondition configCondition) {
-        LogInfo logInfoDeliver= LoggerManager.getInstance(context).getLogInfoLast(LogInfo.OP_DELIVER, LogInfo.STATUS_DELIVER_SUCCESS, null, null);
-        LogInfo logInfoComplete=LoggerManager.getInstance(context).getLogInfoLast(LogInfo.OP_RUN,LogInfo.STATUS_RUN_COMPLETED, null, null);
-        long timeDiff=logInfoComplete.getTimestamp()-logInfoDeliver.getTimestamp();
-        long require=Long.parseLong(configCondition.getValues().get(0));
+        LogInfo logInfoDeliver = LoggerManager.getInstance(context)
+                .getLogInfoLast(LogInfo.OP_DELIVER, LogInfo.STATUS_DELIVER_SUCCESS, null, null);
+        LogInfo logInfoComplete = LoggerManager.getInstance(context)
+                .getLogInfoLast(LogInfo.OP_RUN,LogInfo.STATUS_RUN_COMPLETED, null, null);
+        long timeDiff = logInfoComplete.getTimestamp() - logInfoDeliver.getTimestamp();
+        long require = Long.parseLong(configCondition.getValues().get(0));
         return timeDiff <= require;
     }
 }
