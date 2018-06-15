@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package org.md2k.ema_scheduler.condition.EMA_limit;
 
 import android.content.Context;
@@ -21,57 +48,44 @@ import org.md2k.ema_scheduler.logger.LoggerManager;
 import java.util.ArrayList;
 
 /**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
- * All rights reserved.
- * <p/>
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * <p/>
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p/>
- * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p/>
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Manages the EMA limit condition.
  */
 public class EMALimitManager extends Condition {
     public static final String TAG = EMALimitManager.class.getSimpleName();
 
+    /**
+     * Constructor
+     * @param context Android context.
+     */
     public EMALimitManager(Context context) {
         super(context);
     }
 
+    /**
+     * Returns whether the condition is valid.
+     * @param configCondition Configuration of the condition.
+     * @return Whether the condition is valid.
+     * @throws DataKitException
+     */
     public boolean isValid(ConfigCondition configCondition) throws DataKitException {
-        long curTime= DateTime.getDateTime();
-        long prevTime= 0;
-//        int sampleNo = (Integer.parseInt(configCondition.getValues().get(0))) / 60000;
+        long curTime = DateTime.getDateTime();
+        long prevTime = 0;
         int value = Integer.parseInt(configCondition.getValues().get(0));
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
         DataSource dataSource = configCondition.getData_source();
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder(dataSource);
         ArrayList<DataSourceClient> dataSourceClientArrayList = dataKitAPI.find(dataSourceBuilder);
         if (dataSourceClientArrayList.size() != 0) {
             ArrayList<DataType> dataTypes = dataKitAPI.query(dataSourceClientArrayList.get(0), prevTime, curTime);
             if (dataTypes.size() <value) {
-                log(configCondition, "true: no. of EMA triggered: "+String.valueOf(dataTypes.size())+"< no. of EMA expected: "+String.valueOf(value));
+                log(configCondition, "true: no. of EMA triggered: " + String.valueOf(dataTypes.size()) +
+                        "< no. of EMA expected: " + String.valueOf(value));
                 return true;
             }else{
-                log(configCondition, "false: no. of EMA triggered: "+String.valueOf(dataTypes.size())+">= no. of EMA expected: "+String.valueOf(value));
+                log(configCondition, "false: no. of EMA triggered: " + String.valueOf(dataTypes.size()) +
+                        ">= no. of EMA expected: " + String.valueOf(value));
                 return false;
             }
-
         } else {
             log(configCondition, "true: datasource not found");
             return true;
