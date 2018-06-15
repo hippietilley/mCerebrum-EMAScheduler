@@ -62,9 +62,9 @@ public class ValidBlockManager extends Condition {
     }
 
     /**
-     * Returns the day for the given data source type.
-     * @param dataSourceType Data source type.
-     * @return The day.
+     * Returns whether the condition is valid.
+     * @param configCondition Configuration of the condition.
+     * @return Whether the condition is valid.
      * @throws DataKitException
      */
     public boolean isValid(ConfigCondition configCondition) throws DataKitException {
