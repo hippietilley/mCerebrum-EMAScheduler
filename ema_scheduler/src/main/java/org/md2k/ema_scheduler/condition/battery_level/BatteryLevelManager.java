@@ -1,17 +1,6 @@
-package org.md2k.ema_scheduler.condition.battery_level;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
-
-import org.md2k.datakitapi.exception.DataKitException;
-import org.md2k.ema_scheduler.condition.Condition;
-import org.md2k.ema_scheduler.configuration.ConfigCondition;
-
-/**
- * Copyright (c) 2016, The University of Memphis, MD2K Center
- * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+/*
+ * Copyright (c) 2018, The University of Memphis, MD2K Center of Excellence
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,11 +24,36 @@ import org.md2k.ema_scheduler.configuration.ConfigCondition;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.md2k.ema_scheduler.condition.battery_level;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
+
+import org.md2k.datakitapi.exception.DataKitException;
+import org.md2k.ema_scheduler.condition.Condition;
+import org.md2k.ema_scheduler.configuration.ConfigCondition;
+
+/**
+ *
+ */
 public class BatteryLevelManager extends Condition {
+    /**
+     * Constructor
+     * @param context Android context
+     */
     public BatteryLevelManager(Context context) {
         super(context);
     }
 
+    /**
+     * Returns whether the battery level is a valid condition.
+     * @param configCondition Configuration of the condition.
+     * @return Whether the battery level is a valid condition.
+     * @throws DataKitException
+     */
     public boolean isValid(ConfigCondition configCondition) throws DataKitException {
         double limitPercentage = Double.parseDouble(configCondition.getValues().get(0));
         double percentage = getBatteryLevel();
@@ -52,6 +66,10 @@ public class BatteryLevelManager extends Condition {
         }
     }
 
+    /**
+     * Returns the current battery level as a percentage of charge left.
+     * @return The current battery level as a percentage of charge left.
+     */
     private double getBatteryLevel() {
         IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent intent = context.registerReceiver(null, iFilter);
